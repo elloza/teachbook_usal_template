@@ -1,0 +1,31 @@
+classDiagram
+    class Shape {
+        <<abstract>>
+        +String color
+        +area() float
+        +perimeter() float
+    }
+
+    class Circle {
+        +float radius
+        +area() float
+        +perimeter() float
+    }
+
+    class Rectangle {
+        +float width
+        +float height
+        +area() float
+        +perimeter() float
+    }
+
+    class Triangle {
+        +float base
+        +float height
+        +area() float
+        +perimeter() float
+    }
+
+    Shape <|-- Circle
+    Shape <|-- Rectangle
+    Shape <|-- Triangle

@@ -1,0 +1,100 @@
+name: deploy-book
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  # Opt in early to GitHub's Node 24 runtime for JavaScript actions.
+  # This avoids Node 20 deprecation warnings on official actions.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  deploy-book:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pkg-config \
+            libcairo2-dev \
+            libpango1.0-dev \
+            pango1.0-tools
+
+      - name: Set up TeachBook environment
+        run: |
+          python scripts/setup_env.py --yes --profile --extras pdf
+
+      - name: Check UTF-8 encoding
+        run: |
+          .venv/bin/python scripts/check_encoding.py
+
+      - name: Check static assets
+        run: |
+          .venv/bin/python scripts/optimize_static_assets.py --check
+
+      - name: Install PDF toolchain (same as local full setup)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          .venv/bin/python scripts/setup_latex.py --yes --full
+
+      - name: Generate PDF with CI/CD engine policy
+        run: |
+          .venv/bin/python scripts/export_pdf.py --engine auto
+
+      - name: Verify generated PDFs
+        run: |
+          .venv/bin/python - <<'PY'
+          from pathlib import Path
+          langs = sorted(
+              path.stem.replace("_config_", "", 1)
+              for path in Path("book").glob("_config_*.yml")
+          )
+          missing = [
+              Path("book/_static") / f"teachbook_{lang}.pdf"
+              for lang in langs
+              if not (Path("book/_static") / f"teachbook_{lang}.pdf").is_file()
+          ]
+          if missing:
+              for path in missing:
+                  print(f"Missing generated PDF: {path}")
+              raise SystemExit(1)
+          print("Generated PDFs:", ", ".join(f"teachbook_{lang}.pdf" for lang in langs))
+          PY
+
+      - name: Build HTML book
+        run: |
+          .venv/bin/python scripts/build_book.py
+          # FAILSAFE: Ensure .nojekyll exists even if script skipped it
+          touch book/_build/html/.nojekyll
+
+      - name: Debug Build Output
+        run: |
+          echo "Listing build output structure:"
+          ls -R book/_build/html
+          echo "Checking for .nojekyll:"
+          ls -la book/_build/html/.nojekyll
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: book/_build/html
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,7 @@
+digraph G {
+    rankdir=LR;
+    Controller -> Service;
+    Service -> Repository;
+    Repository -> Database;
+    Service -> Cache;
+}

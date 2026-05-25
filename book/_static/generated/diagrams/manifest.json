@@ -1,0 +1,245 @@
+{
+  "generated_by": "scripts/render_diagrams.py",
+  "items": [
+    {
+      "source": "diagram_sources\\en\\01_tutorial_02_workflow_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\01_tutorial_02_workflow_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\01_tutorial_05_teaching_code_philosophy_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\01_tutorial_05_teaching_code_philosophy_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_chemical_engineering_degree_flow_diagram_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_chemical_engineering_degree_flow_diagram_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_computer_science_degree_er_diagram_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_er_diagram_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_02.plantuml",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_02.svg",
+      "type": "plantuml",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_03.graphviz",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_03.svg",
+      "type": "graphviz",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_04.structurizr",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_04.svg",
+      "type": "structurizr",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_05.wavedrom",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_05.svg",
+      "type": "wavedrom",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_computer_science_degree_uml_class_diagram_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_uml_class_diagram_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_geology_degree_rock_cycle_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_geology_degree_rock_cycle_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_02.graphviz",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_02.svg",
+      "type": "graphviz",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_03.wavedrom",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_03.svg",
+      "type": "wavedrom",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_04.ditaa",
+      "output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_04.svg",
+      "type": "ditaa",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\05_basic_content_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\05_basic_content_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\05_basic_content_mermaid_02.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\05_basic_content_mermaid_02.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\05_basic_content_mermaid_03.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\05_basic_content_mermaid_03.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\05_basic_content_mermaid_04.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\05_basic_content_mermaid_04.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\en\\05_basic_content_mermaid_05.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\en\\05_basic_content_mermaid_05.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\01_tutorial_02_flujo_trabajo_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\01_tutorial_02_flujo_trabajo_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\01_tutorial_05_filosofia_codigo_docente_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\01_tutorial_05_filosofia_codigo_docente_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_02.graphviz",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_02.svg",
+      "type": "graphviz",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_03.wavedrom",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_03.svg",
+      "type": "wavedrom",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_04.ditaa",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_04.svg",
+      "type": "ditaa",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_geologia_ciclo_rocas_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_geologia_ciclo_rocas_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_informatica_diagrama_er_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagrama_er_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_02.plantuml",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_02.svg",
+      "type": "plantuml",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_03.graphviz",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_03.svg",
+      "type": "graphviz",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_04.structurizr",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_04.svg",
+      "type": "structurizr",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_05.wavedrom",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_05.svg",
+      "type": "wavedrom",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_informatica_uml_clases_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_uml_clases_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\02_grados_grado_ingenieria_quimica_diagrama_flujo_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_ingenieria_quimica_diagrama_flujo_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\05_contenidos_basicos_mermaid_01.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\05_contenidos_basicos_mermaid_01.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\05_contenidos_basicos_mermaid_02.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\05_contenidos_basicos_mermaid_02.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\05_contenidos_basicos_mermaid_03.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\05_contenidos_basicos_mermaid_03.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\05_contenidos_basicos_mermaid_04.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\05_contenidos_basicos_mermaid_04.svg",
+      "type": "mermaid",
+      "format": "svg"
+    },
+    {
+      "source": "diagram_sources\\es\\05_contenidos_basicos_mermaid_05.mermaid",
+      "output": "book\\_static\\generated\\diagrams\\es\\05_contenidos_basicos_mermaid_05.svg",
+      "type": "mermaid",
+      "format": "svg"
+    }
+  ]
+}

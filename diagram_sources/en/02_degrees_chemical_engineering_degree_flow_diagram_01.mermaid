@@ -1,0 +1,9 @@
+flowchart LR
+    A[Fresh feed<br/>A + inert] --> M[Mixer]
+    R[A-rich recycle] --> M
+    M --> C[CSTR reactor<br/>A → B]
+    C --> S[Separator]
+    S --> D[B product<br/>distillate]
+    S --> W[Bottoms / purge]
+    S --> R
+

@@ -1,0 +1,13 @@
+flowchart TD
+    Magma["Magma"]
+    Igneous["Igneous Rock"]
+    Sedimentary["Sedimentary Rock"]
+    Metamorphic["Metamorphic Rock"]
+
+    Magma -->|"Cooling and solidification"| Igneous
+    Igneous -->|"Weathering and erosion"| Sedimentary
+    Sedimentary -->|"Heat and pressure"| Metamorphic
+    Metamorphic -->|"Melting"| Magma
+    Igneous -->|"Heat and pressure"| Metamorphic
+    Metamorphic -->|"Weathering and erosion"| Sedimentary
+    Sedimentary -->|"Melting"| Magma

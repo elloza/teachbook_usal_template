@@ -1,0 +1,12 @@
+%%{init: {"themeVariables": {"fontSize": "11px", "fontFamily": "Arial"}}}%%
+classDiagram
+    direction LR
+    class Experimento {
+        +nombre
+        +ejecutar()
+    }
+    class Muestra {
+        +tipo
+        +preparar()
+    }
+    Experimento --> Muestra : usa

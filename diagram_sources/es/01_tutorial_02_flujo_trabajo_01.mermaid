@@ -1,0 +1,7 @@
+flowchart LR
+    A["Escribir contenido<br/>Markdown o Notebooks"] --> B["Previsualizar<br/>build local"]
+    B --> C{"¿Todo se ve bien?"}
+    C -->|"Sí"| D["Guardar cambios<br/>commit"]
+    D --> E["Publicar<br/>push a GitHub"]
+    E --> F["Web y PDFs<br/>GitHub Pages"]
+    C -->|"No"| A

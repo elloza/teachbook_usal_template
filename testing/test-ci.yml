@@ -1,0 +1,150 @@
+# Test TeachBook from first-run environments
+# Only Windows + macOS — the 2 OSes actual professors use.
+# Ubuntu/Linux users presumably know what they're doing.
+name: Test Clean Setup
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # Quick syntax check first
+  syntax:
+    name: "Syntax Check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Verify all scripts compile
+        run: |
+          for f in scripts/*.py; do
+            python -m py_compile "$f" && echo "✅ $f" || exit 1
+          done
+      - name: Verify skills exist
+        run: |
+          for d in .github/skills/*/; do
+            [ -f "${d}SKILL.md" ] && echo "✅ ${d}" || { echo "❌ ${d}SKILL.md missing"; exit 1; }
+          done
+
+  # Test on macOS (Apple Silicon) — no Python, no git, no uv pre-installed
+  test-macos:
+    needs: syntax
+    name: "macOS (M-series) — Clean Setup"
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # GitHub runners have Python pre-installed, but we test the script
+      # still works correctly as if it were a fresh Mac
+      - name: Remove pre-existing venv if any
+        run: rm -rf .venv
+
+      - name: Run setup_env.py
+        run: |
+          # Simulate auto-accept for uv
+          echo "Y" | python3 scripts/setup_env.py
+
+      - name: Verify venv
+        run: |
+          test -d .venv || { echo "❌ No .venv"; exit 1; }
+          .venv/bin/python --version
+          echo "✅ venv OK"
+
+      - name: Verify skill sync
+        run: |
+          for dir in .claude/skills .agents/skills .agent/skills; do
+            test -d "$dir" && echo "✅ $dir" || { echo "❌ $dir missing"; exit 1; }
+          done
+          test -f .github/copilot-instructions.md && echo "✅ copilot-instructions" || { echo "❌ copilot-instructions missing"; exit 1; }
+
+      - name: Build book
+        run: .venv/bin/python scripts/build_book.py
+
+      - name: Verify build output
+        run: |
+          test -f book/_build/html/index.html || { echo "❌ No index.html"; exit 1; }
+          test -d book/_build/html/es || { echo "❌ No es/"; exit 1; }
+          test -d book/_build/html/en || { echo "❌ No en/"; exit 1; }
+          echo "✅ Build OK"
+
+      - name: Test setup_latex (non-interactive)
+        run: |
+          echo "s" | .venv/bin/python scripts/setup_latex.py
+
+      - name: Test pdf_to_markdown
+        run: |
+          .venv/bin/python -c "
+          import fitz
+          doc = fitz.open()
+          page = doc.new_page()
+          page.insert_text((72, 72), 'TeachBook Test')
+          doc.save('/tmp/test.pdf')
+          doc.close()
+          "
+          .venv/bin/python scripts/pdf_to_markdown.py /tmp/test.pdf --output /tmp/test_md
+          test -f /tmp/test_md/test.md && echo "✅ PDF→MD OK" || { echo "❌ PDF→MD failed"; exit 1; }
+
+  # Test on Windows — the #1 OS for non-technical users
+  test-windows:
+    needs: syntax
+    name: "Windows — Clean Setup"
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove pre-existing venv if any
+        shell: pwsh
+        run: if (Test-Path .venv) { Remove-Item -Recurse -Force .venv }
+
+      - name: Run setup_env.py
+        shell: pwsh
+        run: |
+          echo "Y" | python scripts/setup_env.py
+
+      - name: Verify venv
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path .venv)) { Write-Error "No .venv"; exit 1 }
+          .venv\Scripts\python.exe --version
+          Write-Output "✅ venv OK"
+
+      - name: Verify skill sync
+        shell: pwsh
+        run: |
+          @(".claude\skills", ".agents\skills", ".agent\skills") | ForEach-Object {
+            if (Test-Path $_) { Write-Output "✅ $_" }
+            else { Write-Error "❌ $_ missing"; exit 1 }
+          }
+          if (Test-Path ".github\copilot-instructions.md") { Write-Output "✅ copilot-instructions" }
+          else { Write-Error "❌ copilot-instructions missing"; exit 1 }
+
+      - name: Build book
+        shell: pwsh
+        run: .venv\Scripts\python.exe scripts/build_book.py
+
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path "book\_build\html\index.html")) { Write-Error "No index.html"; exit 1 }
+          if (-Not (Test-Path "book\_build\html\es")) { Write-Error "No es/"; exit 1 }
+          if (-Not (Test-Path "book\_build\html\en")) { Write-Error "No en/"; exit 1 }
+          Write-Output "✅ Build OK"
+
+      - name: Test setup_latex (non-interactive)
+        shell: pwsh
+        run: |
+          echo "s" | .venv\Scripts\python.exe scripts/setup_latex.py
+
+      - name: Test pdf_to_markdown
+        shell: pwsh
+        run: |
+          $testPdf = Join-Path $env:RUNNER_TEMP "test.pdf"
+          $testOut = Join-Path $env:RUNNER_TEMP "test_md"
+          .venv\Scripts\python.exe -c "import fitz; doc=fitz.open(); page=doc.new_page(); page.insert_text((72,72),'Test'); doc.save(r'$testPdf'); doc.close()"
+          .venv\Scripts\python.exe scripts/pdf_to_markdown.py $testPdf --output $testOut
+          if (Test-Path "$testOut\test.md") { Write-Output "✅ PDF→MD OK" }
+          else { Write-Error "❌ PDF→MD failed"; exit 1 }

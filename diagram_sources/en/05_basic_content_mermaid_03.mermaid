@@ -1,0 +1,12 @@
+%%{init: {"themeVariables": {"fontSize": "11px", "fontFamily": "Arial"}}}%%
+classDiagram
+    direction LR
+    class Experiment {
+        +name
+        +run()
+    }
+    class Sample {
+        +type
+        +prepare()
+    }
+    Experiment --> Sample : uses

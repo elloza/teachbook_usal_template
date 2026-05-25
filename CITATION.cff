@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+title: 'Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial'
+authors:
+  - name: 'Álvaro Lozano Murciego'
+    affiliation: 'Universidad de Salamanca'
+    city: Salamanca
+    country: ES
+  - name: 'André Sales Mendes'
+    affiliation: 'Universidad de Salamanca'
+    city: Salamanca
+    country: ES
+message: 'If you use this teachbook, please cite it using these metadata.'
+preferred-citation:
+  type: book
+  authors:
+    - name: 'Álvaro Lozano Murciego'
+      affiliation: 'Universidad de Salamanca'
+    - name: 'André Sales Mendes'
+      affiliation: 'Universidad de Salamanca'
+  title: 'Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial'
+  year: 2026
+  publisher:
+    name: 'Universidad de Salamanca'
+  url: 'https://github.com/TeachBooks/template' # Pending specific URL
+  identifiers:
+    - type: url
+      value: 'https://teachbooks.github.io/template/' # Pending specific URL
+      description: 'Published book on GitHub Pages'
+  abstract: >-
+    Material del curso "Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial",
+    orientado a la creación de libros docentes interactivos en las Facultades de Ciencias y de Ciencias Químicas de la Universidad de Salamanca.
+    Permite crear contenido educativo con texto, código y visualizaciones con apoyo de asistentes de IA.
+  keywords:
+    - TeachBook
+    - Universidad de Salamanca
+    - Ciencias
+    - Ciencias Químicas
+    - Docencia
+    - Jupyter Book
+    - Inteligencia Artificial
+  license: CC-BY-4.0
+  contact:
+    - name: 'Álvaro Lozano Murciego'
+      affiliation: 'Universidad de Salamanca'
+    - name: 'André Sales Mendes'
+      affiliation: 'Universidad de Salamanca'

@@ -1,0 +1,7 @@
+jupyter-book>=0.15.1,<2.0
+sphinx-design
+sphinxcontrib-bibtex
+sphinx-thebe
+sphinx-kroki
+Pillow
+PyYAML

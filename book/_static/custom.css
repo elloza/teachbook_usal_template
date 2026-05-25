@@ -1,0 +1,291 @@
+/* Global Layout Stability & Width */
+html {
+    scrollbar-gutter: stable;
+}
+
+/* Base Styles & Layout Consistency */
+:root {
+    --pst-content-width: 60rem;
+    --usal-blue: #003153;
+    --usal-blue-light: #004a7c;
+}
+
+/* Ensure homogeneous article width */
+.bd-main .bd-content .bd-article-container {
+    max-width: var(--pst-content-width) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Language Switcher Container */
+.teachbook-lang-container {
+    display: inline-block;
+    height: 100%;
+    align-self: center;
+    position: relative;
+    /* Ensure it sits above EVERYTHING */
+    z-index: 2000000 !important;
+}
+
+/* Dropdown visibility on hover */
+.teachbook-lang-container:hover .teachbook-lang-dropdown {
+    display: block;
+}
+
+.teachbook-lang-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.6rem !important;
+    height: 32px !important;
+    border: none !important;
+    background-color: transparent !important;
+    color: var(--pst-color-text-main) !important;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.teachbook-lang-btn:hover {
+    background-color: var(--pst-color-background-soft) !important;
+    border-radius: 4px;
+}
+
+.teachbook-lang-btn .lang-text {
+    font-weight: 600;
+}
+
+/* The actual dropdown list */
+.teachbook-lang-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 32px;
+    margin: 0 !important;
+    min-width: 140px;
+    z-index: 1030 !important;
+    /* Slightly higher than header */
+    border: 1px solid var(--pst-color-border);
+    background-color: #ffffff !important;
+    /* Solid white background */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 0.4rem 0;
+    list-style: none;
+    animation: fadeInDown 0.2s ease-out;
+}
+
+.teachbook-lang-dropdown li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.teachbook-lang-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    clear: both;
+    font-weight: 500;
+    color: var(--pst-color-text-main) !important;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.85em;
+    text-decoration: none !important;
+}
+
+.teachbook-lang-dropdown .dropdown-item:hover,
+.teachbook-lang-dropdown .dropdown-item.active {
+    background-color: var(--pst-color-background-soft) !important;
+    color: var(--pst-color-link) !important;
+    text-decoration: none;
+}
+
+/* Sidebar Footer PDF Button */
+.sidebar-footer-pdf {
+    padding: 1.2rem;
+    border-top: 1px solid var(--pst-color-border);
+    margin-top: auto;
+}
+
+.custom-sidebar-pdf-container a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.7rem;
+    background-color: var(--usal-blue) !important;
+    color: white !important;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-decoration: none !important;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: none;
+}
+
+.custom-sidebar-pdf-container a:hover {
+    background-color: var(--usal-blue-light) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.custom-sidebar-pdf-container a:active {
+    transform: scale(0.98);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ensure sidebar toggles are always on top and clickable */
+.sidebar-toggle {
+    z-index: 200000 !important;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Force header components to stay above title text */
+.bd-header-article {
+    position: relative;
+    z-index: 1020;
+    /* Standard Bootstrap/Theme z-index */
+}
+
+/* Ensure the main container creates a stacking context context */
+.bd-content .bd-article-container {
+    isolation: isolate;
+    position: relative;
+    z-index: 0;
+}
+
+/* 
+   --------------------------------------------------------------
+   Desktop Sidebar Toggle Support 
+   --------------------------------------------------------------
+   We use a custom class 'teachbook-sidebar-hidden' toggled by custom.js
+   to force the sidebar to hide on desktop.
+*/
+@media (min-width: 992px) {
+
+    /* Hide the sidebar when the class is present */
+    html.teachbook-sidebar-hidden .bd-sidebar-primary {
+        display: none !important;
+    }
+
+    /* Expand the content area to fill the space */
+    html.teachbook-sidebar-hidden .bd-container .bd-main .bd-content .bd-article-container {
+        max-width: 90% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+/* Fix for the dropdown being behind content */
+.article-header-buttons {
+    z-index: auto;
+}
+
+/* Force the article content to a lower layer */
+/* H1s and other content must sit below the header */
+.bd-article {
+    position: relative;
+    z-index: auto;
+}
+
+/* Just in case H1 has its own weirdness, keep it low */
+.bd-article h1 {
+    position: relative;
+    z-index: auto;
+}
+
+/* 
+   --------------------------------------------------------------
+   Desktop Sidebar Toggle Support 
+   --------------------------------------------------------------
+   (Removed to revert to initial state)
+*/
+
+/* 
+   --------------------------------------------------------------
+   Logo Styling Fix
+   --------------------------------------------------------------
+   Prevent the logo from getting a purple highlight/background on focus/active.
+*/
+.bd-sidebar-primary .navbar-brand:focus,
+.bd-sidebar-primary .navbar-brand:hover,
+.bd-sidebar-primary .navbar-brand:active {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* ========================================
+   OpenDyslexic Accessibility Mode
+   ======================================== */
+/* Font is loaded via JS to avoid @import-after-rules (CSS spec violation) */
+
+/* When accessibility mode is active */
+html.opendyslexic-mode {
+    --dyslexic-font: 'OpenDyslexic', sans-serif;
+}
+
+html.opendyslexic-mode body,
+html.opendyslexic-mode p,
+html.opendyslexic-mode li,
+html.opendyslexic-mode td,
+html.opendyslexic-mode th,
+html.opendyslexic-mode span,
+html.opendyslexic-mode div,
+html.opendyslexic-mode a,
+html.opendyslexic-mode h1,
+html.opendyslexic-mode h2,
+html.opendyslexic-mode h3,
+html.opendyslexic-mode h4,
+html.opendyslexic-mode h5,
+html.opendyslexic-mode h6,
+html.opendyslexic-mode label,
+html.opendyslexic-mode input,
+html.opendyslexic-mode textarea,
+html.opendyslexic-mode button,
+html.opendyslexic-mode pre,
+html.opendyslexic-mode code {
+    font-family: var(--dyslexic-font) !important;
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+    line-height: 1.8 !important;
+}
+
+/* Accessibility toggle button */
+.teachbook-a11y-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0 0.6rem !important;
+    height: 32px !important;
+    border: none !important;
+    background-color: transparent !important;
+    color: var(--pst-color-text-main) !important;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.teachbook-a11y-btn:hover {
+    background-color: var(--pst-color-background-soft) !important;
+    border-radius: 4px;
+}
+
+.teachbook-a11y-btn.active {
+    color: var(--pst-color-link) !important;
+}

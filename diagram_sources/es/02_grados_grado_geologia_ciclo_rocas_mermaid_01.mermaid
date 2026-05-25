@@ -1,0 +1,13 @@
+flowchart TD
+    Magma["Magma"]
+    Ignea["Roca Ígnea"]
+    Sedimentaria["Roca Sedimentaria"]
+    Metamorfica["Roca Metamórfica"]
+
+    Magma -->|"Enfriamiento y solidificación"| Ignea
+    Ignea -->|"Meteorización y erosión"| Sedimentaria
+    Sedimentaria -->|"Calor y presión"| Metamorfica
+    Metamorfica -->|"Fusión"| Magma
+    Ignea -->|"Calor y presión"| Metamorfica
+    Metamorfica -->|"Meteorización y erosión"| Sedimentaria
+    Sedimentaria -->|"Fusión"| Magma

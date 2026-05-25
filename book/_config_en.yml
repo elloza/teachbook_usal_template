@@ -1,0 +1,64 @@
+title: |
+  Creating Electronic Books
+  with Code and
+  Artificial Intelligence
+  Assistants
+author: Álvaro Lozano Murciego and André Sales Mendes
+copyright: "2026"
+logo: "_static/logo.png"
+language: en
+exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*", "es/","temp_build_*", "latex_templates*", "_TRASH*"]
+execute:
+  execute_notebooks: off
+parse:
+  myst_enable_extensions:
+    - colon_fence
+    - dollarmath
+    - linkify
+  use_download_button: true
+  extra_navbar: |
+    <div style="margin-top: 10px; font-size: 0.8em; color: #666;">
+      Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+    </div>
+html_theme_options:
+  icon_links: []
+sphinx:
+  extra_extensions:
+    - sphinx_thebe
+    - sphinxcontrib.bibtex
+    - sphinx_kroki
+  config:
+    html_show_copyright: false
+    suppress_warnings:
+    - bibtex.duplicate_citation
+    html_js_files:
+    - custom.js
+    bibtex_bibfiles:
+    - _static/references.bib
+    thebe_config:
+      always_load: false
+      repository_url: https://github.com/binder-examples/jupyter-stacks-datascience
+      repository_branch: master
+      selector: ".thebe,.cell"
+      selector_input: "pre"
+      selector_output: ".output, .cell_output"
+html:
+  extra_footer: |
+    <p>Built with a modified version of <a href="https://teachbooks.io/">TeachBooks</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">CC BY 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt=""></a></p>
+latex_docclass:
+  book: jupyterBook
+latex:
+  latex_engine: xelatex
+  options: "english"
+  subtitle: "Course for the Faculties of Sciences and Chemical Sciences"       # Optional
+  header_title: |
+    Creating electronic books
+    with code and AI
+  institution: "Universidad de Salamanca"  # Optional
+  edition: "1st Edition"                # Optional
+  cover_logo: "_static/usal_logo.png"  # PDF cover logo; the web logo is configured above in `logo`
+  # isbn: "978-84-XXXXX-XX-X"          # Optional
+  # doi: "10.XXXX/xxxxx"               # Optional
+  preamble: |
+    \usepackage[english]{babel}
+    \selectlanguage{english}

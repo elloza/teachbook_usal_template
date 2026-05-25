@@ -1,0 +1,110 @@
+format: jb-book
+root: en/intro
+parts:
+  - caption: Tutorial
+    chapters:
+    - file: en/01_tutorial/01_what_is_a_teachbook
+    - file: en/01_tutorial/02_workflow
+    - file: en/01_tutorial/03_ai_editing
+    - file: en/01_tutorial/04_my_first_book_in_5_minutes
+    - file: en/01_tutorial/05_x_as_code_philosophy
+  - caption: Examples by Degree
+    chapters:
+    - file: en/02_degrees/physics_degree/intro
+      sections:
+      - file: en/02_degrees/physics_degree/physics_example
+      - file: en/02_degrees/physics_degree/rc_circuit_schemdraw
+      - file: en/02_degrees/physics_degree/advanced_circuitikz
+      - file: en/02_degrees/physics_degree/kroki_diagrams
+      - file: en/02_degrees/physics_degree/ohms_law_fit
+      - file: en/02_degrees/physics_degree/harmonic_oscillator
+    - file: en/02_degrees/math_degree/intro
+      sections:
+      - file: en/02_degrees/math_degree/math_example
+      - file: en/02_degrees/math_degree/quadratic_equation
+      - file: en/02_degrees/math_degree/newtons_method
+      - file: en/02_degrees/math_degree/linear_transformations
+      - file: en/02_degrees/math_degree/unit_distances
+    - file: en/02_degrees/stats_degree/intro
+      sections:
+      - file: en/02_degrees/stats_degree/stats_example
+      - file: en/02_degrees/stats_degree/linear_regression
+      - file: en/02_degrees/stats_degree/monte_carlo_pi
+      - file: en/02_degrees/stats_degree/statistics_questions
+    - file: en/02_degrees/computer_science_degree/intro
+      sections:
+      - file: en/02_degrees/computer_science_degree/er_diagram_mermaid
+      - file: en/02_degrees/computer_science_degree/uml_class_diagram_mermaid
+      - file: en/02_degrees/computer_science_degree/kroki_diagrams
+      - file: en/02_degrees/computer_science_degree/algorithm_complexity
+    - file: en/02_degrees/geology_degree/intro
+      sections:
+      - file: en/02_degrees/geology_degree/topographic_profile
+      - file: en/02_degrees/geology_degree/stratigraphic_column
+      - file: en/02_degrees/geology_degree/rock_cycle_mermaid
+    - file: en/02_degrees/chemical_engineering_degree/intro
+      sections:
+      - file: en/02_degrees/chemical_engineering_degree/flow_diagram
+      - file: en/02_degrees/chemical_engineering_degree/mccabe_thiele
+      - file: en/02_degrees/chemical_engineering_degree/recycle_fsolve
+      - file: en/02_degrees/chemical_engineering_degree/concentration_gradient
+      - file: en/02_degrees/chemical_engineering_degree/moody_chart
+    - file: en/02_degrees/chemistry_degree/intro
+      sections:
+      - file: en/02_degrees/chemistry_degree/buffer_ph_curve
+      - file: en/02_degrees/chemistry_degree/michaelis_menten
+      - file: en/02_degrees/chemistry_degree/interactive_periodic_table
+      - file: en/02_degrees/chemistry_degree/interactive_ir_spectrum
+      - file: en/02_degrees/chemistry_degree/nernst_equation
+  - caption: Cross-disciplinary Examples
+    chapters:
+    - file: en/03_cross_disciplinary_examples/intro
+      sections:
+      - file: en/03_cross_disciplinary_examples/biology_logistic_growth
+      - file: en/03_cross_disciplinary_examples/psychology_likert_questionnaire
+      - file: en/03_cross_disciplinary_examples/language_glossary_frequency
+      - file: en/03_cross_disciplinary_examples/education_rubric_sequence
+      - file: en/03_cross_disciplinary_examples/medicine_simulated_data
+      - file: en/03_cross_disciplinary_examples/chemical_engineering_balance
+  - caption: Examples from Other Books
+    chapters:
+    - file: en/04_examples_from_other_books/intro
+  - caption: Basic Content
+    chapters:
+    - file: en/05_basic_content/intro
+    - file: en/05_basic_content/myst_markdown
+    - file: en/05_basic_content/figures
+    - file: en/05_basic_content/equations
+    - file: en/05_basic_content/citations_bibliography
+    - file: en/05_basic_content/cross_references
+    - file: en/05_basic_content/tables
+    - file: en/05_basic_content/admonitions_dropdowns
+    - file: en/05_basic_content/tabs_cards
+    - file: en/05_basic_content/code
+    - file: en/05_basic_content/videos
+    - file: en/05_basic_content/mermaid
+    - file: en/05_basic_content/html_pdf_compatibility
+  - caption: Interactivity and Assessment
+    chapters:
+    - file: en/06_interactivity/intro
+      sections:
+      - file: en/06_interactivity/thebe_pyodide
+      - file: en/06_interactivity/interactive_notebooks
+      - file: en/06_interactivity/widgets
+      - file: en/06_interactivity/jupyterquiz_quizzes
+      - file: en/06_interactivity/parametric_questions
+      - file: en/06_interactivity/exercises_with_solution
+      - file: en/06_interactivity/interactive_html
+      - file: en/06_interactivity/h5p_optional
+  - caption: Web Publication
+    chapters:
+    - file: en/07_web_publication/intro
+      sections:
+      - file: en/07_web_publication/github_pages
+      - file: en/07_web_publication/own_server
+  - caption: Information
+    chapters:
+    - file: en/90_about
+    - file: en/91_licenses
+    - file: en/92_how_to_cite
+    - file: en/93_bibliography

@@ -1,0 +1,5 @@
+{ signal: [
+  { name: "Vin", wave: "p....|...." },
+  { name: "Vout", wave: "0.p..|.p..", phase: 0.5 },
+  { name: "I", wave: "0..p.|..p.", phase: 0.75 }
+]}

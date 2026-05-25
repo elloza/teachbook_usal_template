@@ -1,0 +1,9 @@
+%%{init: {"themeVariables": {"fontSize": "11px", "fontFamily": "Arial"}}}%%
+stateDiagram-v2
+    direction LR
+    [*] --> Pending
+    Pending --> InProgress : start
+    InProgress --> Completed : finish
+    InProgress --> Error : failure
+    Error --> Pending : retry
+    Completed --> [*]

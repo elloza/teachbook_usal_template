@@ -1,0 +1,25 @@
+erDiagram
+    ESTUDIANTE {
+        int id PK
+        string nombre
+        string email
+    }
+    CURSO {
+        int id PK
+        string nombre
+        int creditos
+    }
+    PROFESOR {
+        int id PK
+        string nombre
+        string departamento
+    }
+    MATRICULA {
+        int id PK
+        float nota
+        string convocatoria
+    }
+
+    ESTUDIANTE ||--o{ MATRICULA : "se matricula"
+    CURSO ||--o{ MATRICULA : "tiene"
+    PROFESOR ||--o{ CURSO : "imparte"

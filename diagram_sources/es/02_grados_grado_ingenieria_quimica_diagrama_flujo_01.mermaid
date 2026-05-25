@@ -1,0 +1,9 @@
+flowchart LR
+    A[Alimentación fresca<br/>A + inerte] --> M[Mezclador]
+    R[Recirculación rica en A] --> M
+    M --> C[Reactor CSTR<br/>A → B]
+    C --> S[Separador]
+    S --> D[Producto B<br/>destilado]
+    S --> W[Residuo / purga]
+    S --> R
+

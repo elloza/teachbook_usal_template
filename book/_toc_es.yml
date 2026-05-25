@@ -1,0 +1,110 @@
+format: jb-book
+root: es/intro
+parts:
+  - caption: Tutorial
+    chapters:
+    - file: es/01_tutorial/01_que_es_un_teachbook
+    - file: es/01_tutorial/02_flujo_trabajo
+    - file: es/01_tutorial/03_edicion_con_ia
+    - file: es/01_tutorial/04_mi_primer_libro_en_5_minutos
+    - file: es/01_tutorial/05_filosofia_algo_como_codigo
+  - caption: Ejemplos por Grado
+    chapters:
+    - file: es/02_grados/grado_fisica/intro
+      sections:
+      - file: es/02_grados/grado_fisica/ejemplo_fisica
+      - file: es/02_grados/grado_fisica/circuitos_schemdraw
+      - file: es/02_grados/grado_fisica/circuitikz_avanzado
+      - file: es/02_grados/grado_fisica/diagramas_kroki
+      - file: es/02_grados/grado_fisica/ley_ohm_ajuste
+      - file: es/02_grados/grado_fisica/oscilador_armonico
+    - file: es/02_grados/grado_matematicas/intro
+      sections:
+      - file: es/02_grados/grado_matematicas/ejemplo_matematicas
+      - file: es/02_grados/grado_matematicas/ecuacion_segundo_grado
+      - file: es/02_grados/grado_matematicas/metodo_newton
+      - file: es/02_grados/grado_matematicas/transformaciones_lineales
+      - file: es/02_grados/grado_matematicas/distancias_unitarias
+    - file: es/02_grados/grado_estadistica/intro
+      sections:
+      - file: es/02_grados/grado_estadistica/ejemplo_estadistica
+      - file: es/02_grados/grado_estadistica/regresion_lineal
+      - file: es/02_grados/grado_estadistica/monte_carlo_pi
+      - file: es/02_grados/grado_estadistica/preguntas_estadistica
+    - file: es/02_grados/grado_informatica/intro
+      sections:
+      - file: es/02_grados/grado_informatica/diagrama_er_mermaid
+      - file: es/02_grados/grado_informatica/uml_clases_mermaid
+      - file: es/02_grados/grado_informatica/diagramas_kroki
+      - file: es/02_grados/grado_informatica/complejidad_algoritmica
+    - file: es/02_grados/grado_geologia/intro
+      sections:
+      - file: es/02_grados/grado_geologia/perfil_topografico
+      - file: es/02_grados/grado_geologia/columna_estratigrafica
+      - file: es/02_grados/grado_geologia/ciclo_rocas_mermaid
+    - file: es/02_grados/grado_ingenieria_quimica/intro
+      sections:
+      - file: es/02_grados/grado_ingenieria_quimica/diagrama_flujo
+      - file: es/02_grados/grado_ingenieria_quimica/mccabe_thiele
+      - file: es/02_grados/grado_ingenieria_quimica/recirculacion_fsolve
+      - file: es/02_grados/grado_ingenieria_quimica/gradiente_concentracion
+      - file: es/02_grados/grado_ingenieria_quimica/grafica_moody
+    - file: es/02_grados/grado_quimica/intro
+      sections:
+      - file: es/02_grados/grado_quimica/curva_ph_tampon
+      - file: es/02_grados/grado_quimica/michaelis_menten
+      - file: es/02_grados/grado_quimica/tabla_periodica_interactiva
+      - file: es/02_grados/grado_quimica/espectro_ir_interactivo
+      - file: es/02_grados/grado_quimica/ecuacion_nernst
+  - caption: Ejemplos transversales
+    chapters:
+    - file: es/03_ejemplos_transversales/intro
+      sections:
+      - file: es/03_ejemplos_transversales/biologia_crecimiento_logistico
+      - file: es/03_ejemplos_transversales/psicologia_cuestionario_likert
+      - file: es/03_ejemplos_transversales/lengua_glosario_frecuencia
+      - file: es/03_ejemplos_transversales/educacion_rubrica_secuencia
+      - file: es/03_ejemplos_transversales/medicina_datos_simulados
+      - file: es/03_ejemplos_transversales/ingenieria_quimica_balance
+  - caption: Ejemplos de otros libros
+    chapters:
+    - file: es/04_ejemplos_otros_libros/intro
+  - caption: Contenidos Básicos
+    chapters:
+    - file: es/05_contenidos_basicos/intro
+    - file: es/05_contenidos_basicos/myst_markdown
+    - file: es/05_contenidos_basicos/figuras
+    - file: es/05_contenidos_basicos/ecuaciones
+    - file: es/05_contenidos_basicos/citas_bibliografia
+    - file: es/05_contenidos_basicos/referencias_cruzadas
+    - file: es/05_contenidos_basicos/tablas
+    - file: es/05_contenidos_basicos/admonitions_dropdowns
+    - file: es/05_contenidos_basicos/tabs_cards
+    - file: es/05_contenidos_basicos/codigo
+    - file: es/05_contenidos_basicos/videos
+    - file: es/05_contenidos_basicos/mermaid
+    - file: es/05_contenidos_basicos/compatibilidad_html_pdf
+  - caption: Interactividad y Evaluación
+    chapters:
+    - file: es/06_interactividad/intro
+      sections:
+      - file: es/06_interactividad/thebe_pyodide
+      - file: es/06_interactividad/notebooks_interactivos
+      - file: es/06_interactividad/widgets
+      - file: es/06_interactividad/quizzes_jupyterquiz
+      - file: es/06_interactividad/preguntas_parametricas
+      - file: es/06_interactividad/ejercicios_con_solucion
+      - file: es/06_interactividad/html_interactivo
+      - file: es/06_interactividad/h5p_opcional
+  - caption: Publicación Web
+    chapters:
+    - file: es/07_publicacion_web/intro
+      sections:
+      - file: es/07_publicacion_web/github_pages
+      - file: es/07_publicacion_web/servidor_propio
+  - caption: Información
+    chapters:
+    - file: es/90_acerca_de
+    - file: es/91_licencias
+    - file: es/92_como_citar
+    - file: es/93_bibliografia

@@ -1,0 +1,44 @@
+% English localization support
+\usepackage[english]{babel}
+\selectlanguage{english}
+
+\AtBeginDocument{
+  % Keep chapter opening pages visually consistent with the Spanish PDF.
+  % The default Bjarne style spells numbers as words (ONE, TWO...), which makes
+  % long chapter numbers such as THIRTYFOUR look cramped and too small.
+  \makeatletter
+  \@ifpackageloaded{fncychap}{
+    \renewcommand{\DOCH}{%
+      \mghrulefill{\RW}\par\nobreak
+      \FmN{\chaptername}\space \thechapter\par\nobreak
+      \mghrulefill{\RW}\par\nobreak
+      \vskip 40\p@
+    }
+    \renewcommand{\DOTIS}[1]{%
+      \raggedright
+      \CTV\FmTi{#1}\par\nobreak
+      \vskip 40\p@
+    }
+  }{}
+  \makeatother
+
+  \gdef\contentsname{Contents}
+  \gdef\chaptername{Chapter}
+  \gdef\partname{Part}
+  \gdef\appendixname{Appendix}
+  \gdef\figurename{Figure}
+  \gdef\tablename{Table}
+  \gdef\bibname{Bibliography}
+  \gdef\indexname{Index}
+
+  \ifdefined\captionsenglish
+    \addto\captionsenglish{%
+      \renewcommand{\contentsname}{Contents}%
+      \renewcommand{\chaptername}{Chapter}%
+      \renewcommand{\figurename}{Figure}%
+      \renewcommand{\tablename}{Table}%
+      \renewcommand{\bibname}{Bibliography}%
+      \renewcommand{\indexname}{Index}%
+    }
+  \fi
+}

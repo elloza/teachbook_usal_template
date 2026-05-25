@@ -1,0 +1,55 @@
+% Spanish localization support
+% Force Spanish terms even if the document class is set to English by Sphinx.
+
+\AtBeginDocument{
+  % --- 1. Fix fncychap (Bjarne style) numbering ---
+  % Standard Bjarne uses spelled-out English words (ONE, TWO...).
+  % We override \DOCH to use digits (\thechapter).
+  \makeatletter
+  \@ifpackageloaded{fncychap}{
+    % Use digits and the localized chapter name
+    \renewcommand{\DOCH}{%
+      \mghrulefill{\RW}\par\nobreak
+      \FmN{\chaptername}\space \thechapter\par\nobreak
+      \mghrulefill{\RW}\par\nobreak
+      \vskip 40\p@
+    }
+    % Also fix unnumbered chapters if needed
+    \renewcommand{\DOTIS}[1]{%
+      \raggedright
+      \CTV\FmTi{#1}\par\nobreak
+      \vskip 40\p@
+    }
+  }{}
+  \makeatother
+
+  % --- 2. Brute force override of captions ---
+  % We use \gdef to ensure these take effect regardless of language settings.
+  \gdef\contentsname{Índice de contenidos}
+  \gdef\chaptername{Capítulo}
+  \gdef\partname{Parte}
+  \gdef\appendixname{Anexo}
+  \gdef\figurename{Figura}
+  \gdef\tablename{Tabla}
+  \gdef\bibname{Bibliografía}
+  \gdef\indexname{Índice}
+  
+  % --- 3. Override Sphinx/Babel hooks ---
+  % We try to add to any possible active caption set
+  \ifdefined\captionsspanish
+    \addto\captionsspanish{%
+      \renewcommand{\contentsname}{Índice de contenidos}%
+      \renewcommand{\chaptername}{Capítulo}%
+    }
+  \fi
+  
+  \ifdefined\captionsenglish
+    \addto\captionsenglish{%
+      \renewcommand{\contentsname}{Índice de contenidos}%
+      \renewcommand{\chaptername}{Capítulo}%
+      \renewcommand{\figurename}{Figura}%
+      \renewcommand{\tablename}{Tabla}%
+      \renewcommand{\indexname}{Índice}%
+    }
+  \fi
+}

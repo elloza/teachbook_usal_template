@@ -1,0 +1,5 @@
+sphinx-jupyterbook-latex>=0.5.2
+cairosvg
+svglib
+reportlab
+PyYAML

@@ -1,0 +1,33 @@
+workspace {
+  model {
+    user = person "User"
+    softwareSystem = softwareSystem "Teaching Platform" {
+      web = container "Web"
+      api = container "API"
+      db = container "Database"
+    }
+    user -> web "Uses"
+    web -> api "Calls"
+    api -> db "Reads/writes"
+  }
+  views {
+    container softwareSystem {
+      include *
+      autoLayout lr
+    }
+    styles {
+      element "Software System" {
+        background #1168BD
+        color #FFFFFF
+      }
+      element "Container" {
+        background #438DD5
+        color #FFFFFF
+      }
+      element "Person" {
+        background #08427B
+        color #FFFFFF
+      }
+    }
+  }
+}

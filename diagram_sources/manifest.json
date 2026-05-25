@@ -1,0 +1,362 @@
+[
+  {
+    "source_markdown": "book\\es\\01_tutorial\\05_filosofia_codigo_docente.md",
+    "line": 28,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\01_tutorial_05_filosofia_codigo_docente_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\01_tutorial_05_filosofia_codigo_docente_01.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/es/01_tutorial_05_filosofia_codigo_docente_01.svg",
+    "caption": "Diagrama: El código como puente hacia el resultado final."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_fisica\\diagramas_kroki.md",
+    "line": 19,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_01.svg",
+    "caption": "Diagrama: Mermaid: cadena de instrumentación."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_fisica\\diagramas_kroki.md",
+    "line": 38,
+    "language": "es",
+    "diagram_type": "graphviz",
+    "source_file": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_02.graphviz",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_02.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_02.svg",
+    "caption": "Diagrama: GraphViz: flujo de señal en un montaje."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_fisica\\diagramas_kroki.md",
+    "line": 90,
+    "language": "es",
+    "diagram_type": "wavedrom",
+    "source_file": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_03.wavedrom",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_03.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_03.svg",
+    "caption": "Diagrama: Wavedrom: señales de entrada y salida."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_fisica\\diagramas_kroki.md",
+    "line": 108,
+    "language": "es",
+    "diagram_type": "ditaa",
+    "source_file": "diagram_sources\\es\\02_grados_grado_fisica_diagramas_kroki_04.ditaa",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_fisica_diagramas_kroki_04.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_04.svg",
+    "caption": "Diagrama: Ditaa: esquema rápido de banco experimental."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_geologia\\ciclo_rocas_mermaid.md",
+    "line": 38,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\02_grados_grado_geologia_ciclo_rocas_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_geologia_ciclo_rocas_mermaid_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_geologia_ciclo_rocas_mermaid_01.svg",
+    "caption": "Diagrama: El ciclo."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_informatica\\diagrama_er_mermaid.md",
+    "line": 50,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\02_grados_grado_informatica_diagrama_er_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagrama_er_mermaid_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagrama_er_mermaid_01.svg",
+    "caption": "Diagrama: Ejemplo: Base de datos de una universidad."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_informatica\\diagramas_kroki.md",
+    "line": 12,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_01.svg",
+    "caption": "Diagrama: Mermaid: arquitectura por capas."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_informatica\\diagramas_kroki.md",
+    "line": 30,
+    "language": "es",
+    "diagram_type": "plantuml",
+    "source_file": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_02.plantuml",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_02.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_02.svg",
+    "caption": "Diagrama: PlantUML: componentes del sistema."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_informatica\\diagramas_kroki.md",
+    "line": 49,
+    "language": "es",
+    "diagram_type": "graphviz",
+    "source_file": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_03.graphviz",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_03.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_03.svg",
+    "caption": "Diagrama: GraphViz: grafo de dependencias."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_informatica\\diagramas_kroki.md",
+    "line": 69,
+    "language": "es",
+    "diagram_type": "structurizr",
+    "source_file": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_04.structurizr",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_04.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_04.svg",
+    "caption": "Diagrama: Structurizr: vista C4 simplificada."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_informatica\\diagramas_kroki.md",
+    "line": 120,
+    "language": "es",
+    "diagram_type": "wavedrom",
+    "source_file": "diagram_sources\\es\\02_grados_grado_informatica_diagramas_kroki_05.wavedrom",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_diagramas_kroki_05.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_05.svg",
+    "caption": "Diagrama: Wavedrom: protocolo digital."
+  },
+  {
+    "source_markdown": "book\\es\\02_grados\\grado_informatica\\uml_clases_mermaid.md",
+    "line": 56,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\02_grados_grado_informatica_uml_clases_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\02_grados_grado_informatica_uml_clases_mermaid_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/es/02_grados_grado_informatica_uml_clases_mermaid_01.svg",
+    "caption": "Diagrama: Ejemplo: Jerarquía de Figuras Geométricas."
+  },
+  {
+    "source_markdown": "book\\es\\04_contenidos_basicos\\mermaid.md",
+    "line": 28,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\04_contenidos_basicos_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\04_contenidos_basicos_mermaid_01.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/es/04_contenidos_basicos_mermaid_01.svg",
+    "caption": "Diagrama: Diagrama de flujo (`flowchart`)."
+  },
+  {
+    "source_markdown": "book\\es\\04_contenidos_basicos\\mermaid.md",
+    "line": 66,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\04_contenidos_basicos_mermaid_02.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\04_contenidos_basicos_mermaid_02.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/es/04_contenidos_basicos_mermaid_02.svg",
+    "caption": "Diagrama: Diagrama de secuencia (`sequenceDiagram`)."
+  },
+  {
+    "source_markdown": "book\\es\\04_contenidos_basicos\\mermaid.md",
+    "line": 112,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\04_contenidos_basicos_mermaid_03.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\04_contenidos_basicos_mermaid_03.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/es/04_contenidos_basicos_mermaid_03.svg",
+    "caption": "Diagrama: Diagrama de clases (`classDiagram`)."
+  },
+  {
+    "source_markdown": "book\\es\\04_contenidos_basicos\\mermaid.md",
+    "line": 152,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\04_contenidos_basicos_mermaid_04.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\04_contenidos_basicos_mermaid_04.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/es/04_contenidos_basicos_mermaid_04.svg",
+    "caption": "Diagrama: Diagrama entidad-relación (`erDiagram`)."
+  },
+  {
+    "source_markdown": "book\\es\\04_contenidos_basicos\\mermaid.md",
+    "line": 186,
+    "language": "es",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\es\\04_contenidos_basicos_mermaid_05.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\es\\04_contenidos_basicos_mermaid_05.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/es/04_contenidos_basicos_mermaid_05.svg",
+    "caption": "Diagrama: Diagrama de estados (`stateDiagram-v2`)."
+  },
+  {
+    "source_markdown": "book\\en\\01_tutorial\\05_teaching_code_philosophy.md",
+    "line": 28,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\01_tutorial_05_teaching_code_philosophy_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\01_tutorial_05_teaching_code_philosophy_01.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/en/01_tutorial_05_teaching_code_philosophy_01.svg",
+    "caption": "Diagram: Code as a bridge to the final result."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\computer_science_degree\\er_diagram_mermaid.md",
+    "line": 50,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\02_degrees_computer_science_degree_er_diagram_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_er_diagram_mermaid_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_er_diagram_mermaid_01.svg",
+    "caption": "Diagram: Example: University database."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\computer_science_degree\\kroki_diagrams.md",
+    "line": 12,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_01.svg",
+    "caption": "Diagram: Mermaid: layered architecture."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\computer_science_degree\\kroki_diagrams.md",
+    "line": 30,
+    "language": "en",
+    "diagram_type": "plantuml",
+    "source_file": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_02.plantuml",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_02.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_02.svg",
+    "caption": "Diagram: PlantUML: system components."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\computer_science_degree\\kroki_diagrams.md",
+    "line": 49,
+    "language": "en",
+    "diagram_type": "graphviz",
+    "source_file": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_03.graphviz",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_03.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_03.svg",
+    "caption": "Diagram: GraphViz: dependency graph."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\computer_science_degree\\kroki_diagrams.md",
+    "line": 69,
+    "language": "en",
+    "diagram_type": "structurizr",
+    "source_file": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_04.structurizr",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_04.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_04.svg",
+    "caption": "Diagram: Structurizr: simplified C4 view."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\computer_science_degree\\kroki_diagrams.md",
+    "line": 120,
+    "language": "en",
+    "diagram_type": "wavedrom",
+    "source_file": "diagram_sources\\en\\02_degrees_computer_science_degree_kroki_diagrams_05.wavedrom",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_kroki_diagrams_05.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_05.svg",
+    "caption": "Diagram: Wavedrom: digital protocol timing."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\computer_science_degree\\uml_class_diagram_mermaid.md",
+    "line": 56,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\02_degrees_computer_science_degree_uml_class_diagram_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_computer_science_degree_uml_class_diagram_mermaid_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_uml_class_diagram_mermaid_01.svg",
+    "caption": "Diagram: Example: Geometric Shape Hierarchy."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\geology_degree\\rock_cycle_mermaid.md",
+    "line": 38,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\02_degrees_geology_degree_rock_cycle_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_geology_degree_rock_cycle_mermaid_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_geology_degree_rock_cycle_mermaid_01.svg",
+    "caption": "Diagram: The cycle."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\physics_degree\\kroki_diagrams.md",
+    "line": 19,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_01.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_01.svg",
+    "caption": "Diagram: Mermaid: instrumentation chain."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\physics_degree\\kroki_diagrams.md",
+    "line": 38,
+    "language": "en",
+    "diagram_type": "graphviz",
+    "source_file": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_02.graphviz",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_02.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_02.svg",
+    "caption": "Diagram: GraphViz: signal flow in an experimental setup."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\physics_degree\\kroki_diagrams.md",
+    "line": 90,
+    "language": "en",
+    "diagram_type": "wavedrom",
+    "source_file": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_03.wavedrom",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_03.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_03.svg",
+    "caption": "Diagram: Wavedrom: input and output signals."
+  },
+  {
+    "source_markdown": "book\\en\\02_degrees\\physics_degree\\kroki_diagrams.md",
+    "line": 108,
+    "language": "en",
+    "diagram_type": "ditaa",
+    "source_file": "diagram_sources\\en\\02_degrees_physics_degree_kroki_diagrams_04.ditaa",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\02_degrees_physics_degree_kroki_diagrams_04.svg",
+    "suggested_figure_path": "../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_04.svg",
+    "caption": "Diagram: Ditaa: quick experimental bench sketch."
+  },
+  {
+    "source_markdown": "book\\en\\04_basic_content\\mermaid.md",
+    "line": 28,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\04_basic_content_mermaid_01.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\04_basic_content_mermaid_01.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/en/04_basic_content_mermaid_01.svg",
+    "caption": "Diagram: Flowchart (`flowchart`)."
+  },
+  {
+    "source_markdown": "book\\en\\04_basic_content\\mermaid.md",
+    "line": 66,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\04_basic_content_mermaid_02.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\04_basic_content_mermaid_02.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/en/04_basic_content_mermaid_02.svg",
+    "caption": "Diagram: Sequence diagram (`sequenceDiagram`)."
+  },
+  {
+    "source_markdown": "book\\en\\04_basic_content\\mermaid.md",
+    "line": 112,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\04_basic_content_mermaid_03.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\04_basic_content_mermaid_03.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/en/04_basic_content_mermaid_03.svg",
+    "caption": "Diagram: Class diagram (`classDiagram`)."
+  },
+  {
+    "source_markdown": "book\\en\\04_basic_content\\mermaid.md",
+    "line": 152,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\04_basic_content_mermaid_04.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\04_basic_content_mermaid_04.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/en/04_basic_content_mermaid_04.svg",
+    "caption": "Diagram: Entity-relationship diagram (`erDiagram`)."
+  },
+  {
+    "source_markdown": "book\\en\\04_basic_content\\mermaid.md",
+    "line": 186,
+    "language": "en",
+    "diagram_type": "mermaid",
+    "source_file": "diagram_sources\\en\\04_basic_content_mermaid_05.mermaid",
+    "expected_output": "book\\_static\\generated\\diagrams\\en\\04_basic_content_mermaid_05.svg",
+    "suggested_figure_path": "../../_static/generated/diagrams/en/04_basic_content_mermaid_05.svg",
+    "caption": "Diagram: State diagram (`stateDiagram-v2`)."
+  }
+]

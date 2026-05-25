@@ -1,0 +1,64 @@
+title: |
+  Elaboración de libros
+  electrónicos mediante
+  código y asistentes de
+  Inteligencia Artificial
+author: Álvaro Lozano Murciego y André Sales Mendes
+copyright: "2026"
+logo: "_static/logo.png"
+language: es
+exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*", "en/", "temp_build_*", "latex_templates*", "_TRASH*"]
+execute:
+  execute_notebooks: off
+parse:
+  myst_enable_extensions:
+    - colon_fence
+    - dollarmath
+    - linkify
+  use_download_button: true
+  extra_navbar: |
+    <div style="margin-top: 10px; font-size: 0.8em; color: #666;">
+      Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+    </div>
+html_theme_options:
+  icon_links: []
+sphinx:
+  extra_extensions:
+    - sphinx_thebe
+    - sphinxcontrib.bibtex
+    - sphinx_kroki
+  config:
+    html_show_copyright: false
+    suppress_warnings:
+    - bibtex.duplicate_citation
+    html_js_files:
+    - custom.js
+    bibtex_bibfiles:
+    - _static/references.bib
+    thebe_config:
+      always_load: false
+      repository_url: https://github.com/binder-examples/jupyter-stacks-datascience
+      repository_branch: master
+      selector: ".thebe,.cell"
+      selector_input: "pre"
+      selector_output: ".output, .cell_output"
+html:
+  extra_footer: |
+    <p>Construido con una versión modificada de <a href="https://teachbooks.io/">TeachBooks</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">CC BY 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt=""></a></p>
+latex_docclass:
+  book: jupyterBook
+latex:
+  latex_engine: xelatex
+  options: "spanish"
+  subtitle: "Curso para las Facultades de Ciencias y de Ciencias Químicas"    # Opcional: subtítulo del libro
+  header_title: |
+    Elaboración de libros electrónicos
+    con código e IA
+  institution: "Universidad de Salamanca"  # Opcional
+  edition: "1ª Edición"               # Opcional
+  cover_logo: "_static/usal_logo.png"  # Logo de la portada PDF; el logo web se configura arriba en `logo`
+  # isbn: "978-84-XXXXX-XX-X"         # Opcional: descomentar cuando se tenga
+  # doi: "10.XXXX/xxxxx"              # Opcional: descomentar cuando se tenga
+  preamble: |
+    \usepackage[spanish]{babel}
+    \selectlanguage{spanish}

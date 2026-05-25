@@ -1,0 +1,31 @@
+classDiagram
+    class Figura {
+        <<abstract>>
+        +String color
+        +area() float
+        +perimetro() float
+    }
+
+    class Circulo {
+        +float radio
+        +area() float
+        +perimetro() float
+    }
+
+    class Rectangulo {
+        +float ancho
+        +float alto
+        +area() float
+        +perimetro() float
+    }
+
+    class Triangulo {
+        +float base
+        +float altura
+        +area() float
+        +perimetro() float
+    }
+
+    Figura <|-- Circulo
+    Figura <|-- Rectangulo
+    Figura <|-- Triangulo

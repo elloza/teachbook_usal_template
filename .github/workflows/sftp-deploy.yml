@@ -1,0 +1,126 @@
+name: sftp-deploy-book
+
+on:
+  workflow_dispatch:
+    inputs:
+      remote_dir:
+        description: "Remote directory to synchronize. Example: public_html"
+        required: true
+        default: "public_html"
+        type: string
+
+env:
+  # Opt in early to GitHub's Node 24 runtime for JavaScript actions.
+  # This avoids Node 20 deprecation warnings on official actions.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-and-deploy-sftp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
+      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+      SFTP_PORT: ${{ secrets.SFTP_PORT || '22' }}
+      SFTP_REMOTE_DIR: ${{ inputs.remote_dir }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            lftp \
+            pkg-config \
+            libcairo2-dev \
+            libpango1.0-dev \
+            pango1.0-tools
+
+      - name: Validate SFTP configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          missing=0
+          for name in SFTP_SERVER SFTP_USERNAME SFTP_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing required GitHub secret: ${name}"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+          if ! [[ "$SFTP_PORT" =~ ^[0-9]+$ ]]; then
+            echo "::error::SFTP_PORT must be numeric."
+            exit 1
+          fi
+
+          if [ -z "$SFTP_REMOTE_DIR" ] || [ "$SFTP_REMOTE_DIR" = "/" ] || [ "$SFTP_REMOTE_DIR" = "." ] || [ "$SFTP_REMOTE_DIR" = ".." ] || [ "$SFTP_REMOTE_DIR" = "~" ] || [ "$SFTP_REMOTE_DIR" = "~/" ]; then
+            echo "::error::Unsafe SFTP remote directory: '$SFTP_REMOTE_DIR'"
+            exit 1
+          fi
+
+          if [[ "$SFTP_REMOTE_DIR" == /* ]] || [[ "$SFTP_REMOTE_DIR" == *".."* ]]; then
+            echo "::error::Use a relative remote directory without '..', such as public_html."
+            exit 1
+          fi
+
+          if ! [[ "$SFTP_REMOTE_DIR" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "::error::SFTP remote directory can only contain letters, numbers, '.', '_', '-' and '/'."
+            exit 1
+          fi
+
+      - name: Set up TeachBook environment
+        run: |
+          python scripts/setup_env.py --yes --profile --extras pdf
+
+      - name: Check UTF-8 encoding
+        run: |
+          .venv/bin/python scripts/check_encoding.py
+
+      - name: Check static assets
+        run: |
+          .venv/bin/python scripts/optimize_static_assets.py --check
+
+      - name: Install PDF toolchain
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          .venv/bin/python scripts/setup_latex.py --yes --full
+
+      - name: Generate PDFs
+        run: |
+          .venv/bin/python scripts/export_pdf.py --engine auto
+
+      - name: Build HTML book
+        run: |
+          .venv/bin/python scripts/build_book.py
+          touch book/_build/html/.nojekyll
+
+      - name: Verify build output
+        run: |
+          test -f book/_build/html/index.html
+          test -d book/_build/html/_static
+
+      - name: Deploy HTML build via SFTP
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          lftp -u "$SFTP_USERNAME","$SFTP_PASSWORD" -p "$SFTP_PORT" "sftp://$SFTP_SERVER" <<EOF
+          set sftp:auto-confirm yes
+          set net:max-retries 2
+          set net:timeout 30
+          mkdir -p $SFTP_REMOTE_DIR
+          mirror -R --delete --parallel=4 --verbose book/_build/html $SFTP_REMOTE_DIR
+          bye
+          EOF

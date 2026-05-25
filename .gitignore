@@ -1,0 +1,69 @@
+# ============================================================
+# TeachBook Sciences Template — .gitignore
+# Solo lo que realmente necesita este proyecto
+# ============================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+.venv
+.venv_*/
+env/
+venv/
+.python-version
+.preview.pid
+.preview.log
+.preview.json
+
+# --- Jupyter ---
+.ipynb_checkpoints
+
+# --- Jupyter Book (build output) ---
+book/_build/
+book/conf.py
+book/_static/languages.json
+book/_config.yml
+book/_toc.yml
+_temp_build_*
+_temp_pdf_*
+.build_logs/
+
+# --- LaTeX (build artifacts) ---
+latex_templates/_sphinx_design_static/
+latex_exports/
+
+# --- Skills sincronizados (la fuente está en .github/skills/) ---
+.claude/skills/
+.agents/skills/
+.agent/skills/
+
+# --- Instrucciones sincronizadas (generada desde AGENTS.md) ---
+.github/copilot-instructions.md
+
+# --- Binarios ---
+*.exe
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editors ---
+.vscode/
+.idea/
+
+# --- Tools cache ---
+.ruff_cache/
+.mypy_cache/
+.cache/
+
+# --- Test artifacts ---
+sidebar_verification.png
+build.log
+build_utf8.log
+media/
+
+# --- Env ---
+.env
