@@ -57,7 +57,7 @@ La carpeta `book/_static/` está destinada a archivos estáticos como imágenes,
 ## Árbol de directorios
 
 ```text
-teachbook_sciences_template/
+teachbook_usal_template/
 ├── book/
 │   ├── _config_es.yml
 │   ├── _config_en.yml

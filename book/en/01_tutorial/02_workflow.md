@@ -57,7 +57,7 @@ The `book/_static/` folder is intended for static files such as images, videos, 
 ## Directory Tree
 
 ```text
-teachbook_sciences_template/
+teachbook_usal_template/
 ├── book/
 │   ├── _config_es.yml
 │   ├── _config_en.yml

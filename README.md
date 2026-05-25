@@ -11,10 +11,10 @@ Puedes usar esta plantilla con cualquiera de estos agentes de código:
 | Herramienta | Requisito | Tipo |
 |---|---|---|
 | **VS Code + GitHub Copilot** | [VS Code](https://code.visualstudio.com/) + extensión GitHub Copilot (requiere suscripción **Copilot Pro**) | Editor de código |
-| **Antigravity** | Cuenta Google | App de escritorio de Google |
+| **Antigravity IDE** | Cuenta Google | App de escritorio de Google |
 | **OpenAI Codex** | Suscripción **ChatGPT Plus** o superior | App de escritorio de OpenAI |
 
-> **¿Cuál elegir?** Si ya usas VS Code, ve con Copilot. Si prefieres la app de Google, Antigravity. Si usas ChatGPT Plus, la app de escritorio Codex de OpenAI.
+> **¿Cuál elegir?** Si ya usas VS Code, ve con Copilot. Si prefieres la app de Google, Antigravity IDE. Si usas ChatGPT Plus, la app de escritorio Codex de OpenAI.
 
 ---
 
@@ -129,7 +129,7 @@ Así tienes una plantilla limpia para empezar, pero conservas material reutiliza
 ## 📂 Estructura del proyecto (no hace falta tocarla)
 
 ```
-teachbook_sciences_template/
+teachbook_usal_template/
 ├── book/                    # ← Contenido del libro (aquí editas)
 │   ├── es/                  # Contenido en español
 │   │   ├── intro.md         # Página de inicio

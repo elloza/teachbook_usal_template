@@ -22,7 +22,7 @@ Tu trabajo es que TODO funcione con fricción CERO.
 ## Arquitectura del Proyecto
 
 ```
-teachbook_sciences_template/
+teachbook_usal_template/
 ├── book/                          # Contenido del libro
 │   ├── _config_es.yml             # Configuración español (idioma principal)
 │   ├── _config_en.yml             # Configuración inglés

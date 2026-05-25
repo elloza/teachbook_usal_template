@@ -9,7 +9,7 @@ The `{image}` directive inserts an image without numbering:
 
 ````md
 ```{image} ../../_static/logo.png
-:alt: TeachBook project logo
+:alt: Book logo
 :width: 60%
 :align: center
 ```
@@ -18,7 +18,7 @@ The `{image}` directive inserts an image without numbering:
 Result:
 
 ```{image} ../../_static/logo.png
-:alt: TeachBook project logo
+:alt: Book logo
 :width: 60%
 :align: center
 ```
@@ -33,7 +33,7 @@ The `{figure}` directive adds automatic numbering (`Figure 1`, `Figure 2`…):
 :align: center
 :name: fig-figures-1
 
-Official TeachBook project logo.
+Book logo.
 ```
 ````
 
@@ -47,7 +47,7 @@ The {numref}`fig-logo-en` visually summarizes this part of the explanation.
 :align: center
 :name: fig-logo-en
 
-Official TeachBook project logo.
+Book logo.
 ```
 
 ## Cross-reference to a figure
@@ -55,10 +55,10 @@ Official TeachBook project logo.
 Use `{numref}` to reference figures by their number:
 
 ```md
-The {numref}`fig-logo-en` shows the project logo.
+The {numref}`fig-logo-en` shows the book logo.
 ```
 
-Result: The {numref}`fig-logo-en` shows the project logo.
+Result: The {numref}`fig-logo-en` shows the book logo.
 
 ## Margin figure
 

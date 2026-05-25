@@ -9,7 +9,7 @@ La directiva `{image}` inserta una imagen sin numeraci贸n:
 
 ````md
 ```{image} ../../_static/logo.png
-:alt: Logo del proyecto TeachBook
+:alt: Logo del libro
 :width: 60%
 :align: center
 ```
@@ -18,7 +18,7 @@ La directiva `{image}` inserta una imagen sin numeraci贸n:
 Resultado:
 
 ```{image} ../../_static/logo.png
-:alt: Logo del proyecto TeachBook
+:alt: Logo del libro
 :width: 60%
 :align: center
 ```
@@ -33,7 +33,7 @@ La directiva `{figure}` a帽ade numeraci贸n autom谩tica (`Figura 1`, `Figura 2`鈥
 :align: center
 :name: fig-figuras-1
 
-Logo oficial del proyecto TeachBook.
+Logo del libro.
 ```
 ````
 
@@ -47,7 +47,7 @@ El {numref}`fig-logo` resume visualmente esta parte de la explicaci贸n.
 :align: center
 :name: fig-logo
 
-Logo oficial del proyecto TeachBook.
+Logo del libro.
 ```
 
 ## Referencia cruzada a una figura
@@ -55,10 +55,10 @@ Logo oficial del proyecto TeachBook.
 Usa `{numref}` para referenciar figuras por su n煤mero:
 
 ```md
-En la {numref}`fig-logo` se muestra el logo del proyecto.
+En la {numref}`fig-logo` se muestra el logo del libro.
 ```
 
-Resultado: En la {numref}`fig-logo` se muestra el logo del proyecto.
+Resultado: En la {numref}`fig-logo` se muestra el logo del libro.
 
 ## Figura en el margen
 

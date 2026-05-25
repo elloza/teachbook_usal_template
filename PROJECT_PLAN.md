@@ -1,7 +1,7 @@
 # Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial — Project Plan (v1)
 
 Este documento define el **plan completo de implementación**
-del repositorio `teachbook_sciences_template`.
+del repositorio `teachbook_usal_template`.
 
 El objetivo es crear una **plantilla docente reutilizable**
 para el curso **Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial** y para libros electrónicos interactivos basados en TeachBooks,
@@ -55,7 +55,7 @@ No introducir tecnologías adicionales.
 
 Implementar exactamente esta estructura:
 
-teachbook_sciences_template/
+teachbook_usal_template/
 ├── book/
 │   ├── es/              # Contenido en Español
 │   │   ├── intro.md
