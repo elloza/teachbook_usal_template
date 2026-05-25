@@ -39,7 +39,7 @@ python scripts/render_circuitikz.py rc_circuit.tex book/_static/generated/rc_cir
 
 ## Insert it in a MyST page
 
-```md
+````md
 ```{figure} ../../../_static/generated/rc_circuit.png
 :alt: RC circuit generated with CircuitikZ
 :width: 70%
@@ -48,10 +48,9 @@ python scripts/render_circuitikz.py rc_circuit.tex book/_static/generated/rc_cir
 
 RC circuit generated with CircuitikZ.
 ```
-```
+````
 
 ## Rendered result
-
 
 The {numref}`fig-advanced-circuitikz-2` visually summarizes this part of the explanation.
 
