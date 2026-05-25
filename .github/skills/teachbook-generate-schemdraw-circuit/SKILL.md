@@ -53,7 +53,6 @@ with schemdraw.Drawing() as d:
     d += elm.Resistor().right().label('R')
     d += elm.Capacitor().down().label('C')
     d += elm.Wire().left()
-    d.draw()
 ```
 
 ## Plantilla: Circuito RL serie
@@ -67,7 +66,6 @@ with schemdraw.Drawing() as d:
     d += elm.Resistor().right().label('R')
     d += elm.Inductor().down().label('L')
     d += elm.Wire().left()
-    d.draw()
 ```
 
 ## Plantilla: Circuito con diodo
@@ -81,7 +79,6 @@ with schemdraw.Drawing() as d:
     d += elm.Resistor().right().label('R')
     d += elm.Diode().down().label('D')
     d += elm.Wire().left()
-    d.draw()
 ```
 
 ## Estructura del notebook
@@ -99,7 +96,7 @@ El notebook debe seguir esta estructura de celdas:
 |---|---|
 | Formato | Siempre crear como **.ipynb** (no .md con código). |
 | Imports | `import schemdraw` + `import schemdraw.elements as elm`. |
-| Contexto | Usar `with schemdraw.Drawing() as d:` para agrupar elementos. |
+| Contexto | Usar `with schemdraw.Drawing() as d:` para agrupar elementos. En notebooks, NO llamar después a `d.draw()`, porque se muestran dos diagramas. |
 | Etiquetas | Añadir `.label('nombre')` a cada componente. |
 | Direcciones | `.up()`, `.down()`, `.left()`, `.right()` para orientar componentes. |
 | Multi-idioma | Crear el notebook en TODOS los idiomas configurados. |

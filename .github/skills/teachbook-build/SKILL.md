@@ -43,12 +43,14 @@ book/_build/html/           ← Raíz del sitio web
 
 El agente DEBE usar el Python del entorno virtual (`.venv`), NO el Python del sistema:
 
-Antes de compilar contenido nuevo o modificado, comprobar la codificación para evitar que acentos y eñes aparezcan como caracteres rotos en HTML, PDF, consola o GitHub:
+Antes de compilar contenido nuevo o modificado, comprobar siempre la codificación para evitar que acentos y eñes aparezcan como caracteres rotos en HTML, PDF, consola o GitHub:
 
 | Sistema | Comando |
 |---|---|
 | Linux / macOS | `.venv/bin/python scripts/check_encoding.py` |
 | Windows | `.venv\Scripts\python.exe scripts/check_encoding.py` |
+
+Esta comprobación es obligatoria antes de publicar. Revisa archivos de contenido, notebooks, configuraciones, scripts, skills, fuentes de diagramas, workflows y textos sin extensión como `LICENSE` o `CODEOWNERS`. Si falla, corregir el archivo indicado antes de compilar o hacer commit.
 
 Si se han añadido o cambiado imágenes, GIFs o logos, comprobar también que los assets estáticos son aptos para web/PDF:
 
@@ -68,7 +70,7 @@ Si se han añadido o cambiado imágenes, GIFs o logos, comprobar también que lo
 2. **Verificar rutas de archivos**: Cada entrada `file:` en el TOC debe apuntar a un archivo real en `book/<lang>/`.
 3. **Verificar `_config_<lang>.yml`**: Comprobar que no hay errores de sintaxis YAML.
 4. **Verificar contenido**: Los archivos `.md` deben tener sintaxis MyST válida.
-5. **Verificar codificación**: Ejecutar `scripts/check_encoding.py` si aparecen acentos, eñes, signos o comillas como caracteres raros.
+5. **Verificar codificación**: Ejecutar `scripts/check_encoding.py` siempre; si aparecen acentos, eñes, signos o comillas como caracteres raros, corregir el archivo fuente indicado por el script.
 6. **Re-ejecutar**: Tras corregir, volver a ejecutar `build_book.py`.
 
 ### Errores comunes

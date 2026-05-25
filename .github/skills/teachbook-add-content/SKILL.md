@@ -320,6 +320,8 @@ El agente DEBE ejecutar estas verificaciones ANTES de commit:
    | Linux / macOS | `.venv/bin/python scripts/check_encoding.py` |
    | Windows | `.venv\Scripts\python.exe scripts\check_encoding.py` |
 
+   Este check es estricto y debe pasarse en local antes de publicar: valida contenido, notebooks, scripts, skills, workflows, fuentes de diagramas y archivos de texto sin extensión. Si informa de mojibake, caracteres de reemplazo, `?` dentro de palabras o texto no ASCII en celdas `code`, corregir el archivo antes de seguir.
+
 2. Ejecutar la comprobación automática multi-idioma:
 
    | Sistema | Comando |

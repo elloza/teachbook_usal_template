@@ -93,9 +93,10 @@ Aplicar siempre:
 - Para símbolos: usar texto ASCII (`Ohm`, `pi`, `Delta`, `uF`, `tau`, `x^2`) o mathtext de Matplotlib cuando sea necesario (`r"$x^2$"`, `r"$\pi$"`).
 - Tras crear o modificar notebooks, ejecutar y guardar outputs con `.venv`, y luego validar:
 
-```bash
-python scripts/check_encoding.py
-```
+| Sistema | Comando |
+|---|---|
+| Linux / macOS | `.venv/bin/python scripts/check_encoding.py` |
+| Windows | `.venv\Scripts\python.exe scripts/check_encoding.py` |
 
 Si `scripts/check_encoding.py` detecta una celda de código con texto no ASCII, hay que corregirla antes de compilar o commitear.
 

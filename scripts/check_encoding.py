@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import re
 import subprocess
 import sys
@@ -22,17 +23,55 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 TEXT_SUFFIXES = {
     ".bib",
+    ".cff",
+    ".cls",
     ".css",
+    ".csv",
+    ".ditaa",
+    ".dot",
+    ".graphviz",
+    ".html",
+    ".ini",
     ".ipynb",
     ".js",
     ".json",
     ".md",
     ".mermaid",
+    ".mmd",
+    ".plantuml",
+    ".ps1",
     ".py",
+    ".rst",
+    ".sh",
+    ".sty",
+    ".structurizr",
+    ".svg",
     ".tex",
+    ".toml",
     ".txt",
+    ".wavedrom",
+    ".xml",
     ".yaml",
     ".yml",
+}
+
+TEXT_FILENAMES = {
+    ".gitignore",
+    "CODEOWNERS",
+    "LICENSE",
+    "Makefile",
+    "WAIVER",
+    "latexmkjarc",
+    "latexmkrc",
+}
+
+SKIPPED_DIRS = {
+    ".build_logs",
+    ".git",
+    ".venv",
+    "__pycache__",
+    "_build",
+    "latex_exports",
 }
 
 SUSPICIOUS_SEQUENCES = {
@@ -59,35 +98,51 @@ class EncodingIssue:
 
 def force_utf8_stdio() -> None:
     """Make diagnostics readable when launched from Windows consoles/agents."""
-    if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-    if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+    for name in ("stdout", "stderr"):
+        stream = getattr(sys, name)
+        encoding = (getattr(stream, "encoding", None) or "").lower()
+        if encoding in ("utf-8", "utf8"):
+            continue
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            buffer = getattr(stream, "buffer", None)
+            if buffer is not None:
+                setattr(
+                    sys,
+                    name,
+                    io.TextIOWrapper(buffer, encoding="utf-8", errors="replace"),
+                )
+
+
+def is_text_path(path: Path) -> bool:
+    return path.suffix.lower() in TEXT_SUFFIXES or path.name in TEXT_FILENAMES
 
 
 def project_files() -> list[Path]:
     """Return tracked and untracked project files, honoring .gitignore."""
     try:
         result = subprocess.run(
-            ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+            ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
             cwd=PROJECT_ROOT,
             check=True,
             capture_output=True,
-            encoding="utf-8",
-            errors="replace",
         )
-        return [
-            PROJECT_ROOT / line
-            for line in result.stdout.splitlines()
-            if line and (PROJECT_ROOT / line).exists()
-        ]
+        files: list[Path] = []
+        for raw_path in result.stdout.split(b"\0"):
+            if not raw_path:
+                continue
+            relative = raw_path.decode("utf-8", errors="surrogateescape")
+            candidate = PROJECT_ROOT / relative
+            if candidate.exists() and candidate.is_file():
+                files.append(candidate)
+        return files
     except Exception:
-        skipped = {".git", ".venv", "_build", "__pycache__", ".build_logs", "latex_exports"}
         files: list[Path] = []
         for path in PROJECT_ROOT.rglob("*"):
             if not path.is_file():
                 continue
-            if any(part in skipped or part.startswith("_temp_build_") for part in path.parts):
+            if any(part in SKIPPED_DIRS or part.startswith("_temp_") for part in path.parts):
                 continue
             files.append(path)
         return files
@@ -108,11 +163,15 @@ def is_expected_question_mark_context(line: str) -> bool:
 
 
 def scan_file(path: Path) -> list[EncodingIssue]:
-    if path.suffix.lower() not in TEXT_SUFFIXES:
+    if not is_text_path(path):
         return []
 
     relative = path.relative_to(PROJECT_ROOT)
-    data = path.read_bytes()
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        return [EncodingIssue(relative, f"no se pudo leer el archivo: {exc}", None, None)]
+
     try:
         text = data.decode("utf-8")
     except UnicodeDecodeError as exc:
@@ -192,11 +251,27 @@ def scan_project() -> tuple[int, list[EncodingIssue]]:
     checked = 0
     issues: list[EncodingIssue] = []
     for path in project_files():
-        if path.suffix.lower() not in TEXT_SUFFIXES:
+        if not is_text_path(path):
             continue
         checked += 1
         issues.extend(scan_file(path))
     return checked, issues
+
+
+def github_escape(value: str) -> str:
+    return value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def print_github_annotation(issue: EncodingIssue) -> None:
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    parts = [f"file={github_escape(issue.path.as_posix())}"]
+    if issue.line_number is not None:
+        parts.append(f"line={issue.line_number}")
+    message = issue.reason
+    if issue.excerpt:
+        message = f"{message}: {issue.excerpt}"
+    print(f"::error {','.join(parts)}::{github_escape(message)}")
 
 
 def main() -> int:
@@ -208,6 +283,7 @@ def main() -> int:
 
     print("❌ Problemas de codificación detectados:")
     for issue in issues:
+        print_github_annotation(issue)
         where = f"{issue.path}"
         if issue.line_number is not None:
             where += f":{issue.line_number}"

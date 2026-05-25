@@ -19,9 +19,10 @@ description: >
 ## Qué hace `git_helper.py`
 
 1. **Muestra el estado** de los archivos modificados (`git status`).
-2. **Añade todos los cambios** al área de staging (`git add .`).
-3. **Crea un commit** con mensaje automático basado en la fecha y hora: `"Actualización automática YYYY-MM-DD HH:MM:SS"`.
-4. **Sube a GitHub** (`git push`).
+2. **Comprueba la codificación UTF-8 localmente** con `scripts/check_encoding.py`.
+3. **Añade todos los cambios** al área de staging (`git add .`).
+4. **Crea un commit** con mensaje automático basado en la fecha y hora: `"Actualización automática YYYY-MM-DD HH:MM:SS"`.
+5. **Sube a GitHub** (`git push`).
 
 Tras el push, **GitHub Actions** se ejecuta automáticamente:
 - Compila el libro HTML para todos los idiomas.
@@ -40,6 +41,14 @@ El agente DEBE usar el Python del entorno virtual (`.venv`):
 |---|---|
 | Linux / macOS | `.venv/bin/python scripts/git_helper.py` |
 | Windows | `.venv\Scripts\python.exe scripts/git_helper.py` |
+
+`git_helper.py` debe parar antes de publicar si `scripts/check_encoding.py` detecta:
+- archivos de texto que no son UTF-8 válido,
+- mojibake típico (por ejemplo `U+00C3`, `U+00C2` o secuencias `U+00E2 U+20AC`),
+- acentos sustituidos por `?`,
+- texto no ASCII dentro de celdas `code` de notebooks.
+
+No hacer `git push` manual si este check falla. Primero corregir el archivo indicado y repetir la comprobación en local.
 
 ### Si el script dice "No hay cambios para guardar"
 
