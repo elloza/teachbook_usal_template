@@ -2,6 +2,14 @@
 
 The interactive table below summarizes a teaching selection of representative elements. It is not intended to be a complete database; it is a fast way to compare properties and chemical families during an explanation.
 
+The values and categories in a teaching periodic table should be treated as a gateway to evaluated data. IUPAC keeps its periodic table updated with abridged standard atomic weights recommended by CIAAW {cite:p}`iupac_periodic_table_2022`.
+
+A useful qualitative reading is that many trends increase with effective nuclear charge:
+
+$$
+Z_{\mathrm{eff}} \uparrow \quad \Longrightarrow \quad E_{\mathrm{ion}} \uparrow \ \text{and}\ r_{\mathrm{at}} \downarrow
+$$
+
 **Interactive table. Basic properties of selected elements.**
 
 ```{raw} html
@@ -108,3 +116,7 @@ The interactive table makes trends quick to compare: alkali metals have low ioni
 
 Select electronegativity and compare sodium, chlorine, and argon. Then explain why NaCl is interpreted very differently from a covalent molecule such as HCl.
 
+```{admonition} Guided reading
+:class: dropdown
+Compare sodium, magnesium, and chlorine using ionization energy and electronegativity. The goal is not to memorize values, but to recognize patterns across groups and periods.
+```

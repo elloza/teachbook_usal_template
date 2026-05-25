@@ -23,6 +23,8 @@ description: >
 
 > Toda sección nueva con citas bibliográficas debe decidir el alcance antes de escribir: **global por defecto** con `{cite:t}` / `{cite:p}` y la página final `Bibliografía` / `Bibliography` con `:cited:`, o **local solo si el usuario lo pide** con `{bibliography}` filtrada dentro de `{only} html`. En PDF no se generan bibliografías locales por página; `export_pdf.py` crea un `.bib` temporal con las citas usadas.
 
+> Si una cita está asociada a contenido `{raw} html`, no la dejes solo dentro del HTML crudo. Para que aparezca en la bibliografía final del PDF, pon la cita en Markdown normal o añade `\cite{clave}` dentro del fallback `{raw} latex`.
+
 > **Codificación obligatoria:** todo archivo de contenido, configuración, notebook, script o skill debe guardarse como **UTF-8**. No se admite mojibake, caracteres de reemplazo (`U+FFFD`) ni sustituir letras con tilde por `?`. Antes de cerrar cambios de contenido, ejecutar `python scripts/check_encoding.py` o `python scripts/check_multilang_integrity.py` con el Python de `.venv`.
 
 ## Regla obligatoria de captions y referencias
@@ -88,6 +90,12 @@ Para una bibliografía local parcial, se puede filtrar por claves dentro del mis
 - Como la página global con `:cited:` puede repetir entradas ya mostradas localmente en HTML, los `_config_<lang>.yml` deben mantener `suppress_warnings: ["bibtex.duplicate_citation"]`.
 - El modo local funciona solo en HTML. En PDF debe aparecer únicamente la bibliografía global final generada desde el `.bib` temporal de citas usadas.
 - La repetición en HTML entre bibliografía local y global es aceptable; no intentes eliminar la página global para evitarla si el libro necesita bibliografía completa.
+
+### Citas en bloques raw HTML/LaTeX
+
+- `{raw} html` no se imprime en PDF. Las citas escritas solo ahí no alimentan la bibliografía final del PDF.
+- Si el contenido HTML necesita una referencia en PDF, añadir fallback `{raw} latex` con `\cite{clave}`.
+- `scripts/collect_used_bibliography.py` valida esas citas LaTeX y `scripts/export_pdf.py` las incluye en el `.bib` temporal usado por la página final `Bibliografía` / `Bibliography`.
 
 ### Verificación obligatoria con citas
 

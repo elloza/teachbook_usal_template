@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="360" viewBox="0 0 980 360" role="img" aria-labelledby="title desc">
+  <title id="title">Mapa de recursos del grado en Ingenieria Quimica</title>
+  <desc id="desc">Mapa conceptual con cinco ejemplos: balances, destilacion, recirculacion, transporte y grafica de Moody.</desc>
+  <rect width="980" height="360" fill="#ffffff"/>
+  <rect x="36" y="36" width="908" height="288" rx="10" fill="#f6f8fa" stroke="#d0d7de"/>
+  <circle cx="490" cy="180" r="68" fill="#1a7f37"/>
+  <text x="490" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#ffffff">Ingenieria</text>
+  <text x="490" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#ffffff">Quimica</text>
+  <text x="490" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">proceso + calculo</text>
+  <g font-family="Arial, sans-serif" font-size="16" fill="#24292f">
+    <rect x="78" y="62" width="245" height="76" rx="8" fill="#ddf4ff" stroke="#0969da"/>
+    <text x="200" y="94" text-anchor="middle" font-weight="700">Balances</text>
+    <text x="200" y="119" text-anchor="middle">conservacion de materia</text>
+    <rect x="80" y="222" width="245" height="76" rx="8" fill="#fbefff" stroke="#8250df"/>
+    <text x="202" y="254" text-anchor="middle" font-weight="700">Destilacion</text>
+    <text x="202" y="279" text-anchor="middle">McCabe-Thiele</text>
+    <rect x="657" y="62" width="245" height="76" rx="8" fill="#fff8c5" stroke="#bf8700"/>
+    <text x="779" y="94" text-anchor="middle" font-weight="700">Recirculacion</text>
+    <text x="779" y="119" text-anchor="middle">ecuaciones no lineales</text>
+    <rect x="657" y="222" width="245" height="76" rx="8" fill="#ffebe9" stroke="#cf222e"/>
+    <text x="779" y="254" text-anchor="middle" font-weight="700">Transporte</text>
+    <text x="779" y="279" text-anchor="middle">difusion y catalisis</text>
+    <rect x="367" y="270" width="245" height="54" rx="8" fill="#dafbe1" stroke="#1a7f37"/>
+    <text x="490" y="303" text-anchor="middle" font-weight="700">Grafica de Moody</text>
+  </g>
+  <g stroke="#57606a" stroke-width="2" fill="none">
+    <path d="M423 158 L323 100"/>
+    <path d="M426 205 L325 260"/>
+    <path d="M557 158 L657 100"/>
+    <path d="M557 205 L657 260"/>
+    <path d="M490 248 L490 270"/>
+  </g>
+</svg>

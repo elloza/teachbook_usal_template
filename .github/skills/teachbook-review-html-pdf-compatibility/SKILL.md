@@ -34,6 +34,8 @@ Auditar el contenido del TeachBook para asegurarse de que todo funciona tanto en
 | Citas BibTeX | ✅ | ✅ | — |
 | Referencias cruzadas | ✅ | ✅ | — |
 
+Regla especial para bibliografía: una cita escrita solo dentro de `{raw} html` no aparece en PDF ni alimenta la bibliografía final. Si el contenido impreso necesita esa fuente, el fallback `{raw} latex` debe incluir `\cite{clave}`.
+
 ## Proceso de revisión
 
 ### Paso 1: Escanear archivos
@@ -47,6 +49,7 @@ Buscar en todos los `.md` e `.ipynb` de `book/es/` y `book/en/`:
 5. `jupyterquiz` sin alternativa admonition → ⚠️
 6. `ipywidgets` sin alternativa → ⚠️
 7. `{thebe-button}` sin nota de compatibilidad → ⚠️
+8. `{cite:p}` o `{cite:t}` dentro de `{raw} html` sin `\cite{...}` en el fallback `{raw} latex` → ❌
 
 ### Paso 2: Generar informe
 
@@ -71,6 +74,7 @@ Para cada problema encontrado, proponer la corrección específica:
 
 - Mermaid sin fallback → añadir `{admonition}` con descripción tras el diagrama
 - iframe sin LaTeX → añadir bloque `{raw} latex` con `\url{...}`
+- cita en HTML raw → mover la cita a Markdown normal o añadir `\cite{clave}` en el bloque `{raw} latex`
 - Tabs sin alternativa → añadir sección con el contenido de todas las tabs
 
 ## Regla de oro

@@ -14,6 +14,8 @@ description: >
 
 Todo HTML personalizado va dentro de ` ```{raw} html` y **DEBE** llevar un bloque ` ```{raw} latex` como alternativa para PDF. Sin el fallback LaTeX, el PDF muestra contenido vacío o falla.
 
+Si el bloque HTML contiene una cita bibliográfica, repetirla fuera del HTML como Markdown normal o en el fallback LaTeX con `\cite{clave}`. Las citas dentro de `{raw} html` no alimentan la bibliografía final del PDF.
+
 ## Patrones disponibles
 
 ### 1. Secciones colapsables (acordeón)
@@ -122,6 +124,7 @@ La respuesta correcta es **42**. Esto se debe a que...
 | Sin frameworks | **NO** usar React, Vue, Angular, ni archivos `.js` externos. |
 | Sin Node | No se usa npm/yarn. Solo HTML + CSS inline. |
 | Fallback LaTeX | **SIEMPRE** añadir ` ```{raw} latex` después de ` ```{raw} html`. |
+| Citas | Si hay bibliografía en el contenido HTML, añadir `\cite{clave}` en el fallback LaTeX o mover la cita a Markdown normal. |
 | CSS inline | Todo el CSS debe ir en atributos `style="..."` o en bloques `<style>` dentro del mismo bloque. |
 | IDs únicos | Si se usan IDs (pestañas), deben ser únicos en toda la página. |
 | Multi-idioma | El contenido HTML debe existir en todos los idiomas. |

@@ -2,6 +2,14 @@
 
 An infrared spectrum links absorption bands with functional groups. The tool below is a teaching simulation: when a functional group is enabled, approximate bands are shown in the regions where they commonly appear.
 
+Real spectra should be checked against evaluated databases. The NIST Chemistry WebBook includes IR spectra for thousands of compounds as well as thermochemical and spectroscopic data {cite:p}`nist_chemistry_webbook_srd69`.
+
+The horizontal axis uses wavenumber:
+
+$$
+\tilde{\nu} = \frac{1}{\lambda}
+$$
+
 **Interactive figure. Approximate IR bands by functional group.**
 
 ```{raw} html
@@ -79,3 +87,7 @@ An infrared spectrum links absorption bands with functional groups. The tool bel
 
 The interactive figure helps separate two ideas: band position gives information about the bond, but width and intensity also depend on chemical environment and sample conditions.
 
+```{admonition} Guided activity
+:class: dropdown
+Enable O-H and C=O at the same time. Then disable O-H and observe how the broad high-frequency band disappears. That width is often as informative as the peak position.
+```

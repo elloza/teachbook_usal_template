@@ -2,6 +2,14 @@
 
 La tabla interactiva siguiente resume una selección docente de elementos representativos. No pretende ser una base de datos completa, sino una forma rápida de comparar propiedades y familias químicas durante una explicación.
 
+Los valores y categorías de una tabla periódica docente deben entenderse como una puerta de entrada a datos evaluados. IUPAC mantiene la tabla periódica actualizada con los pesos atómicos abreviados recomendados por CIAAW {cite:p}`iupac_periodic_table_2022`.
+
+Una lectura cualitativa útil es pensar que muchas tendencias aumentan con la carga nuclear efectiva:
+
+$$
+Z_{\mathrm{eff}} \uparrow \quad \Longrightarrow \quad E_{\mathrm{ion}} \uparrow \ \text{y}\ r_{\mathrm{at}} \downarrow
+$$
+
 **Tabla interactiva. Propiedades básicas de elementos seleccionados.**
 
 ```{raw} html
@@ -108,3 +116,7 @@ La tabla interactiva permite comparar rápidamente tendencias: los alcalinos mue
 
 Selecciona la electronegatividad y compara sodio, cloro y argón. Después explica por qué NaCl se interpreta de forma muy distinta a una molécula covalente como HCl.
 
+```{admonition} Lectura guiada
+:class: dropdown
+Compara sodio, magnesio y cloro usando energía de ionización y electronegatividad. El objetivo no es memorizar valores, sino reconocer patrones por grupos y periodos.
+```

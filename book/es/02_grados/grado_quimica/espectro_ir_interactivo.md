@@ -2,6 +2,14 @@
 
 Un espectro infrarrojo permite relacionar bandas de absorción con grupos funcionales. La herramienta siguiente es una simulación didáctica: al activar un grupo funcional se muestran bandas aproximadas en las regiones donde suelen aparecer.
 
+Para contrastar espectros reales conviene usar bases de datos evaluadas. El NIST Chemistry WebBook incluye espectros IR de miles de compuestos y otros datos termoquímicos y espectroscópicos {cite:p}`nist_chemistry_webbook_srd69`.
+
+El eje horizontal usa número de onda:
+
+$$
+\tilde{\nu} = \frac{1}{\lambda}
+$$
+
 **Figura interactiva. Bandas IR aproximadas por grupo funcional.**
 
 ```{raw} html
@@ -79,3 +87,7 @@ Un espectro infrarrojo permite relacionar bandas de absorción con grupos funcio
 
 La figura interactiva ayuda a separar dos ideas: la posición de una banda orienta sobre el enlace, pero la anchura e intensidad también dependen del entorno químico y de la muestra.
 
+```{admonition} Actividad guiada
+:class: dropdown
+Activa O-H y C=O a la vez. Después desactiva O-H y observa cómo desaparece la banda ancha de alta frecuencia. Esa anchura suele ser tan informativa como la posición del máximo.
+```

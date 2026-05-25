@@ -2,7 +2,9 @@
 
 The script keeps `book/_static/references.bib` as the source of truth, validates
 that every MyST citation key exists, and can write a reduced BibTeX file with
-only the entries used by one language.
+only the entries used by one language.  It also collects LaTeX citations inside
+`{raw} latex` fallbacks so PDF-only alternatives contribute to the final PDF
+bibliography.
 """
 
 from __future__ import annotations
@@ -28,6 +30,10 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BIB_FILE = PROJECT_ROOT / "book" / "_static" / "references.bib"
 CITE_RE = re.compile(r"(?<!`)\{cite(?::[^}\s]+)?\}`([^`\n]+)`")
+LATEX_CITE_RE = re.compile(
+    r"\\(?:cite|citep|citet|parencite|textcite|autocite|footcite)"
+    r"(?:\[[^\]]*\]){0,2}\{([^}]+)\}"
+)
 FENCE_RE = re.compile(r"^\s*([`~]{3,})(.*)$")
 SKIPPED_DIRECTIVES = {
     "bibliography",
@@ -36,7 +42,6 @@ SKIPPED_DIRECTIVES = {
     "eval-rst",
     "kroki",
     "literalinclude",
-    "raw",
 }
 
 
@@ -65,7 +70,7 @@ class CitationUse:
 class Fence:
     char: str
     length: int
-    scan: bool
+    mode: str
 
 
 @dataclass
@@ -119,17 +124,38 @@ def resolve_content_dir(lang: str | None, content_dir: Path | None) -> Path:
     return (PROJECT_ROOT / "book" / lang).resolve()
 
 
-def is_scannable_fence(info: str) -> bool:
+def get_myst_directive(info: str) -> tuple[str | None, str]:
     stripped = info.strip()
     if not stripped or not stripped.startswith("{"):
-        return False
+        return None, ""
+    if "}" not in stripped:
+        return None, ""
     directive = stripped[1:].split("}", 1)[0].strip().split()[0]
-    return directive not in SKIPPED_DIRECTIVES
+    argument = stripped.split("}", 1)[1].strip()
+    return directive, argument
 
 
-def iter_scannable_markdown_lines(text: str) -> list[tuple[int, str]]:
+def fence_scan_mode(info: str) -> str:
+    directive, argument = get_myst_directive(info)
+    if directive is None:
+        return "skip"
+    if directive == "raw":
+        raw_format = argument.split(None, 1)[0].lower() if argument else ""
+        return "latex" if raw_format in {"latex", "tex"} else "skip"
+    if directive in SKIPPED_DIRECTIVES:
+        return "skip"
+    return "markdown"
+
+
+def current_scan_mode(stack: list[Fence]) -> str:
+    if not stack:
+        return "markdown"
+    return stack[-1].mode
+
+
+def iter_citation_lines(text: str) -> list[tuple[int, str, str]]:
     stack: list[Fence] = []
-    scannable: list[tuple[int, str]] = []
+    scannable: list[tuple[int, str, str]] = []
 
     for line_number, line in enumerate(text.splitlines(), start=1):
         fence_match = FENCE_RE.match(line)
@@ -148,18 +174,19 @@ def iter_scannable_markdown_lines(text: str) -> list[tuple[int, str]]:
                 stack.pop()
                 continue
 
-            if all(frame.scan for frame in stack):
+            if current_scan_mode(stack) != "skip":
                 stack.append(
                     Fence(
                         char=fence_char,
                         length=fence_len,
-                        scan=is_scannable_fence(info),
+                        mode=fence_scan_mode(info),
                     )
                 )
             continue
 
-        if all(frame.scan for frame in stack):
-            scannable.append((line_number, line))
+        mode = current_scan_mode(stack)
+        if mode != "skip":
+            scannable.append((line_number, mode, line))
 
     return scannable
 
@@ -175,10 +202,21 @@ def split_citation_keys(raw_keys: str) -> list[str]:
 
 def collect_citations_from_markdown(text: str, source: Path, note: str = "") -> list[CitationUse]:
     uses: list[CitationUse] = []
-    for line_number, line in iter_scannable_markdown_lines(text):
-        for match in CITE_RE.finditer(line):
+    for line_number, mode, line in iter_citation_lines(text):
+        if mode == "markdown":
+            pattern = CITE_RE
+        elif mode == "latex":
+            pattern = LATEX_CITE_RE
+        else:
+            continue
+        for match in pattern.finditer(line):
             for key in split_citation_keys(match.group(1)):
-                uses.append(CitationUse(key=key, source=source, line=line_number, note=note))
+                cite_note = note
+                if mode == "latex":
+                    cite_note = f"{note}; raw latex".strip("; ")
+                uses.append(
+                    CitationUse(key=key, source=source, line=line_number, note=cite_note)
+                )
     return uses
 
 

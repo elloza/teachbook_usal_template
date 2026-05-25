@@ -37,7 +37,17 @@ TinyTeX debe instalarse de forma quirúrgica: `TinyTeX-1` + paquetes concretos n
 4. Aplica plantillas personalizadas.
 5. Convierte SVG a PNG antes de compilar cuando hace falta.
 6. Replica rutas compartidas como `_static/` y `_images/` si LaTeX las referencia desde rutas anidadas.
-7. Copia los PDFs finales a `book/_static/`.
+7. Genera un `.bib` temporal por idioma con las citas usadas en Markdown y en fallbacks `{raw} latex`.
+8. Copia los PDFs finales a `book/_static/`.
+
+## Bibliografía en PDF
+
+La bibliografía del PDF se genera desde un `.bib` temporal con solo las claves usadas. El recolector incluye:
+
+- citas MyST normales: `{cite:t}` y `{cite:p}`,
+- citas LaTeX dentro de bloques `{raw} latex`: `\cite{clave}`, `\citep{clave}`, `\citet{clave}`, `\parencite{clave}`, etc.
+
+Las citas que aparezcan únicamente dentro de `{raw} html` no cuentan para el PDF, porque ese contenido no se imprime. Si una pieza HTML necesita referencia bibliográfica en la versión impresa, repetir la cita en el fallback `{raw} latex` con `\cite{clave}`.
 
 ## Ubicación de salida
 
@@ -109,6 +119,15 @@ Deben existir:
 book/_static/teachbook_es.pdf
 book/_static/teachbook_en.pdf
 ```
+
+Si el cambio toca citas, bibliografía o bloques `{raw} html` / `{raw} latex`, validar también el `.bib` temporal:
+
+| Sistema | Comando |
+|---|---|
+| Linux / macOS | `.venv/bin/python scripts/collect_used_bibliography.py --lang es --output .build_logs/references_used_es.bib` |
+| Windows PowerShell | `.venv\Scripts\python.exe scripts\collect_used_bibliography.py --lang es --output .build_logs\references_used_es.bib` |
+
+Repetir para `--lang en` si el contenido equivalente existe en inglés. Si una cita del PDF está en `{raw} latex`, debe aparecer en ese archivo generado.
 
 ## Workflows CI/CD
 

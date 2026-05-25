@@ -96,6 +96,8 @@ Reemplazar `VIDEO_ID` por el ID real del video (los caracteres después de `v=` 
 
 **Error crítico**: Usar `{raw} html` sin el bloque `{raw} latex`. Esto causa que el PDF falle o muestre contenido vacío.
 
+Si el contenido HTML necesita una cita bibliográfica en PDF, NO pongas la cita solo dentro de `{raw} html`. Añade la cita en el fallback `{raw} latex` con sintaxis LaTeX, por ejemplo `\cite{smith2023}`. `scripts/export_pdf.py` recoge esas citas LaTeX y las incluye en el `.bib` temporal del PDF.
+
 ---
 
 ## 3. Ecuaciones LaTeX
@@ -231,6 +233,13 @@ Para mostrar solo algunas claves, también dentro de `{only} html`:
 Este patrón funciona en HTML. En PDF no se deben generar bibliografías locales: `scripts/export_pdf.py` genera un `.bib` temporal con las citas usadas y las imprime solo en la página final `Bibliografía` / `Bibliography`. Como la web puede mostrar entradas en bibliografías locales y en la página global con `:cited:`, los `_config_<lang>.yml` deben mantener suprimido el aviso esperado `bibtex.duplicate_citation`.
 
 La repetición en HTML entre una bibliografía local y la página global es aceptable: la local ayuda a leer esa página y la global reúne todo el libro. En PDF solo debe quedar la bibliografía global final.
+
+### Citas dentro de HTML interactivo o raw
+
+- Las citas MyST (`{cite:p}` / `{cite:t}`) deben ir en texto Markdown normal cuando deban aparecer tanto en HTML como en PDF.
+- Las citas dentro de `{raw} html` no cuentan para el PDF, porque ese bloque no se imprime.
+- Si el fallback `{raw} latex` necesita citar una fuente, usar `\cite{clave}` o `\cite{clave1,clave2}`. El exportador PDF añade esas claves a la bibliografía final.
+- No pongas una cita únicamente en `{raw} html` si esa fuente debe aparecer en la bibliografía final del PDF.
 
 Para validar claves o generar un `.bib` de inspección con las citas usadas:
 
