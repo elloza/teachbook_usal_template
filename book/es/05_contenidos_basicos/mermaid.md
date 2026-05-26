@@ -3,6 +3,46 @@
 
 **Kroki** permite convertir texto en diagramas SVG durante la compilación del libro. Si usas `:type: mermaid`, puedes escribir sintaxis Mermaid y obtener un diagrama que funciona tanto en **HTML** como en **PDF**.
 
+## Cómo se genera la imagen en este proyecto
+
+En un archivo `.md`, el punto de partida puede ser un bloque de texto como este:
+
+````md
+```{kroki}
+:type: mermaid
+:align: center
+
+flowchart LR
+    A[Muestra] --> B[Preparación]
+    B --> C[Medición]
+    C --> D[Resultados]
+```
+````
+
+Ese bloque no es una imagen todavía: es la **fuente editable** del diagrama. En este proyecto, cuando se trabaja con las skills de diagramas y compilación, el agente prepara el contenido siguiendo un flujo más robusto que dejar el bloque `{kroki}` directamente en la página final:
+
+1. Guarda la fuente editable en `diagram_sources/`.
+2. Genera una imagen SVG en `book/_static/generated/diagrams/`.
+3. Para Mermaid, genera además un PNG de respaldo en `book/_static/generated/diagrams_pdf/` para la exportación PDF.
+4. Sustituye el bloque `{kroki}` por una figura MyST normal que apunta a la imagen generada.
+
+El resultado final que queda en el libro se parece a esto:
+
+````md
+```{figure} ../../_static/generated/diagrams/es/mi_diagrama.svg
+:name: fig-mi-diagrama
+:alt: Diagrama generado desde Mermaid
+:width: 75%
+:align: center
+
+Diagrama generado desde código Mermaid.
+```
+````
+
+```{important}
+Jupyter Book por sí solo no hace esta sustitución automática. La conversión a imagen estática forma parte del flujo de las skills del proyecto: `teachbook-generate-diagram` prepara y renderiza el diagrama, y `teachbook-build` compila después el libro usando esas imágenes ya generadas.
+```
+
 ## Diagrama de flujo (`flowchart`)
 
 ````md
