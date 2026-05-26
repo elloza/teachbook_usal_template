@@ -11,6 +11,7 @@ import zipfile
 import tarfile
 import tempfile
 import time
+import urllib.error
 
 # Fix: Windows cp1252 can't encode emojis — force UTF-8
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
@@ -859,61 +860,94 @@ def get_platform_target():
 
 def fetch_latest_release():
     api_url = f"https://api.github.com/repos/tectonic-typesetting/tectonic/releases/tags/{TECTONIC_RELEASE_TAG}"
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "teachbook-setup"}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    req = urllib.request.Request(api_url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+    data = fetch_github_json(api_url, f"Tectonic {TECTONIC_RELEASE_TAG}")
+    if data:
         return data.get("tag_name"), data.get("assets", [])
-    except Exception as e:
-        print(f"❌ Error consultando Tectonic {TECTONIC_RELEASE_TAG}: {e}")
-        return None, []
+    return None, []
 
 
 def fetch_latest_release_for_repo(repo_slug):
     api_url = f"https://api.github.com/repos/{repo_slug}/releases/latest"
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "teachbook-setup"}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    req = urllib.request.Request(api_url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+    data = fetch_github_json(api_url, f"GitHub API ({repo_slug})")
+    if data:
         return data.get("tag_name"), data.get("assets", [])
-    except Exception as e:
-        print(f"❌ Error consultando GitHub API ({repo_slug}): {e}")
-        return None, []
+    return None, []
+
+
+def fetch_github_json(api_url, label):
+    """Fetch public GitHub JSON, retrying without GITHUB_TOKEN on auth errors."""
+    base_headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "teachbook-setup",
+    }
+    token = os.environ.get("GITHUB_TOKEN")
+    header_sets = []
+    if token:
+        header_sets.append({**base_headers, "Authorization": f"Bearer {token}"})
+    header_sets.append(base_headers)
+
+    last_error = None
+    for headers in header_sets:
+        try:
+            req = urllib.request.Request(api_url, headers=headers)
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+            if exc.code in (401, 403) and "Authorization" in headers:
+                print(
+                    f"⚠️  GitHub rechazó el token para {label}; "
+                    "reintentando sin credenciales."
+                )
+                continue
+            break
+        except Exception as exc:
+            last_error = exc
+            break
+
+    print(f"❌ Error consultando {label}: {last_error}")
+    return None
 
 
 def download_file_with_retries(url, destination, label, attempts=4):
     """Download a release asset with retries and CI-friendly headers."""
-    headers = {"User-Agent": "teachbook-setup"}
+    base_headers = {"User-Agent": "teachbook-setup"}
     token = os.environ.get("GITHUB_TOKEN")
+    header_sets = []
     if token and "github.com" in url:
-        headers["Authorization"] = f"Bearer {token}"
+        header_sets.append({**base_headers, "Authorization": f"Bearer {token}"})
+    header_sets.append(base_headers)
 
     last_error = None
-    for attempt in range(1, attempts + 1):
-        try:
-            print(f"   Descargando {label} (intento {attempt}/{attempts})...")
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=120) as resp:
-                with open(destination, "wb") as f:
-                    shutil.copyfileobj(resp, f)
-            if os.path.getsize(destination) > 0:
-                return True
-            last_error = "archivo descargado vacío"
-        except Exception as exc:
-            last_error = exc
+    for headers in header_sets:
+        for attempt in range(1, attempts + 1):
+            try:
+                print(f"   Descargando {label} (intento {attempt}/{attempts})...")
+                req = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    with open(destination, "wb") as f:
+                        shutil.copyfileobj(resp, f)
+                if os.path.getsize(destination) > 0:
+                    return True
+                last_error = "archivo descargado vacío"
+            except urllib.error.HTTPError as exc:
+                last_error = exc
+                if exc.code in (401, 403) and "Authorization" in headers:
+                    print(
+                        "   ⚠️  GitHub rechazó el token de descarga; "
+                        "reintentando sin credenciales."
+                    )
+                    break
+            except Exception as exc:
+                last_error = exc
 
-        if attempt < attempts:
-            wait_seconds = min(2 * attempt, 8)
-            print(f"   ⚠️  Descarga fallida ({last_error}). Reintentando en {wait_seconds}s...")
-            time.sleep(wait_seconds)
+            if attempt < attempts:
+                wait_seconds = min(2 * attempt, 8)
+                print(
+                    f"   ⚠️  Descarga fallida ({last_error}). "
+                    f"Reintentando en {wait_seconds}s..."
+                )
+                time.sleep(wait_seconds)
 
     print(f"❌ Error descargando {label}: {last_error}")
     return False
@@ -1151,18 +1185,10 @@ def get_tinytex_asset_name(system, arch):
 
 def fetch_tinytex_release_assets():
     api_url = f"https://api.github.com/repos/rstudio/tinytex-releases/releases/tags/v{TINYTEX_VERSION}"
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "teachbook-setup"}
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    req = urllib.request.Request(api_url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+    data = fetch_github_json(api_url, f"TinyTeX v{TINYTEX_VERSION}")
+    if data:
         return data.get("assets", [])
-    except Exception as e:
-        print(f"❌ Error consultando TinyTeX v{TINYTEX_VERSION}: {e}")
-        return []
+    return []
 
 
 def install_tinytex_portable():
