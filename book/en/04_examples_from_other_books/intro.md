@@ -68,6 +68,11 @@ The goal is not to provide a formal literature review, but to show real examples
   - Jupyter Book
   - Geospatial data science book with Python, Google Earth Engine, interactive maps, local data, visualization, analysis, timelapse animations, and web apps.
   - [Open](https://book.geemap.org/index.html)
+* - Geology and Geological Engineering Degrees
+  - GemGIS
+  - Technical documentation with tutorials
+  - Applied documentation example for spatial data processing in geomodeling: vector and raster data, WMS/WFS/WCS services, GemPy data preparation, PyVista visualization, and export workflows for GIS tools.
+  - [Open](https://gemgis.readthedocs.io/en/latest/getting_started/about.html)
 * - Computer Science Degree
   - Python for Engineers
   - TeachBook/Jupyter Book

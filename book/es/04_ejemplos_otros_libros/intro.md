@@ -68,6 +68,11 @@ La intención no es hacer una revisión bibliográfica formal, sino mostrar ejem
   - Jupyter Book
   - Libro de ciencia de datos geoespaciales con Python, Google Earth Engine, mapas interactivos, datos locales, visualización, análisis, animaciones temporales y aplicaciones web.
   - [Abrir](https://book.geemap.org/index.html)
+* - Grado en Geología e Ingeniería Geológica
+  - GemGIS
+  - Documentación técnica con tutoriales
+  - Ejemplo de documentación aplicada al procesado de datos espaciales para geomodelado: datos vectoriales y ráster, servicios WMS/WFS/WCS, preparación de datos para GemPy, visualización con PyVista y exportación hacia herramientas SIG.
+  - [Abrir](https://gemgis.readthedocs.io/en/latest/getting_started/about.html)
 * - Grado en Ingeniería Informática
   - Python for Engineers
   - TeachBook/Jupyter Book
