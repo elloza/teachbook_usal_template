@@ -101,17 +101,118 @@ jobs:
             --dereference \
             --hard-dereference \
             --directory book/_build/html \
-            -cvf "$RUNNER_TEMP/artifact.tar" \
+            -czf "$RUNNER_TEMP/artifact.tar.gz" \
             .
 
       - name: Upload artifact
+        id: upload-pages
         uses: actions/upload-artifact@v4
         with:
           name: github-pages
-          path: ${{ runner.temp }}/artifact.tar
+          path: ${{ runner.temp }}/artifact.tar.gz
           if-no-files-found: error
+          compression-level: 0
           retention-days: 1
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        env:
+          ARTIFACT_ID: ${{ steps.upload-pages.outputs.artifact-id }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import time
+          import urllib.error
+          import urllib.request
+
+          api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
+          repo = os.environ["GITHUB_REPOSITORY"]
+          token = os.environ["GITHUB_TOKEN"]
+          artifact_id = int(os.environ["ARTIFACT_ID"])
+          build_version = os.environ["GITHUB_SHA"]
+
+          def request_json(method, url, payload=None, auth_token=token):
+              headers = {
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {auth_token}",
+                  "User-Agent": "teachbook-pages-deploy",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              }
+              data = None
+              if payload is not None:
+                  data = json.dumps(payload).encode("utf-8")
+                  headers["Content-Type"] = "application/json"
+              request = urllib.request.Request(
+                  url,
+                  data=data,
+                  headers=headers,
+                  method=method,
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=60) as response:
+                      body = response.read().decode("utf-8")
+              except urllib.error.HTTPError as error:
+                  body = error.read().decode("utf-8", errors="replace")
+                  raise RuntimeError(
+                      f"{method} {url} failed with HTTP {error.code}: {body}"
+                  ) from error
+              return json.loads(body) if body else {}
+
+          oidc_request = urllib.request.Request(
+              os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"],
+              headers={
+                  "Accept": "application/json",
+                  "Authorization": (
+                      f"Bearer {os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']}"
+                  ),
+                  "User-Agent": "teachbook-pages-deploy",
+              },
+          )
+          with urllib.request.urlopen(oidc_request, timeout=60) as response:
+              oidc_token = json.loads(response.read().decode("utf-8"))["value"]
+
+          deployment = request_json(
+              "POST",
+              f"{api_url}/repos/{repo}/pages/deployments",
+              {
+                  "artifact_id": artifact_id,
+                  "pages_build_version": build_version,
+                  "oidc_token": oidc_token,
+              },
+          )
+          deployment_id = deployment.get("id") or build_version
+          status_url = deployment.get(
+              "status_url",
+              f"{api_url}/repos/{repo}/pages/deployments/{deployment_id}",
+          )
+          page_url = deployment.get("page_url", "")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"page_url={page_url}\n")
+
+          print(f"Created Pages deployment {deployment_id}")
+          if page_url:
+              print(f"Page URL: {page_url}")
+
+          final_failures = {
+              "deployment_cancelled",
+              "deployment_content_failed",
+              "deployment_failed",
+              "deployment_lost",
+              "deployment_perms_error",
+          }
+          for _ in range(120):
+              status_response = request_json("GET", status_url)
+              status = status_response.get("status")
+              print(f"Pages deployment status: {status}")
+              if status == "succeed":
+                  sys.exit(0)
+              if status in final_failures:
+                  raise RuntimeError(f"Pages deployment failed with status: {status}")
+              time.sleep(5)
+
+          raise RuntimeError("Pages deployment timed out")
+          PY
