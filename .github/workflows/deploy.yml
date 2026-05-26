@@ -96,7 +96,7 @@ jobs:
           ls -la book/_build/html/.nojekyll
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@v4
         with:
           path: book/_build/html
 
