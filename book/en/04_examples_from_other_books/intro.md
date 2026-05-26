@@ -23,6 +23,11 @@ The goal is not to provide a formal literature review, but to show real examples
   - Jupyter Book
   - Bilingual course with lessons in coding, plant biology, computation, and bioinformatics; a useful example of integrating biological content, notebooks, practice activities, and access through Binder or Colab.
   - [Open](https://plantsandpython.github.io/PlantsAndPython/00_Opening_page.html)
+* - Medicine and bioimage analysis
+  - Bio-image Analysis Notebooks
+  - Jupyter Book
+  - Practical book on biomedical image analysis with Python: fundamentals, segmentation, machine learning, 3D analysis, feature extraction, algorithm validation, and reproducible workflows.
+  - [Open](https://haesleinhuepf.github.io/BioImageAnalysisNotebooks/01_introduction/trailer.html)
 * - Chemical Sciences
   - eChem: Computational Chemistry from Laptop to HPC
   - Jupyter Book
@@ -38,6 +43,11 @@ The goal is not to provide a formal literature review, but to show real examples
   - Jupyter Book
   - How to organize notes with examples on Bayesian statistics, regression, MCMC, Gaussian processes, and mini-projects.
   - [Open](https://buqeye.github.io/LearningFromData/about.html)
+* - Biostatistics
+  - A Little Bit of Everything in Biostatistics for Health Science Students
+  - Jupyter Book
+  - Introductory biostatistics manual for health science students, useful as an example of organizing concepts, data, descriptive analysis, inference, and applied activities.
+  - [Open](https://paytonyau.github.io/biostats-book/chapters/01_vitals.html)
 * - Physics Degree
   - ShowingPhysics
   - Jupyter Book
