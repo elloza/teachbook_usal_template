@@ -13,6 +13,16 @@ La intención no es hacer una revisión bibliográfica formal, sino mostrar ejem
   - Tipo
   - Qué puede aprender un docente
   - Enlace
+* - Todas las áreas
+  - Gallery of Jupyter Books
+  - Directorio de Jupyter Books
+  - Catálogo comunitario de libros construidos con Jupyter Book, útil para explorar estructuras, estilos de navegación, repositorios y ejemplos docentes de muchas disciplinas.
+  - [Abrir](https://executablebooks.org/en/latest/gallery/)
+* - Biología y Botánica
+  - Plants & Python
+  - Jupyter Book
+  - Curso bilingüe con lecciones de programación, biología vegetal, computación y bioinformática; buen ejemplo de integración entre contenidos biológicos, notebooks, prácticas y acceso con Binder o Colab.
+  - [Abrir](https://plantsandpython.github.io/PlantsAndPython/00_Opening_page.html)
 * - Ciencias Químicas
   - eChem: Computational Chemistry from Laptop to HPC
   - Jupyter Book
@@ -43,6 +53,11 @@ La intención no es hacer una revisión bibliográfica formal, sino mostrar ejem
   - Material docente web
   - Buen ejemplo de curso por lecciones, ejercicios, programación con Python y política explícita de uso de herramientas de IA.
   - [Abrir](https://geo-python-site.readthedocs.io/en/latest/course-info/ai-tools.html)
+* - Grado en Geología e Ingeniería Geológica
+  - Earth Engine and Geemap
+  - Jupyter Book
+  - Libro de ciencia de datos geoespaciales con Python, Google Earth Engine, mapas interactivos, datos locales, visualización, análisis, animaciones temporales y aplicaciones web.
+  - [Abrir](https://book.geemap.org/index.html)
 * - Grado en Ingeniería Informática
   - Python for Engineers
   - TeachBook/Jupyter Book
@@ -53,6 +68,11 @@ La intención no es hacer una revisión bibliográfica formal, sino mostrar ejem
   - Jupyter Book
   - Ejemplo de libro matemático con capítulos por áreas, notebooks, soluciones de ejercicios y materiales reutilizables para docentes.
   - [Abrir](https://timothyprojectgig.github.io/JB_Math_Textbook/intro.html)
+* - Parasitología y datos de malaria
+  - MalariaGEN parasite data user guide: Pf8 IGV-notebook
+  - Jupyter Book / notebook de análisis
+  - Ejemplo aplicado con datos genómicos de Plasmodium falciparum: acceso a datos Pf8, visualización interactiva de regiones genómicas con IGV y análisis de variantes asociadas a resistencia antimalárica.
+  - [Abrir](https://malariagen.github.io/parasite-data/pf8/useful_genomics_howtos/igv_notebook.html)
 ```
 
 Al revisar estos ejemplos conviene fijarse en tres aspectos: cómo se estructura el índice, qué tipo de actividades se proponen y cómo se combinan texto, código, visualizaciones y ejercicios.

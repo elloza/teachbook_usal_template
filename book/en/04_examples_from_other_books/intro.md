@@ -13,6 +13,16 @@ The goal is not to provide a formal literature review, but to show real examples
   - Type
   - What a teacher can learn
   - Link
+* - All areas
+  - Gallery of Jupyter Books
+  - Jupyter Books directory
+  - Community catalogue of books built with Jupyter Book, useful for exploring structures, navigation styles, repositories, and teaching examples across many disciplines.
+  - [Open](https://executablebooks.org/en/latest/gallery/)
+* - Biology and Botany
+  - Plants & Python
+  - Jupyter Book
+  - Bilingual course with lessons in coding, plant biology, computation, and bioinformatics; a useful example of integrating biological content, notebooks, practice activities, and access through Binder or Colab.
+  - [Open](https://plantsandpython.github.io/PlantsAndPython/00_Opening_page.html)
 * - Chemical Sciences
   - eChem: Computational Chemistry from Laptop to HPC
   - Jupyter Book
@@ -43,6 +53,11 @@ The goal is not to provide a formal literature review, but to show real examples
   - Teaching website
   - A lesson-based course with exercises, Python programming, and an explicit policy for the use of AI tools.
   - [Open](https://geo-python-site.readthedocs.io/en/latest/course-info/ai-tools.html)
+* - Geology and Geological Engineering Degrees
+  - Earth Engine and Geemap
+  - Jupyter Book
+  - Geospatial data science book with Python, Google Earth Engine, interactive maps, local data, visualization, analysis, timelapse animations, and web apps.
+  - [Open](https://book.geemap.org/index.html)
 * - Computer Science Degree
   - Python for Engineers
   - TeachBook/Jupyter Book
@@ -53,6 +68,11 @@ The goal is not to provide a formal literature review, but to show real examples
   - Jupyter Book
   - A mathematics book organized by areas, with notebooks, exercise solutions, and reusable material for teachers.
   - [Open](https://timothyprojectgig.github.io/JB_Math_Textbook/intro.html)
+* - Parasitology and malaria data
+  - MalariaGEN parasite data user guide: Pf8 IGV-notebook
+  - Jupyter Book / analysis notebook
+  - Applied example with Plasmodium falciparum genomic data: Pf8 data access, interactive visualization of genomic regions with IGV, and analysis of variants associated with antimalarial resistance.
+  - [Open](https://malariagen.github.io/parasite-data/pf8/useful_genomics_howtos/igv_notebook.html)
 ```
 
 When reviewing these examples, it is useful to focus on three aspects: how the table of contents is structured, what type of activities are proposed, and how text, code, visualizations, and exercises are combined.

@@ -10,7 +10,7 @@ Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-krok
 ```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_01.svg
 :name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-01
 :alt: Diagrama: Mermaid: arquitectura por capas
-:width: 90%
+:width: 60%
 :align: center
 
 Diagrama: Mermaid: arquitectura por capas.
@@ -20,7 +20,7 @@ Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-krok
 ```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_02.svg
 :name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-02
 :alt: Diagrama: PlantUML: componentes del sistema
-:width: 90%
+:width: 60%
 :align: center
 
 Diagrama: PlantUML: componentes del sistema.
@@ -30,7 +30,7 @@ Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-krok
 ```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_03.svg
 :name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-03
 :alt: Diagrama: GraphViz: grafo de dependencias
-:width: 90%
+:width: 60%
 :align: center
 
 Diagrama: GraphViz: grafo de dependencias.
@@ -40,7 +40,7 @@ Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-krok
 ```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_04.svg
 :name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-04
 :alt: Diagrama: Structurizr: vista C4 simplificada
-:width: 90%
+:width: 60%
 :align: center
 
 Diagrama: Structurizr: vista C4 simplificada.
@@ -55,7 +55,7 @@ Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-krok
 ```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_05.svg
 :name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-05
 :alt: Diagrama: Wavedrom: protocolo digital
-:width: 90%
+:width: 60%
 :align: center
 
 Diagrama: Wavedrom: protocolo digital.
