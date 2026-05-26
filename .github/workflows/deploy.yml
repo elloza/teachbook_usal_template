@@ -5,6 +5,9 @@ on:
     branches:
       - main
   workflow_dispatch:
+  repository_dispatch:
+    types:
+      - deploy-book
 
 env:
   # Opt in early to GitHub's Node 24 runtime for JavaScript actions.
