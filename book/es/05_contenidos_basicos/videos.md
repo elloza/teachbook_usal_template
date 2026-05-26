@@ -45,22 +45,42 @@ Para vídeos alojados en `_static/`:
 
 ````md
 ```{raw} html
-<video width="560" controls>
-  <source src="_static/mi_video.mp4" type="video/mp4">
+<video width="720" controls preload="metadata" style="max-width: 100%; height: auto;">
+  <source src="../../_static/videos/mi_primer_libro_desde_cero.mp4" type="video/mp4">
   Tu navegador no soporta vídeo HTML5.
 </video>
 ```
 
 ```{raw} latex
 \begin{center}
-\textbf{Video local:} consulte la versión digital para reproducirlo.
+\textbf{Video local: Mi primer libro desde cero}\\
+Archivo local: \texttt{book/\_static/videos/mi\_primer\_libro\_desde\_cero.mp4}. Consulte la version digital para reproducirlo.
 \end{center}
 ```
 ````
 
+Resultado:
+
+```{raw} html
+<video width="720" controls preload="metadata" style="max-width: 100%; height: auto;">
+  <source src="../../_static/videos/mi_primer_libro_desde_cero.mp4" type="video/mp4">
+  Tu navegador no soporta vídeo HTML5.
+</video>
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Video local: Mi primer libro desde cero}\\
+Archivo local: \texttt{book/\_static/videos/mi\_primer\_libro\_desde\_cero.mp4}. Consulte la version digital para reproducirlo.\\
+Duracion: 6:32.
+\end{center}
+```
+
+**Duración:** 6:32 | **Tema:** creación de un primer TeachBook desde cero.
+
 Ruta recomendada para los vídeos locales del libro:
 
-- `book/_static/videos/mi_video.mp4`
+- `book/_static/videos/mi_primer_libro_desde_cero.mp4`
 
 ## Vídeos generados externamente
 

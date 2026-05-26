@@ -12,7 +12,7 @@ La idea no es que aprendas Git, Python, LaTeX o GitHub en profundidad antes de e
     <p>Una explicación breve del recorrido completo para crear, previsualizar, generar PDF y publicar tu primer TeachBook.</p>
   </div>
   <audio class="teachbook-audio-header__player" controls preload="metadata">
-    <source src="../../_static/audio/primer_libro_notebooklm.m4a" type="audio/mp4">
+    <source src="../../_static/audio/primer_libro_notebooklm.mp3" type="audio/mpeg">
     Tu navegador no soporta el elemento de audio HTML5.
   </audio>
   <footer class="teachbook-audio-header__footnote">
@@ -25,7 +25,7 @@ La idea no es que aprendas Git, Python, LaTeX o GitHub en profundidad antes de e
 ```{raw} latex
 \begin{center}
 \textbf{Audio: resumen de Mi primer libro desde cero}\\
-Recurso local: \texttt{book/\_static/audio/primer\_libro\_notebooklm.m4a}.\\
+Recurso local: \texttt{book/\_static/audio/primer\_libro\_notebooklm.mp3}.\\
 Audio generado con NotebookLM a partir de la URL de esta misma pagina:
 \url{https://elloza.com/teachbook_usal_template/es/01_tutorial/04_mi_primer_libro_en_5_minutos.html}.
 \end{center}
