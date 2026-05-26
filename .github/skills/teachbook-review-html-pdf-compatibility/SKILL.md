@@ -27,6 +27,7 @@ Auditar el contenido del TeachBook para asegurarse de que todo funciona tanto en
 | Código con syntax highlighting | ✅ | ✅ | — |
 | Mermaid `{mermaid}` | ✅ | ❌ | Añadir descripción textual |
 | YouTube iframe | ✅ | ❌ | Añadir `{raw} latex` con URL |
+| Audio `<audio>` | ✅ | ❌ | Añadir `{raw} latex` con descripción y ruta |
 | Thebe live code | ✅ | ❌ | Código visible como texto estático |
 | JupyterQuiz | ✅ | ❌ | Añadir preguntas en formato admonition |
 | HTML personalizado `{raw} html` | ✅ | ❌ | Añadir `{raw} latex` fallback |
@@ -45,11 +46,12 @@ Buscar en todos los `.md` e `.ipynb` de `book/es/` y `book/en/`:
 1. `{mermaid}` sin texto alternativo → ⚠️
 2. `{raw} html` sin correspondiente `{raw} latex` → ❌
 3. `iframe` sin `{raw} latex` → ❌
-4. `{tab}` sin alternativa → ⚠️
-5. `jupyterquiz` sin alternativa admonition → ⚠️
-6. `ipywidgets` sin alternativa → ⚠️
-7. `{thebe-button}` sin nota de compatibilidad → ⚠️
-8. `{cite:p}` o `{cite:t}` dentro de `{raw} html` sin `\cite{...}` en el fallback `{raw} latex` → ❌
+4. `<audio>` sin `{raw} latex` → ❌
+5. `{tab}` sin alternativa → ⚠️
+6. `jupyterquiz` sin alternativa admonition → ⚠️
+7. `ipywidgets` sin alternativa → ⚠️
+8. `{thebe-button}` sin nota de compatibilidad → ⚠️
+9. `{cite:p}` o `{cite:t}` dentro de `{raw} html` sin `\cite{...}` en el fallback `{raw} latex` → ❌
 
 ### Paso 2: Generar informe
 
@@ -74,6 +76,7 @@ Para cada problema encontrado, proponer la corrección específica:
 
 - Mermaid sin fallback → añadir `{admonition}` con descripción tras el diagrama
 - iframe sin LaTeX → añadir bloque `{raw} latex` con `\url{...}`
+- audio sin LaTeX → añadir bloque `{raw} latex` con título, descripción y ruta del recurso
 - cita en HTML raw → mover la cita a Markdown normal o añadir `\cite{clave}` en el bloque `{raw} latex`
 - Tabs sin alternativa → añadir sección con el contenido de todas las tabs
 
@@ -81,6 +84,6 @@ Para cada problema encontrado, proponer la corrección específica:
 
 > **Todo contenido debe ser comprensible tanto en la versión web como en la versión impresa.**
 
-Si algo es imposible en PDF (como un video), la versión impresa debe contener como mínimo:
+Si algo es imposible en PDF (como un video o audio), la versión impresa debe contener como mínimo:
 - Un texto describiendo qué es
 - Una URL o referencia para acceder al recurso original

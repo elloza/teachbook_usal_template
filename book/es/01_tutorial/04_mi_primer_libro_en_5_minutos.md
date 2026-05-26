@@ -4,6 +4,33 @@ Esta página muestra un primer recorrido completo para crear un libro nuevo desd
 
 La idea no es que aprendas Git, Python, LaTeX o GitHub en profundidad antes de empezar. La idea es que entiendas qué está pasando en cada pantalla, qué le puedes pedir al agente y dónde mirar si necesitas comprobar que todo ha salido bien.
 
+```{raw} html
+<section class="teachbook-audio-header" aria-label="Resumen en audio de esta página">
+  <div class="teachbook-audio-header__text">
+    <p class="teachbook-audio-header__eyebrow">Resumen en audio</p>
+    <h2>Escucha la guía antes de empezar</h2>
+    <p>Una explicación breve del recorrido completo para crear, previsualizar, generar PDF y publicar tu primer TeachBook.</p>
+  </div>
+  <audio class="teachbook-audio-header__player" controls preload="metadata">
+    <source src="../../_static/audio/primer_libro_notebooklm.m4a" type="audio/mp4">
+    Tu navegador no soporta el elemento de audio HTML5.
+  </audio>
+  <footer class="teachbook-audio-header__footnote">
+    Audio generado con NotebookLM a partir de la URL de esta misma página:
+    <a href="https://elloza.com/teachbook_usal_template/es/01_tutorial/04_mi_primer_libro_en_5_minutos.html">04_mi_primer_libro_en_5_minutos.html</a>.
+  </footer>
+</section>
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Audio: resumen de Mi primer libro desde cero}\\
+Recurso local: \texttt{book/\_static/audio/primer\_libro\_notebooklm.m4a}.\\
+Audio generado con NotebookLM a partir de la URL de esta misma pagina:
+\url{https://elloza.com/teachbook_usal_template/es/01_tutorial/04_mi_primer_libro_en_5_minutos.html}.
+\end{center}
+```
+
 ```{note}
 Los GIFs de esta página están acelerados para que el proceso se vea de forma compacta. La instalación inicial del entorno y la generación del PDF pueden tardar bastante más, sobre todo la primera vez que se instala el motor de LaTeX.
 ```

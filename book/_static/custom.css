@@ -10,6 +10,55 @@ html {
     --usal-blue-light: #004a7c;
 }
 
+/* Featured audio block used in tutorial pages */
+.teachbook-audio-header {
+    margin: 1.4rem 0 1.8rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--pst-color-border);
+    border-left: 4px solid var(--usal-blue);
+    border-radius: 8px;
+    background: #f5f9fc;
+    box-shadow: 0 8px 24px rgba(0, 49, 83, 0.08);
+}
+
+.teachbook-audio-header__text {
+    margin-bottom: 0.8rem;
+}
+
+.teachbook-audio-header__eyebrow {
+    margin: 0 0 0.2rem;
+    color: var(--usal-blue);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.teachbook-audio-header h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.2rem;
+}
+
+.teachbook-audio-header p {
+    margin: 0;
+}
+
+.teachbook-audio-header__player {
+    display: block;
+    width: 100%;
+    margin: 0.7rem 0 0.6rem;
+}
+
+.teachbook-audio-header__footnote {
+    color: var(--pst-color-text-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+html[data-theme="dark"] .teachbook-audio-header {
+    background: #17232d;
+    box-shadow: none;
+}
+
 /* Ensure homogeneous article width */
 .bd-main .bd-content .bd-article-container {
     max-width: var(--pst-content-width) !important;

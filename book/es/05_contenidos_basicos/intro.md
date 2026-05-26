@@ -25,6 +25,7 @@ La tabla siguiente resume los elementos principales de esta sección.
 | [Pestañas y tarjetas](tabs_cards.md) | Contenido en pestañas (sphinx-design) |
 | [Código fuente](codigo.md) | Bloques de código con resaltado |
 | [Vídeos](videos.md) | YouTube y vídeo local (HTML + PDF) |
+| [Audio](audio.md) | Reproductores HTML5, formatos recomendados y fallback PDF |
 | [Diagramas Mermaid](mermaid.md) | Diagramas de flujo, secuencia, clases… |
 | [Compatibilidad HTML/PDF](compatibilidad_html_pdf.md) | Qué funciona dónde y cómo asegurar compatibilidad |
 

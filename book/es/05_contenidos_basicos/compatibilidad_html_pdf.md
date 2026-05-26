@@ -23,6 +23,7 @@ La tabla siguiente resume los elementos principales de esta sección.
 | Referencias cruzadas | ✅ | ✅ | Usar libremente |
 | Diagramas Kroki (Mermaid, PlantUML, etc.) | ✅ | ✅ | Usar `{kroki}` con `:type: mermaid` |
 | Vídeos (iframe/YouTube) | ✅ | ❌ | Usar `{raw} latex` con URL |
+| Audio (`<audio>`) | ✅ | ❌ | Usar `{raw} latex` con descripción y ruta |
 | Pestañas (`{tabbed}`, `{tab-set}`) | ✅ | ❌ | En PDF: contenido secuencial |
 | HTML interactivo (`<details>`) | ✅ | ❌ | Usar `{raw} latex` alternativo |
 | Thebe (código en vivo) | ✅ | ❌ | Código visible como texto en PDF |
@@ -58,6 +59,24 @@ Texto alternativo para el PDF.
 ```
 ````
 
+## Ejemplo: audio con fallback
+
+````md
+```{raw} html
+<audio controls preload="metadata">
+  <source src="../../_static/audio/sample_tone_440hz.wav" type="audio/wav">
+  Tu navegador no soporta el elemento de audio HTML5.
+</audio>
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Audio: tono de 440 Hz}\\
+Recurso local: \texttt{book/\_static/audio/sample\_tone\_440hz.wav}. Consulte la version digital para reproducirlo.
+\end{center}
+```
+````
+
 ## Ejemplo: diagrama con Kroki
 
 ````md
@@ -73,7 +92,7 @@ flowchart LR
 ## Reglas prácticas
 
 1. **Si es texto, imagen, ecuación o tabla**: no te preocupes, funciona en ambos.
-2. **Si es interactivo (vídeo, HTML personalizado)**: añade SIEMPRE una alternativa textual.
+2. **Si es interactivo (vídeo, audio, HTML personalizado)**: añade SIEMPRE una alternativa textual.
 3. **Si es un diagrama**: usa Kroki. Funciona en HTML y PDF.
 4. **Si es un dropdown**: en PDF se muestra expandido (no hay problema).
 5. **Si son pestañas**: en PDF se muestra todo seguido (verifica que tenga sentido).

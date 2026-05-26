@@ -64,6 +64,7 @@ sidebar_verification.png
 build.log
 build_utf8.log
 media/
+recursos/
 
 # --- Env ---
 .env

@@ -82,6 +82,7 @@ parts:
     - file: en/05_basic_content/tabs_cards
     - file: en/05_basic_content/code
     - file: en/05_basic_content/videos
+    - file: en/05_basic_content/audio
     - file: en/05_basic_content/mermaid
     - file: en/05_basic_content/html_pdf_compatibility
   - caption: Interactivity and Assessment

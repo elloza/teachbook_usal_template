@@ -23,6 +23,7 @@ The following table summarizes the main elements of this section.
 | Cross-references | ✅ | ✅ | Use freely |
 | Kroki diagrams (Mermaid, PlantUML, etc.) | ✅ | ✅ | Use `{kroki}` with `:type: mermaid` |
 | Videos (iframe/YouTube) | ✅ | ❌ | Use `{raw} latex` with URL |
+| Audio (`<audio>`) | ✅ | ❌ | Use `{raw} latex` with description and path |
 | Tabs (`{tabbed}`, `{tab-set}`) | ✅ | ❌ | In PDF: sequential content |
 | Interactive HTML (`<details>`) | ✅ | ❌ | Use `{raw} latex` alternative |
 | Thebe (live code) | ✅ | ❌ | Code visible as text in PDF |
@@ -58,6 +59,24 @@ Alternative text for the PDF.
 ```
 ````
 
+## Example: audio with fallback
+
+````md
+```{raw} html
+<audio controls preload="metadata">
+  <source src="../../_static/audio/sample_tone_440hz.wav" type="audio/wav">
+  Your browser does not support the HTML5 audio element.
+</audio>
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Audio: 440 Hz tone}\\
+Local resource: \texttt{book/\_static/audio/sample\_tone\_440hz.wav}. See the digital version to play it.
+\end{center}
+```
+````
+
 ## Example: diagram with Kroki
 
 ````md
@@ -73,7 +92,7 @@ flowchart LR
 ## Practical rules
 
 1. **If it is text, image, equation, or table**: do not worry, it works in both.
-2. **If it is interactive (video, custom HTML)**: ALWAYS add a text alternative.
+2. **If it is interactive (video, audio, custom HTML)**: ALWAYS add a text alternative.
 3. **If it is a diagram**: use Kroki. It works in both HTML and PDF.
 4. **If it is a dropdown**: in PDF it appears expanded (no problem).
 5. **If it uses tabs**: in PDF everything appears sequentially (verify it still makes sense).

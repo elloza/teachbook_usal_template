@@ -27,7 +27,17 @@ BOOK_DIR = PROJECT_ROOT / "book"
 STATIC_DIR = BOOK_DIR / "_static"
 REPORT_DEFAULT = PROJECT_ROOT / ".build_logs" / "static_assets.json"
 OPTIMIZABLE_SUFFIXES = {".png", ".jpg", ".jpeg"}
-AUDIT_SUFFIXES = OPTIMIZABLE_SUFFIXES | {".gif", ".svg", ".webp", ".mp4", ".pdf"}
+AUDIT_SUFFIXES = OPTIMIZABLE_SUFFIXES | {
+    ".gif",
+    ".svg",
+    ".webp",
+    ".mp4",
+    ".pdf",
+    ".wav",
+    ".mp3",
+    ".ogg",
+    ".m4a",
+}
 GIF_REFERENCE_PATTERN = re.compile(r"(?P<path>[^\s<>\"')]+\.gif)", re.IGNORECASE)
 MIN_SAVING_BYTES = 1024
 

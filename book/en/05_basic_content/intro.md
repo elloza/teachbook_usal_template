@@ -25,6 +25,7 @@ The following table summarizes the main elements of this section.
 | [Tabs and cards](tabs_cards.md) | Tabbed content (sphinx-design) |
 | [Source code](code.md) | Code blocks with syntax highlighting |
 | [Videos](videos.md) | YouTube and local video (HTML + PDF) |
+| [Audio](audio.md) | HTML5 players, recommended formats, and PDF fallback |
 | [Mermaid diagrams](mermaid.md) | Flowcharts, sequences, class diagrams… |
 | [HTML/PDF compatibility](html_pdf_compatibility.md) | What works where and how to ensure compatibility |
 

@@ -1,12 +1,12 @@
 ---
 name: teachbook-multimedia
 description: >
-  Guía para insertar contenido multimedia en el libro: imágenes, videos de YouTube,
+  Guía para insertar contenido multimedia en el libro: imágenes, audio, videos de YouTube,
   ecuaciones LaTeX, tablas, admoniciones, código ejecutable y citas bibliográficas.
   Todos los patrones son compatibles con HTML y PDF simultáneamente.
   Trigger phrases: "insertar imagen", "añadir video", "YouTube", "fórmula", "ecuación",
   "tabla", "nota", "advertencia", "cita bibliográfica", "imagen", "multimedia",
-  "insertar multimedia", "video", "BibTeX", "referencia", "add image", "add video".
+  "insertar multimedia", "video", "audio", "BibTeX", "referencia", "add image", "add video".
 ---
 
 # Skill: Contenido Multimedia (HTML + PDF)
@@ -100,7 +100,45 @@ Si el contenido HTML necesita una cita bibliográfica en PDF, NO pongas la cita 
 
 ---
 
-## 3. Ecuaciones LaTeX
+## 3. Audio local HTML5
+
+**Compatibilidad: HTML ✅ PDF ✅ (con patrón dual)**
+
+Usar este patrón para audios alojados en `book/_static/audio/`. NUNCA usar `<audio>` sin el bloque `{raw} latex` alternativo:
+
+````markdown
+```{raw} html
+<audio controls preload="metadata">
+  <source src="../../_static/audio/mi_audio.mp3" type="audio/mpeg">
+  Tu navegador no soporta el elemento de audio HTML5.
+</audio>
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Audio: titulo del recurso}\\
+Archivo local: \texttt{book/\_static/audio/mi\_audio.mp3}. Consulte la version digital para reproducirlo.
+\end{center}
+```
+````
+
+- En **HTML**: se muestra el reproductor nativo del navegador.
+- En **PDF**: se muestra una referencia textual al recurso.
+- Usar `preload="metadata"` y evitar `autoplay`.
+- Para audios largos, añadir resumen o transcripción breve.
+- Si el audio no es propio, indicar fuente y licencia.
+
+Formatos recomendados:
+
+| Formato | Uso recomendado |
+|---|---|
+| WAV | Ejemplos breves o señales generadas sin dependencias |
+| MP3 | Voz, explicaciones grabadas o audios largos ya exportados |
+| OGG | Fuente adicional, no como único formato |
+
+---
+
+## 4. Ecuaciones LaTeX
 
 **Compatibilidad: HTML ✅ PDF ✅**
 
@@ -120,7 +158,7 @@ Requiere que `dollarmath` esté en `myst_enable_extensions` del `_config.yml` (y
 
 ---
 
-## 4. Tablas
+## 5. Tablas
 
 **Compatibilidad: HTML ✅ PDF ✅**
 
@@ -137,7 +175,7 @@ Requiere que `dollarmath` esté en `myst_enable_extensions` del `_config.yml` (y
 
 ---
 
-## 5. Admoniciones (bloques destacados)
+## 6. Admoniciones (bloques destacados)
 
 **Compatibilidad: HTML ✅ PDF ✅**
 
@@ -163,7 +201,7 @@ Este bloque admite un título personalizado.
 
 ---
 
-## 6. Código ejecutable (Notebooks)
+## 7. Código ejecutable (Notebooks)
 
 **Compatibilidad: HTML ✅ PDF ✅**
 
@@ -182,7 +220,7 @@ Por defecto está en `off` para velocidad de compilación. Solo activar si el us
 
 ---
 
-## 7. Citas bibliográficas (BibTeX)
+## 8. Citas bibliográficas (BibTeX)
 
 **Compatibilidad: HTML ✅ PDF ✅**
 
@@ -267,6 +305,7 @@ Entrada de ejemplo en `references.bib`:
 |---|---|---|---|
 | Imágenes (`{image}`) | ✅ | ✅ | PNG/JPG recomendado; validar con `optimize_static_assets.py --check` |
 | YouTube (patrón dual) | ✅ | ✅ | NUNCA sin `{raw} latex` |
+| Audio local (patrón dual) | ✅ | ✅ | NUNCA sin `{raw} latex`; guardar en `_static/audio/` |
 | Ecuaciones (`$...$`) | ✅ | ✅ | Requiere `dollarmath` en config |
 | Tablas | ✅ | ✅ | Sintaxis MyST estándar |
 | Admoniciones | ✅ | ✅ | `{note}`, `{warning}`, `{tip}`, `{admonition}` |

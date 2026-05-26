@@ -82,6 +82,7 @@ parts:
     - file: es/05_contenidos_basicos/tabs_cards
     - file: es/05_contenidos_basicos/codigo
     - file: es/05_contenidos_basicos/videos
+    - file: es/05_contenidos_basicos/audio
     - file: es/05_contenidos_basicos/mermaid
     - file: es/05_contenidos_basicos/compatibilidad_html_pdf
   - caption: Interactividad y Evaluación
