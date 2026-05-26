@@ -95,10 +95,22 @@ jobs:
           echo "Checking for .nojekyll:"
           ls -la book/_build/html/.nojekyll
 
+      - name: Package Pages artifact
+        run: |
+          tar \
+            --dereference \
+            --hard-dereference \
+            --directory book/_build/html \
+            -cvf "$RUNNER_TEMP/artifact.tar" \
+            .
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
-          path: book/_build/html
+          name: github-pages
+          path: ${{ runner.temp }}/artifact.tar
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Deploy to GitHub Pages
         id: deployment
