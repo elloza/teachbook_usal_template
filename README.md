@@ -1,6 +1,6 @@
 # Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial 🎓
 
-[![DOI](https://zenodo.org/badge/1248954678.svg)](https://doi.org/10.5281/zenodo.20449102)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20449102-blue.svg)](https://doi.org/10.5281/zenodo.20449102)
 [![Licencia: CC BY 4.0](https://img.shields.io/badge/Licencia-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 Material y plantilla del curso **Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial**, dirigido a las **Facultades de Ciencias y de Ciencias Químicas de la USAL** y diseñado para que profesores sin conocimientos de informática puedan crear y publicar libros digitales usando **agentes de código con IA**.
