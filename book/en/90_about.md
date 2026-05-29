@@ -25,7 +25,6 @@ The published version of the book can be viewed at:
     <div>
       <h3>Álvaro Lozano Murciego</h3>
       <p class="author-profile-role">Associate Professor, Computer Science and Automation</p>
-      <p>Lecturer and researcher at the University of Salamanca in the area of Languages and Computer Systems. His work connects software engineering, learning systems, educational analytics and digital tools for improving teaching-material production.</p>
       <div class="author-profile-links">
         <a href="https://produccioncientifica.usal.es/investigadores/148041/detalle">USAL profile</a>
         <a href="https://orcid.org/0000-0002-0493-4471">ORCID</a>
@@ -36,8 +35,7 @@ The published version of the book can be viewed at:
     <img src="../_static/authors/andre_filipe_sales_mendes.jpg" alt="Portrait of André Filipe Sales Mendes" loading="lazy">
     <div>
       <h3>André Filipe Sales Mendes</h3>
-      <p class="author-profile-role">Adjunct Lecturer, Computer Science and Automation</p>
-      <p>Lecturer and researcher at the University of Salamanca in the area of Languages and Computer Systems. His work sits at the intersection of software engineering, educational technology and practical tools that support university teaching.</p>
+      <p class="author-profile-role">Assistant Professor, Computer Science and Automation</p>
       <div class="author-profile-links">
         <a href="https://produccioncientifica.usal.es/investigadores/147997/detalle?lang=en">USAL profile</a>
         <a href="https://orcid.org/0000-0003-0976-2784">ORCID</a>
@@ -54,7 +52,8 @@ The published version of the book can be viewed at:
 :align: center
 ```
 
-**Álvaro Lozano Murciego.** Associate Professor in the Department of Computer Science and Automation at the University of Salamanca, in the area of Languages and Computer Systems. His work connects software engineering, learning systems, educational analytics and digital tools for improving teaching-material production.
+**Álvaro Lozano Murciego**  
+Associate Professor, Computer Science and Automation
 
 - USAL profile: https://produccioncientifica.usal.es/investigadores/148041/detalle
 - ORCID: https://orcid.org/0000-0002-0493-4471
@@ -65,7 +64,8 @@ The published version of the book can be viewed at:
 :align: center
 ```
 
-**André Filipe Sales Mendes.** Adjunct Lecturer in the Department of Computer Science and Automation at the University of Salamanca, in the area of Languages and Computer Systems. His work sits at the intersection of software engineering, educational technology and practical tools that support university teaching.
+**André Filipe Sales Mendes**  
+Assistant Professor, Computer Science and Automation
 
 - USAL profile: https://produccioncientifica.usal.es/investigadores/147997/detalle?lang=en
 - ORCID: https://orcid.org/0000-0003-0976-2784

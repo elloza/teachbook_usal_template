@@ -25,7 +25,6 @@ La versión publicada del libro puede consultarse en:
     <div>
       <h3>Álvaro Lozano Murciego</h3>
       <p class="author-profile-role">Profesor Titular de Universidad, Informática y Automática</p>
-      <p>Docente e investigador de la Universidad de Salamanca en el área de Lenguajes y Sistemas Informáticos. Su trabajo combina ingeniería del software, sistemas de aprendizaje, analítica educativa y herramientas digitales para mejorar la creación de materiales docentes.</p>
       <div class="author-profile-links">
         <a href="https://produccioncientifica.usal.es/investigadores/148041/detalle">Perfil USAL</a>
         <a href="https://orcid.org/0000-0002-0493-4471">ORCID</a>
@@ -36,8 +35,7 @@ La versión publicada del libro puede consultarse en:
     <img src="../_static/authors/andre_filipe_sales_mendes.jpg" alt="Retrato de André Filipe Sales Mendes" loading="lazy">
     <div>
       <h3>André Filipe Sales Mendes</h3>
-      <p class="author-profile-role">Profesor Asociado, Informática y Automática</p>
-      <p>Docente e investigador de la Universidad de Salamanca en el área de Lenguajes y Sistemas Informáticos. Su actividad se sitúa en la intersección entre ingeniería del software, tecnología educativa y herramientas de apoyo para la docencia universitaria.</p>
+      <p class="author-profile-role">Profesor Ayudante Doctor, Informática y Automática</p>
       <div class="author-profile-links">
         <a href="https://produccioncientifica.usal.es/investigadores/147997/detalle?lang=en">Perfil USAL</a>
         <a href="https://orcid.org/0000-0003-0976-2784">ORCID</a>
@@ -54,7 +52,8 @@ La versión publicada del libro puede consultarse en:
 :align: center
 ```
 
-**Álvaro Lozano Murciego.** Profesor Titular de Universidad en el Departamento de Informática y Automática de la Universidad de Salamanca, en el área de Lenguajes y Sistemas Informáticos. Su trabajo combina ingeniería del software, sistemas de aprendizaje, analítica educativa y herramientas digitales para mejorar la creación de materiales docentes.
+**Álvaro Lozano Murciego**  
+Profesor Titular de Universidad, Informática y Automática
 
 - Perfil USAL: https://produccioncientifica.usal.es/investigadores/148041/detalle
 - ORCID: https://orcid.org/0000-0002-0493-4471
@@ -65,7 +64,8 @@ La versión publicada del libro puede consultarse en:
 :align: center
 ```
 
-**André Filipe Sales Mendes.** Profesor Asociado en el Departamento de Informática y Automática de la Universidad de Salamanca, en el área de Lenguajes y Sistemas Informáticos. Su actividad se sitúa en la intersección entre ingeniería del software, tecnología educativa y herramientas de apoyo para la docencia universitaria.
+**André Filipe Sales Mendes**  
+Profesor Ayudante Doctor, Informática y Automática
 
 - Perfil USAL: https://produccioncientifica.usal.es/investigadores/147997/detalle?lang=en
 - ORCID: https://orcid.org/0000-0003-0976-2784
