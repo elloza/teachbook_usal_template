@@ -34,6 +34,7 @@ except ModuleNotFoundError as exc:
     raise SystemExit(1)
 
 from collect_used_bibliography import BibliographyError, collect_used_bibliography
+from pdf_names import DEFAULT_PDF_FILENAME, pdf_filename_for_lang
 
 
 def get_jupyter_book():
@@ -880,13 +881,13 @@ def build_pdf_for_lang(lang, engine_name):
     if lang == "default":
         config_file = "_config.yml"
         toc_file = "_toc.yml"
-        pdf_filename = "teachbook.pdf"
+        pdf_filename = DEFAULT_PDF_FILENAME
         src_dir = os.path.abspath(BOOK_DIR)
         temp_mode = False
     else:
         config_file = f"_config_{lang}.yml"
         toc_file = f"_toc_{lang}.yml"
-        pdf_filename = f"teachbook_{lang}.pdf"
+        pdf_filename = pdf_filename_for_lang(lang)
         temp_mode = True
 
     if temp_mode:
@@ -1309,7 +1310,7 @@ Uso:
   python scripts/export_pdf.py --verbose                         # muestra el log completo en pantalla
 
 La opción --allow-existing es un salvavidas para despliegue: NO oculta el fallo
-de generación, pero permite publicar la web si `book/_static/teachbook_<lang>.pdf`
+de generación, pero permite publicar la web si el PDF esperado de cada idioma
 ya existe y tiene contenido.
 
 Por defecto se muestra una salida resumida para docentes. Los logs completos se
@@ -1360,7 +1361,7 @@ guardan en `.build_logs/` y, si algo falla, se imprime la cola relevante del err
         if allow_existing:
             missing_or_empty = []
             for lang in languages:
-                pdf_path = os.path.join(STATIC_DIR, f"teachbook_{lang}.pdf")
+                pdf_path = os.path.join(STATIC_DIR, pdf_filename_for_lang(lang))
                 if not os.path.isfile(pdf_path) or os.path.getsize(pdf_path) == 0:
                     missing_or_empty.append(pdf_path)
 

@@ -30,6 +30,7 @@ except ModuleNotFoundError as exc:
     raise SystemExit(1)
 
 from collect_used_bibliography import BibliographyError, collect_used_bibliography
+from pdf_names import DEFAULT_PDF_FILENAME, pdf_filename_for_lang
 
 VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 
@@ -388,7 +389,7 @@ def build_language(lang):
         toc_file = "_toc.yml"
         build_cache_dir = os.path.join(BOOK_DIR, "_build")
         final_dest = FINAL_HTML_DIR
-        pdf_name = "teachbook.pdf"
+        pdf_name = DEFAULT_PDF_FILENAME
 
         # Standard build logic for default
         if os.path.exists(build_cache_dir):
@@ -423,7 +424,7 @@ def build_language(lang):
     # LOCALIZED STANDALONE BUILD (en, fr, etc.)
     config_file = f"_config_{lang}.yml"
     toc_file = f"_toc_{lang}.yml"
-    pdf_name = f"teachbook_{lang}.pdf"
+    pdf_name = pdf_filename_for_lang(lang)
 
     # 1. Create temporary standalone project AT ROOT to avoid recursion/path issues
     # Use _temp_build_{lang}
@@ -573,6 +574,16 @@ def build_language(lang):
             if not os.path.exists(final_images_dir):
                 os.makedirs(final_images_dir)
             merge_dir_into(temp_images_dir, final_images_dir)
+
+        # Sphinx stores files referenced as downloads in a root-level _downloads/
+        # directory. Localized pages point to ../_downloads/..., so merge it too.
+        temp_downloads_dir = os.path.join(temp_build_root, "_build", "html", "_downloads")
+        final_downloads_dir = os.path.join(FINAL_HTML_DIR, "_downloads")
+        if os.path.exists(temp_downloads_dir):
+            print(f"   Merging downloads from temp build ({lang}) to global _downloads...")
+            if not os.path.exists(final_downloads_dir):
+                os.makedirs(final_downloads_dir)
+            merge_dir_into(temp_downloads_dir, final_downloads_dir)
 
     except subprocess.CalledProcessError:
         print(f"❌ Error compilando idioma standalone: {lang}")

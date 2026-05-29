@@ -10,6 +10,8 @@ TeachBooks provides documentation, components and working patterns that make it 
 
 We thank the [TeachBooks](https://teachbooks.io/) project and [Delft University of Technology (TU Delft)](https://www.tudelft.nl/) for their work on open tools for educational books. The [credits page in the TeachBooks Manual](https://teachbooks.io/manual/credits.html) is used as a reference for explicitly acknowledging the tools, communities and institutional support on which this material builds.
 
+TeachBooks, Jupyter Book and MyST Markdown are acknowledged here as tools, documentation and technical communities on which this project builds. They are not part of the book authorship or of the creator metadata declared in `CITATION.cff` and Zenodo.
+
 ## Book license
 
 This book is distributed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) license.

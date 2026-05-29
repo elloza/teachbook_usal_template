@@ -240,8 +240,8 @@ Generate the book PDFs in all languages and check that they were created correct
 The template normally generates one PDF per language and places them in `book/_static/`, for example:
 
 ```text
-book/_static/teachbook_es.pdf
-book/_static/teachbook_en.pdf
+book/_static/ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf
+book/_static/CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf
 ```
 
 The reason for the initial wait is that the project needs a LaTeX engine to convert the book to PDF. LaTeX is the system that produces academic documents with good typography, equations, indexes, and references. You do not need to learn LaTeX to use the template, but the engine that compiles the document must be installed.

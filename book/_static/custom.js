@@ -262,7 +262,11 @@ function injectPDFButton(languages, rootPrefix) {
             if (path.includes(`/${l.code}/`)) lang = l.code;
         });
 
-        const pdfFilename = `teachbook_${lang}.pdf`;
+        const pdfFilenames = {
+            "es": "ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf",
+            "en": "CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf"
+        };
+        const pdfFilename = pdfFilenames[lang] || `TeachBook_${lang}.pdf`;
         const pdfUrl = rootPrefix + `_static/${pdfFilename}`;
 
         const langStrings = {

@@ -70,21 +70,24 @@ jobs:
       - name: Verify generated PDFs
         run: |
           .venv/bin/python - <<'PY'
+          import sys
           from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from pdf_names import pdf_filename_for_lang
           langs = sorted(
               path.stem.replace("_config_", "", 1)
               for path in Path("book").glob("_config_*.yml")
           )
           missing = [
-              Path("book/_static") / f"teachbook_{lang}.pdf"
+              Path("book/_static") / pdf_filename_for_lang(lang)
               for lang in langs
-              if not (Path("book/_static") / f"teachbook_{lang}.pdf").is_file()
+              if not (Path("book/_static") / pdf_filename_for_lang(lang)).is_file()
           ]
           if missing:
               for path in missing:
                   print(f"Missing generated PDF: {path}")
               raise SystemExit(1)
-          print("Generated PDFs:", ", ".join(f"teachbook_{lang}.pdf" for lang in langs))
+          print("Generated PDFs:", ", ".join(pdf_filename_for_lang(lang) for lang in langs))
           PY
 
       - name: Build HTML book

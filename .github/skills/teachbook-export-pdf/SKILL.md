@@ -52,8 +52,8 @@ Las citas que aparezcan únicamente dentro de `{raw} html` no cuentan para el PD
 ## Ubicación de salida
 
 ```text
-book/_static/teachbook_es.pdf
-book/_static/teachbook_en.pdf
+book/_static/ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf
+book/_static/CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf
 ```
 
 ## Motores soportados
@@ -116,8 +116,8 @@ Si el entorno se instaló en modo base, instalar antes el extra Python de PDF:
 Deben existir:
 
 ```text
-book/_static/teachbook_es.pdf
-book/_static/teachbook_en.pdf
+book/_static/ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf
+book/_static/CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf
 ```
 
 Si el cambio toca citas, bibliografía o bloques `{raw} html` / `{raw} latex`, validar también el `.bib` temporal:
@@ -155,8 +155,8 @@ Si Tectonic falla en CI con un problema del motor, `--engine auto` debe caer al 
 
 ## Checklist final
 
-- [ ] `book/_static/teachbook_es.pdf` existe.
-- [ ] `book/_static/teachbook_en.pdf` existe.
+- [ ] `book/_static/ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf` existe.
+- [ ] `book/_static/CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf` existe.
 - [ ] El flujo local/CI usa `setup_latex.py --yes --full` + `export_pdf.py --engine auto`.
 - [ ] SVG/Kroki no llegan crudos a LaTeX.
 - [ ] El fallback avanzado sigue siendo explícito, no default.

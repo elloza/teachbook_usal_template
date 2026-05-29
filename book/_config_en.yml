@@ -3,7 +3,7 @@ title: |
   with Code and
   Artificial Intelligence
   Assistants
-author: Álvaro Lozano Murciego and André Sales Mendes
+author: Álvaro Lozano Murciego and André Filipe Sales Mendes
 copyright: "2026"
 logo: "_static/logo.png"
 language: en
@@ -58,7 +58,7 @@ latex:
   edition: "1st Edition"                # Optional
   cover_logo: "_static/usal_logo.png"  # PDF cover logo; the web logo is configured above in `logo`
   # isbn: "978-84-XXXXX-XX-X"          # Optional
-  # doi: "10.XXXX/xxxxx"               # Optional
+  # doi: "10.5281/zenodo.XXXXXXX"      # Optional: uncomment when Zenodo assigns the DOI
   preamble: |
     \usepackage[english]{babel}
     \selectlanguage{english}

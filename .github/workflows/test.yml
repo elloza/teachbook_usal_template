@@ -97,8 +97,8 @@ jobs:
         timeout-minutes: 45
         run: |
           .venv/bin/python scripts/export_pdf.py --engine auto
-          test -f book/_static/teachbook_es.pdf || { echo "❌ No Spanish PDF generated"; exit 1; }
-          test -f book/_static/teachbook_en.pdf || { echo "❌ No English PDF generated"; exit 1; }
+          test -f book/_static/ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf || { echo "❌ No Spanish PDF generated"; exit 1; }
+          test -f book/_static/CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf || { echo "❌ No English PDF generated"; exit 1; }
           echo "✅ PDF export OK on macOS"
 
       - name: Test pdf_to_markdown
@@ -251,8 +251,8 @@ jobs:
         run: |
           .venv\Scripts\python.exe scripts\export_pdf.py --engine auto
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (-Not (Test-Path "book\_static\teachbook_es.pdf")) { Write-Error "No Spanish PDF generated"; exit 1 }
-          if (-Not (Test-Path "book\_static\teachbook_en.pdf")) { Write-Error "No English PDF generated"; exit 1 }
+          if (-Not (Test-Path "book\_static\ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf")) { Write-Error "No Spanish PDF generated"; exit 1 }
+          if (-Not (Test-Path "book\_static\CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf")) { Write-Error "No English PDF generated"; exit 1 }
           Write-Output "✅ PDF export OK on Windows"
 
       - name: Test pdf_to_markdown

@@ -470,7 +470,7 @@ El proyecto incluye un GitHub Action (`.github/workflows/deploy.yml`) que:
 6. Compila el libro HTML para todos los idiomas con `scripts/build_book.py`.
 7. Despliega a GitHub Pages.
 
-**Regla crítica de publicación:** no se debe publicar una versión nueva subiendo solo HTML. La ruta soportada es `commit + push` a `main`, porque el workflow regenera primero `book/_static/teachbook_<lang>.pdf` y después construye la web que enlaza esos PDFs recientes. Si se cambia contenido, diagramas, imágenes o notebooks, el deploy debe producir PDFs nuevos en la misma ejecución.
+**Regla crítica de publicación:** no se debe publicar una versión nueva subiendo solo HTML. La ruta soportada es `commit + push` a `main`, porque el workflow regenera primero los PDFs finales de `book/_static/` y después construye la web que enlaza esos PDFs recientes. Si se cambia contenido, diagramas, imágenes o notebooks, el deploy debe producir PDFs nuevos en la misma ejecución.
 
 Para que GitHub Pages funcione, el usuario debe:
 1. Tener el repo en GitHub.

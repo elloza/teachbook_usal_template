@@ -29,7 +29,7 @@ Tras el push, **GitHub Actions** se ejecuta automáticamente:
 - Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
 - Despliega todo a GitHub Pages.
 
-La publicación correcta NO consiste en subir solo HTML. El workflow de Pages debe regenerar primero los PDFs (`book/_static/teachbook_es.pdf`, `book/_static/teachbook_en.pdf`, etc.) y después compilar la web que enlaza esos PDFs recientes.
+La publicación correcta NO consiste en subir solo HTML. El workflow de Pages debe regenerar primero los PDFs finales de `book/_static/` y después compilar la web que enlaza esos PDFs recientes.
 
 ## Instrucciones para el agente
 

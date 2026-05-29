@@ -16,8 +16,8 @@ In this book you will find:
 
 You can also download the printable version of the book:
 
-- [Download PDF in English](../_static/teachbook_en.pdf)
-- [Descargar PDF en español](../_static/teachbook_es.pdf)
+- [Download PDF in English](../_static/CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf)
+- [Descargar PDF en español](../_static/ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf)
 
 ```{note}
 This project is designed to be used with **VS Code** and **AI** assistants.

@@ -289,3 +289,96 @@ html.opendyslexic-mode code {
 .teachbook-a11y-btn.active {
     color: var(--pst-color-link) !important;
 }
+
+/* Author profiles on About pages */
+.author-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
+    margin: 1.2rem 0 1.5rem;
+}
+
+.author-profile-card {
+    display: grid;
+    grid-template-columns: 124px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    border: 1px solid var(--pst-color-border);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--pst-color-background);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.author-profile-card img {
+    width: 124px;
+    height: 124px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 2px var(--usal-blue), 0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+.author-profile-card h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+}
+
+.author-profile-role {
+    margin: 0 0 0.65rem;
+    color: var(--usal-blue);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.author-profile-card p {
+    margin: 0 0 0.65rem;
+    line-height: 1.5;
+}
+
+.author-profile-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.author-profile-links a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.55rem;
+    border-radius: 6px;
+    background: var(--pst-color-background-soft);
+    color: var(--pst-color-link);
+    font-weight: 600;
+    text-decoration: none !important;
+    font-size: 0.82rem;
+}
+
+.author-profile-links a:hover {
+    background: rgba(0, 49, 83, 0.1);
+}
+
+.pdf-author-fallback {
+    display: none !important;
+}
+
+@media (max-width: 900px) {
+    .author-profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .author-profile-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .author-profile-card img {
+        margin: 0 auto;
+    }
+
+    .author-profile-links {
+        justify-content: center;
+    }
+}

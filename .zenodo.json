@@ -1,0 +1,44 @@
+{
+  "title": "Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial",
+  "upload_type": "publication",
+  "publication_type": "book",
+  "creators": [
+    {
+      "name": "Lozano Murciego, Álvaro",
+      "affiliation": "Universidad de Salamanca",
+      "orcid": "0000-0002-0493-4471"
+    },
+    {
+      "name": "Sales Mendes, André Filipe",
+      "affiliation": "Universidad de Salamanca",
+      "orcid": "0000-0003-0976-2784"
+    }
+  ],
+  "description": "<p>Material del curso <em>Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial</em>, orientado a la creación de libros docentes interactivos para las Facultades de Ciencias y de Ciencias Químicas de la Universidad de Salamanca.</p><p>El proyecto combina una plantilla reproducible basada en Jupyter Book y TeachBooks con guías docentes para trabajar con asistentes de inteligencia artificial.</p>",
+  "access_right": "open",
+  "license": "cc-by-4.0",
+  "keywords": [
+    "TeachBook",
+    "Jupyter Book",
+    "MyST Markdown",
+    "Universidad de Salamanca",
+    "Ciencias",
+    "Ciencias Químicas",
+    "Docencia",
+    "Libros electrónicos",
+    "Inteligencia Artificial"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/elloza/teachbook_usal_template",
+      "relation": "isSupplementedBy",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://elloza.com/teachbook_usal_template/",
+      "relation": "isDocumentedBy",
+      "resource_type": "publication-book"
+    }
+  ],
+  "notes": "Este material se ha construido con TeachBooks, Jupyter Book y MyST Markdown. Estas herramientas y comunidades se reconocen en los créditos y agradecimientos del libro; no forman parte de la autoría del depósito."
+}

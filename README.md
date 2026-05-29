@@ -1,6 +1,26 @@
 # Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial 🎓
 
+[![DOI](https://zenodo.org/badge/1248954678.svg)](https://zenodo.org/badge/latestdoi/1248954678)
+[![Licencia: CC BY 4.0](https://img.shields.io/badge/Licencia-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
 Material y plantilla del curso **Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial**, dirigido a las **Facultades de Ciencias y de Ciencias Químicas de la USAL** y diseñado para que profesores sin conocimientos de informática puedan crear y publicar libros digitales usando **agentes de código con IA**.
+
+---
+
+## Cita y DOI
+
+La cita recomendada está en formato APA 7.ª edición. También hay metadatos reutilizables en [`CITATION.cff`](CITATION.cff), [`CITATION.bib`](CITATION.bib) y [`.zenodo.json`](.zenodo.json).
+
+> Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial*. Universidad de Salamanca. https://elloza.com/teachbook_usal_template/
+
+El badge DOI de Zenodo está preparado para este repositorio. Cuando la integración GitHub-Zenodo esté activada y se publique la primera release, el enlace apuntará automáticamente al DOI más reciente:
+
+- https://zenodo.org/badge/latestdoi/1248954678
+
+Autores:
+
+- Álvaro Lozano Murciego — ORCID: https://orcid.org/0000-0002-0493-4471
+- André Filipe Sales Mendes — ORCID: https://orcid.org/0000-0003-0976-2784
 
 ---
 
@@ -23,7 +43,7 @@ Puedes usar esta plantilla con cualquiera de estos agentes de código:
 Antes de abrir la plantilla con tu agente de IA, necesitas tener instalado **como mínimo**:
 
 ### Imprescindible
-1. **Python 3.10 o superior** → [Descargar](https://www.python.org/downloads/)
+1. **Python 3.12** → [Descargar](https://www.python.org/downloads/)
    - ⚠️ **En Windows**: marca la casilla **"Add Python to PATH"** durante la instalación
    - Para verificar: abre una terminal y escribe `python --version` (o `py --version` en Windows)
 
@@ -65,7 +85,7 @@ El agente:
 
 > **"Compila el libro"** o **"Genera la web"**
 
-Esto crea la versión HTML navegadle en `book/_build/html/`. Puedes abrirla en cualquier navegador.
+Esto crea la versión HTML navegable en `book/_build/html/`. Puedes abrirla en cualquier navegador.
 
 ### 3️⃣ Ver cambios en tiempo real (desarrollo)
 
@@ -77,7 +97,7 @@ Se abrirá tu navegador en `localhost:8000` y los cambios se reflejarán automá
 
 > **"Genera los PDFs del libro"** o **"Exportar a PDF"**
 
-El agente instalará LaTeX (Tectonic) si es necesario y generará `teachbook_es.pdf` y `teachbook_en.pdf`.
+El agente instalará LaTeX (Tectonic) si es necesario y generará `ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf` y `CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf`.
 
 ### 5️⃣ Guardar cambios en GitHub
 
@@ -238,5 +258,5 @@ Este proyecto está licenciado bajo **CC BY 4.0** — eres libre de usar, modifi
 ## 👥 Créditos
 
 - **Álvaro Lozano Murciego** — Universidad de Salamanca
-- **André Sales Mendes** — Universidad de Salamanca
+- **André Filipe Sales Mendes** — Universidad de Salamanca
 - Basado en [TeachBooks](https://teachbooks.io/) y [Jupyter Book](https://jupyterbook.org/)
