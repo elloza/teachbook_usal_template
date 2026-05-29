@@ -1,12 +1,12 @@
 # How to Cite
 
 ```{only} html
-[![DOI](https://zenodo.org/badge/1248954678.svg)](https://zenodo.org/badge/latestdoi/1248954678)
+[![DOI](https://zenodo.org/badge/1248954678.svg)](https://doi.org/10.5281/zenodo.20449102)
 ```
 
 ```{raw} latex
 \begin{center}
-\textbf{Zenodo DOI:} see the Zenodo record associated with this repository.
+\textbf{Zenodo DOI:} \url{https://doi.org/10.5281/zenodo.20449102}
 \end{center}
 ```
 
@@ -14,7 +14,7 @@ If you use this material, please cite it as follows.
 
 ## Recommended Citation (APA 7th edition)
 
-> Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial* [Creating electronic books with code and artificial intelligence assistants]. Universidad de Salamanca. https://elloza.com/teachbook_usal_template/
+> Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial* [Creating electronic books with code and artificial intelligence assistants]. Universidad de Salamanca. https://doi.org/10.5281/zenodo.20449102
 
 ## BibTeX
 
@@ -26,8 +26,9 @@ You can also use the downloadable BibTeX file: {download}`citation.bib <../_stat
   title = {Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial},
   year = {2026},
   publisher = {Universidad de Salamanca},
-  url = {https://elloza.com/teachbook_usal_template/},
-  note = {Source code: https://github.com/elloza/teachbook_usal_template. Zenodo DOI: https://zenodo.org/badge/latestdoi/1248954678}
+  doi = {10.5281/zenodo.20449102},
+  url = {https://doi.org/10.5281/zenodo.20449102},
+  note = {Source code: https://github.com/elloza/teachbook_usal_template}
 }
 ```
 
@@ -38,4 +39,4 @@ You can also use the downloadable BibTeX file: {download}`citation.bib <../_stat
 
 ## DOI
 
-The DOI will be assigned by Zenodo when the first archived release is published. The badge on this page always points to the latest DOI associated with this repository.
+Final Zenodo DOI for this version: https://doi.org/10.5281/zenodo.20449102.

@@ -58,7 +58,7 @@ latex:
   edition: "1st Edition"                # Optional
   cover_logo: "_static/usal_logo.png"  # PDF cover logo; the web logo is configured above in `logo`
   # isbn: "978-84-XXXXX-XX-X"          # Optional
-  # doi: "10.5281/zenodo.XXXXXXX"      # Optional: uncomment when Zenodo assigns the DOI
+  doi: "10.5281/zenodo.20449102"
   preamble: |
     \usepackage[english]{babel}
     \selectlanguage{english}

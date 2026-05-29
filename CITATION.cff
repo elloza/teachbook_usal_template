@@ -27,6 +27,7 @@ keywords:
 license: CC-BY-4.0
 repository-code: 'https://github.com/elloza/teachbook_usal_template'
 url: 'https://elloza.com/teachbook_usal_template/'
+doi: '10.5281/zenodo.20449102'
 contact:
   - family-names: 'Lozano Murciego'
     given-names: 'Álvaro'
@@ -47,11 +48,12 @@ preferred-citation:
   year: 2026
   publisher:
     name: 'Universidad de Salamanca'
+  doi: '10.5281/zenodo.20449102'
   url: 'https://elloza.com/teachbook_usal_template/'
   identifiers:
     - type: url
       value: 'https://github.com/elloza/teachbook_usal_template'
       description: 'Repositorio fuente en GitHub'
-    - type: url
-      value: 'https://zenodo.org/badge/latestdoi/1248954678'
-      description: 'DOI más reciente asignado por Zenodo'
+    - type: doi
+      value: '10.5281/zenodo.20449102'
+      description: 'DOI de Zenodo'

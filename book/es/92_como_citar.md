@@ -1,12 +1,12 @@
 # Cómo citar
 
 ```{only} html
-[![DOI](https://zenodo.org/badge/1248954678.svg)](https://zenodo.org/badge/latestdoi/1248954678)
+[![DOI](https://zenodo.org/badge/1248954678.svg)](https://doi.org/10.5281/zenodo.20449102)
 ```
 
 ```{raw} latex
 \begin{center}
-\textbf{DOI Zenodo:} consulte el registro de Zenodo asociado a este repositorio.
+\textbf{DOI Zenodo:} \url{https://doi.org/10.5281/zenodo.20449102}
 \end{center}
 ```
 
@@ -14,7 +14,7 @@ Si utilizas este material, por favor cítalo de la siguiente manera.
 
 ## Cita recomendada (APA 7.ª edición)
 
-> Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial*. Universidad de Salamanca. https://elloza.com/teachbook_usal_template/
+> Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial*. Universidad de Salamanca. https://doi.org/10.5281/zenodo.20449102
 
 ## BibTeX
 
@@ -26,8 +26,9 @@ También puedes usar el archivo BibTeX descargable: {download}`citation.bib <../
   title = {Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial},
   year = {2026},
   publisher = {Universidad de Salamanca},
-  url = {https://elloza.com/teachbook_usal_template/},
-  note = {Código fuente: https://github.com/elloza/teachbook_usal_template. DOI de Zenodo: https://zenodo.org/badge/latestdoi/1248954678}
+  doi = {10.5281/zenodo.20449102},
+  url = {https://doi.org/10.5281/zenodo.20449102},
+  note = {Código fuente: https://github.com/elloza/teachbook_usal_template}
 }
 ```
 
@@ -38,4 +39,4 @@ También puedes usar el archivo BibTeX descargable: {download}`citation.bib <../
 
 ## DOI
 
-El DOI se asignará en Zenodo al publicar la primera release archivada. El badge de esta página apunta siempre al DOI más reciente que Zenodo tenga asociado al repositorio.
+DOI definitivo de Zenodo para esta versión: https://doi.org/10.5281/zenodo.20449102.

@@ -1,6 +1,6 @@
 # Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial 🎓
 
-[![DOI](https://zenodo.org/badge/1248954678.svg)](https://zenodo.org/badge/latestdoi/1248954678)
+[![DOI](https://zenodo.org/badge/1248954678.svg)](https://doi.org/10.5281/zenodo.20449102)
 [![Licencia: CC BY 4.0](https://img.shields.io/badge/Licencia-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 Material y plantilla del curso **Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial**, dirigido a las **Facultades de Ciencias y de Ciencias Químicas de la USAL** y diseñado para que profesores sin conocimientos de informática puedan crear y publicar libros digitales usando **agentes de código con IA**.
@@ -11,11 +11,11 @@ Material y plantilla del curso **Elaboración de libros electrónicos mediante c
 
 La cita recomendada está en formato APA 7.ª edición. También hay metadatos reutilizables en [`CITATION.cff`](CITATION.cff), [`CITATION.bib`](CITATION.bib) y [`.zenodo.json`](.zenodo.json).
 
-> Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial*. Universidad de Salamanca. https://elloza.com/teachbook_usal_template/
+> Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial*. Universidad de Salamanca. https://doi.org/10.5281/zenodo.20449102
 
-El badge DOI de Zenodo está preparado para este repositorio. Cuando la integración GitHub-Zenodo esté activada y se publique la primera release, el enlace apuntará automáticamente al DOI más reciente:
+DOI definitivo de Zenodo para esta versión:
 
-- https://zenodo.org/badge/latestdoi/1248954678
+- https://doi.org/10.5281/zenodo.20449102
 
 Autores:
 
