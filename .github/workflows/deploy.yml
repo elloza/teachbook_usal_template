@@ -123,7 +123,7 @@ jobs:
 
       - name: Upload artifact
         id: upload-pages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: github-pages
           path: ${{ runner.temp }}/artifact.tar

@@ -2,11 +2,15 @@
 theme: default
 layout: cover
 title: '5. La Filosofía del "X como código"'
+titleTemplate: "%s"
 info: |
   Estas diapositivas se generan desde la plantilla Slidev del TeachBook.
 class: teachbook-slidev
 transition: slide-left
 mdc: true
+drawings:
+  enabled: true
+  persist: true
 ---
 
 # 5. La Filosofía del "X como código"

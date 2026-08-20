@@ -2,11 +2,15 @@
 theme: default
 layout: cover
 title: "Equations and Mathematics"
+titleTemplate: "%s"
 info: |
   These slides are generated from the TeachBook slide template.
 class: teachbook-slidev
 transition: slide-left
 mdc: true
+drawings:
+  enabled: true
+  persist: true
 ---
 
 # Equations and Mathematics

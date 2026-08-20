@@ -55,10 +55,12 @@ slides/en/02_degrees/physics_degree/intro/slides.md
 ---
 theme: default
 title: Título del capítulo
+titleTemplate: "%s"
 info: Diapositivas docentes asociadas al TeachBook.
 class: text-center
 drawings:
-  persist: false
+  enabled: true
+  persist: true
 transition: slide-left
 ---
 
@@ -82,6 +84,11 @@ Contenido pendiente de adaptar.
 ```
 
 En inglés, traducir el contenido visible. Mantener rutas y nombres de archivo según el idioma correspondiente del TOC.
+
+## Título y anotaciones
+
+- Mantener `titleTemplate: "%s"` para que la pestaña del navegador use solo el título de la deck y no añada "Slidev".
+- Mantener `drawings.enabled: true` y `drawings.persist: true` para permitir anotaciones durante la presentación y conservarlas como dibujos de Slidev.
 
 ## Validación obligatoria
 

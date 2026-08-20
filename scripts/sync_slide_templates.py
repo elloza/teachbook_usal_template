@@ -164,11 +164,15 @@ def template_for_deck(deck: DeckSpec) -> str:
 theme: default
 layout: cover
 title: {yaml_title}
+titleTemplate: "%s"
 info: |
   {notes}
 class: teachbook-slidev
 transition: slide-left
 mdc: true
+drawings:
+  enabled: true
+  persist: true
 ---
 
 # {deck.title}

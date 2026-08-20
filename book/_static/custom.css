@@ -79,11 +79,11 @@ html {
     text-decoration: none !important;
 }
 
-/* Hide only the desktop search button injected in the top theme header.
-   Keep the primary sidebar search and the mobile header search available. */
+/* Hide the duplicated top theme header on desktop.
+   Desktop already has navigation/search in the sidebar and article header;
+   mobile keeps #pst-header for the menu toggles and search button. */
 @media (min-width: 992px) {
-    #pst-header .navbar-header-items .navbar-persistent--container .search-button__button,
-    #pst-header .navbar-header-items .navbar-persistent--container .bd-search {
+    #pst-header {
         display: none !important;
     }
 }

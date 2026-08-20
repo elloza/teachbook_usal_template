@@ -2,11 +2,15 @@
 theme: default
 layout: cover
 title: "4. Mi primer libro desde cero"
+titleTemplate: "%s"
 info: |
   Estas diapositivas se generan desde la plantilla Slidev del TeachBook.
 class: teachbook-slidev
 transition: slide-left
 mdc: true
+drawings:
+  enabled: true
+  persist: true
 ---
 
 # 4. Mi primer libro desde cero

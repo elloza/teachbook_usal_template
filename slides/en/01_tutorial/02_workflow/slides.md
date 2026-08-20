@@ -2,11 +2,15 @@
 theme: default
 layout: cover
 title: "2. Workflow"
+titleTemplate: "%s"
 info: |
   These slides are generated from the TeachBook slide template.
 class: teachbook-slidev
 transition: slide-left
 mdc: true
+drawings:
+  enabled: true
+  persist: true
 ---
 
 # 2. Workflow
