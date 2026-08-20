@@ -1369,6 +1369,13 @@ En Windows usa siempre el Python del proyecto:
         print("ℹ️  Modo completo: preparando también el fallback latexmk + XeLaTeX usado por CI/CD.")
         return install_full_latex_ci()
 
+    def finish_with_full_fallback(reason):
+        if not full_mode:
+            return False
+        print(f"⚠️  {reason}")
+        print("ℹ️  Modo --full: continuaré con TinyTeX portable como motor PDF de respaldo.")
+        return install_full_latex_ci()
+
     if is_tectonic_installed():
         if verify_tectonic():
             if verify_svg_converter():
@@ -1385,6 +1392,8 @@ En Windows usa siempre el Python del proyecto:
                 sys.exit(1)
                 return
             sys.exit(1)
+        if finish_with_full_fallback("Tectonic encontrado pero no operativo en esta ejecución."):
+            return
         print("⚠️  Tectonic encontrado pero no funciona. Se reinstalará.")
 
     if "--check" in sys.argv:
@@ -1417,8 +1426,12 @@ En Windows usa siempre el Python del proyecto:
                 return
             sys.exit(1)
             return
+        if finish_with_full_fallback("Tectonic se instaló, pero no pudo compilar el documento mínimo."):
+            return
         sys.exit(1)
     else:
+        if finish_with_full_fallback("No se pudo instalar Tectonic automáticamente."):
+            return
         print()
         print("❌ No se pudo instalar Tectonic automáticamente.")
         print("   Puedes instalarlo manualmente:")
