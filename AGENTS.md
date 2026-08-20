@@ -42,6 +42,10 @@ teachbook_usal_template/
 │   │   ├── 91_licencias.md
 │   │   └── 92_como_citar.md
 │   └── en/                        # Contenido en inglés (misma estructura)
+├── slides/                        # Diapositivas Slidev asociadas al libro
+│   ├── package.json               # Proyecto Node/Slidev
+│   ├── es/                        # Decks en español
+│   └── en/                        # Decks en inglés
 ├── scripts/                       # Scripts de automatización
 │   ├── setup_env.py               # Configuración del entorno
 │   ├── build_book.py              # Compilación HTML
@@ -89,6 +93,20 @@ Para añadir un nuevo idioma (ej: portugués `pt`):
 4. Crear `latex_templates/pt/language_support.tex` si se quiere PDF.
 5. Añadir el código de idioma al mapa en `scripts/build_book.py` (`LANG_DISPLAY_NAMES`).
 
+## Diapositivas Slidev
+
+El proyecto puede incluir una carpeta `slides/` con diapositivas web generadas con Slidev. Las diapositivas son material docente asociado al libro y se publican dentro del mismo sitio HTML, bajo `book/_build/html/slides/`.
+
+Reglas obligatorias:
+
+- Las diapositivas siguen soporte multi-idioma igual que `book/`: si existe una deck en español, debe existir su equivalente en inglés y en cualquier otro idioma configurado.
+- La unidad de trabajo es **una deck por capítulo padre del TOC**. Las entradas `sections:` no tienen deck propia en v1; heredan la deck del capítulo al que pertenecen.
+- La fuente de cada deck vive en `slides/<lang>/<ruta-del-capitulo>/slides.md`.
+- El build genera `_static/slides_manifest.json`, que conecta cada página del libro con su deck contextual y con el hub de diapositivas del idioma.
+- El botón superior `Slides` de la web lee ese manifest. Si la página actual tiene deck asociada, abre esa deck; si no, abre el hub `slides/<lang>/index.html`.
+- No usar frameworks JS adicionales fuera de Slidev. Slidev queda aislado dentro de `slides/` y el libro sigue compilándose con Jupyter Book.
+- Antes de cerrar cambios de diapositivas, ejecutar `python scripts/check_slides_integrity.py` y `python scripts/check_encoding.py`.
+
 ## Protocolo OBLIGATORIO para Añadir Contenido
 
 Cuando añadas un capítulo o sección, DEBES seguir estos pasos EN ORDEN:
@@ -96,6 +114,7 @@ Cuando añadas un capítulo o sección, DEBES seguir estos pasos EN ORDEN:
 ### 1. Crear el archivo de contenido en TODOS los idiomas
 - Si creas `book/es/02_grados/grado_biologia/intro.md`, TAMBIÉN creas `book/en/02_degrees/grado_biology/intro.md`.
 - Si un idioma no está traducido aún, crea el archivo con un placeholder: `*(Traducción pendiente)*`.
+- Si creas un capítulo padre nuevo, crea también `slides/<lang>/<ruta-del-capitulo>/slides.md` en TODOS los idiomas configurados. Si la deck aún no está escrita, usa una plantilla mínima con aviso de contenido pendiente.
 
 ### 2. Actualizar TODOS los `_toc_<lang>.yml`
 - Añadir la entrada en `_toc_es.yml` Y en `_toc_en.yml` (y cualquier otro idioma).
@@ -104,6 +123,7 @@ Cuando añadas un capítulo o sección, DEBES seguir estos pasos EN ORDEN:
 ### 3. Verificar que no hay contenido huérfano
 - Ningún archivo `.md` en `book/es/` o `book/en/` debe existir sin estar referenciado en su `_toc.yml`.
 - Ninguna entrada en `_toc.yml` debe apuntar a un archivo que no existe.
+- Ninguna deck `slides/<lang>/**/slides.md` debe quedar huérfana respecto a los capítulos padre del TOC.
 
 ### 4. Verificar codificación UTF-8
 - Ejecutar `python scripts/check_encoding.py` con el Python de `.venv`.
@@ -410,6 +430,9 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Renderizar diagramas | `python scripts/render_diagrams.py` | Convierte fuentes en `diagram_sources/` a imágenes estáticas en `book/_static/generated/diagrams/` |
 | Sustituir diagramas renderizados | `python scripts/replace_kroki_with_figures.py` | Cambia bloques `{kroki}` por `{figure}` solo si existe la imagen generada |
 | Verificar idiomas/menús | `python scripts/check_multilang_integrity.py` | Comprueba que todos los idiomas tienen la misma estructura de menú y archivos completos |
+| Crear plantillas de diapositivas | `python scripts/sync_slide_templates.py` | Crea placeholders Slidev para los capítulos padre que no tengan deck |
+| Verificar diapositivas | `python scripts/check_slides_integrity.py` | Comprueba decks multi-idioma, posiciones y ausencia de decks huérfanas |
+| Compilar diapositivas | `python scripts/build_slides.py` | Genera las decks Slidev, hubs por idioma y `_static/slides_manifest.json` |
 | Verificar/generar bibliografía usada | `python scripts/collect_used_bibliography.py --lang es --output .build_logs/references_used_es.bib` | Valida claves `{cite}` y genera un `.bib` de inspección con solo las citas usadas |
 | Verificar/optimizar assets estáticos | `python scripts/optimize_static_assets.py --check` | Audita imágenes web, PNG/JPG optimizables y fallbacks PNG para GIFs |
 | Renderizar CircuitikZ | `python scripts/render_circuitikz.py <entrada.tex> [salida.png]` | Compila CircuitikZ y genera una imagen PNG |
@@ -469,10 +492,12 @@ El proyecto incluye un GitHub Action (`.github/workflows/deploy.yml`) que:
 3. Instala las dependencias Python de PDF con `scripts/setup_env.py --yes --extras pdf`.
 4. Instala la cadena PDF completa con `scripts/setup_latex.py --yes --full`.
 5. Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
-6. Compila el libro HTML para todos los idiomas con `scripts/build_book.py`.
-7. Despliega a GitHub Pages.
+6. Compila el libro HTML y, si existe `slides/package.json`, las diapositivas Slidev para todos los idiomas con `scripts/build_book.py`.
+7. Despliega a GitHub Pages incluyendo `/slides/`.
 
 **Regla crítica de publicación:** no se debe publicar una versión nueva subiendo solo HTML. La ruta soportada es `commit + push` a `main`, porque el workflow regenera primero los PDFs finales de `book/_static/` y después construye la web que enlaza esos PDFs recientes. Si se cambia contenido, diagramas, imágenes o notebooks, el deploy debe producir PDFs nuevos en la misma ejecución.
+
+Si se cambian diapositivas, el deploy también debe producir de nuevo el sitio Slidev y el manifest `_static/slides_manifest.json` dentro del mismo build publicado.
 
 Para que GitHub Pages funcione, el usuario debe:
 1. Tener el repo en GitHub.
@@ -534,6 +559,7 @@ Las skills están en `.github/skills/` (fuente de verdad) y se sincronizan a `.c
 | `teachbook-export-latex-project` | Exportar el libro como proyecto LaTeX editable para retoques finales |
 | `teachbook-git-publish` | Guardar y publicar cambios |
 | `teachbook-add-content` | Añadir nuevos capítulos o secciones |
+| `teachbook-generate-slidev-slides` | Crear o actualizar diapositivas Slidev multi-idioma asociadas a capítulos padre |
 | `teachbook-multimedia` | Insertar imágenes, videos, ecuaciones |
 | `teachbook-optimize-static-assets` | Revisar y optimizar assets estáticos para web sin romper PDF |
 | `teachbook-pdf-to-markdown` | Convertir PDFs existentes a Markdown |

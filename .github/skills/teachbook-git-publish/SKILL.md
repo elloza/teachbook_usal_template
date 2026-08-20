@@ -26,10 +26,13 @@ description: >
 
 Tras el push, **GitHub Actions** se ejecuta automáticamente:
 - Compila el libro HTML para todos los idiomas.
+- Compila las diapositivas Slidev si existe `slides/package.json`.
 - Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
-- Despliega todo a GitHub Pages.
+- Despliega todo a GitHub Pages, incluyendo `/slides/`.
 
 La publicación correcta NO consiste en subir solo HTML. El workflow de Pages debe regenerar primero los PDFs finales de `book/_static/` y después compilar la web que enlaza esos PDFs recientes.
+
+Si se han cambiado diapositivas, la publicación correcta también debe regenerar `book/_build/html/slides/` y `_static/slides_manifest.json` dentro del mismo workflow. No publicar una carpeta Slidev manualmente por separado.
 
 ## Instrucciones para el agente
 
@@ -49,6 +52,13 @@ El agente DEBE usar el Python del entorno virtual (`.venv`):
 - texto no ASCII dentro de celdas `code` de notebooks.
 
 No hacer `git push` manual si este check falla. Primero corregir el archivo indicado y repetir la comprobación en local.
+
+Si se han tocado diapositivas, validar antes:
+
+| Sistema | Comando |
+|---|---|
+| Linux / macOS | `.venv/bin/python scripts/check_slides_integrity.py` |
+| Windows | `.venv\Scripts\python.exe scripts\check_slides_integrity.py` |
 
 ### Si el script dice "No hay cambios para guardar"
 
@@ -77,6 +87,8 @@ Después de ejecutar `git_helper.py`:
 | "No hay cambios para guardar" | No es un error; no hay archivos nuevos o modificados |
 | El workflow de Actions falla | Revisar los logs en GitHub → Actions → click en el workflow fallido |
 | La web no se actualiza | Verificar que GitHub Pages usa "GitHub Actions" como source (no "Deploy from branch") |
+| El botón Slides no aparece | Verificar que el workflow generó `_static/slides_manifest.json` |
+| Las slides dan 404 en GitHub Pages | Revisar que `build_slides.py` usó la base del repositorio y que `/slides/` está dentro del artefacto publicado |
 
 ## Nota importante
 

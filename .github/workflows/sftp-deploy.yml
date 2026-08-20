@@ -33,6 +33,13 @@ jobs:
         with:
           python-version: 3.12
 
+      - name: Set up Node.js for Slidev
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.18.0
+          cache: npm
+          cache-dependency-path: slides/package-lock.json
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -104,6 +111,8 @@ jobs:
           .venv/bin/python scripts/export_pdf.py --engine auto
 
       - name: Build HTML book
+        env:
+          TEACHBOOK_SITE_BASE: /
         run: |
           .venv/bin/python scripts/build_book.py
           touch book/_build/html/.nojekyll

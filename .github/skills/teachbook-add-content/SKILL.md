@@ -21,6 +21,8 @@ description: >
 
 > Todo asset nuevo en `book/_static/` debe mantener formatos seguros para web y PDF. PNG/JPG/SVG son la base estable; WebP solo como mejora HTML con fallback. Tras añadir imágenes o GIFs, ejecutar `python scripts/optimize_static_assets.py --check` y corregir fallbacks GIF si faltan.
 
+> Si se añade un **capítulo padre** nuevo al TOC, también se debe crear la deck Slidev equivalente en `slides/<lang>/<ruta-del-capitulo>/slides.md` para TODOS los idiomas configurados. Las `sections:` no tienen deck propia en v1; heredan la deck del capítulo padre.
+
 > Toda sección nueva con citas bibliográficas debe decidir el alcance antes de escribir: **global por defecto** con `{cite:t}` / `{cite:p}` y la página final `Bibliografía` / `Bibliography` con `:cited:`, o **local solo si el usuario lo pide** con `{bibliography}` filtrada dentro de `{only} html`. En PDF no se generan bibliografías locales por página; `export_pdf.py` crea un `.bib` temporal con las citas usadas.
 
 > Si una cita está asociada a contenido `{raw} html`, no la dejes solo dentro del HTML crudo. Para que aparezca en la bibliografía final del PDF, pon la cita en Markdown normal o añade `\cite{clave}` dentro del fallback `{raw} latex`.
@@ -237,6 +239,7 @@ Determinar ANTES de escribir nada:
 - ¿Es un **capítulo nuevo** (entrada directa en `chapters:`) o una **sección** dentro de un capítulo existente (entrada en `sections:`)?
 - ¿En qué **parte** del TOC va? (Tutorial, Ejemplos por Grado, Información...)
 - ¿Cuál es el **nombre del archivo** y la **ruta** en cada idioma?
+- Si es capítulo padre, ¿cuál será la ruta de la deck en `slides/<lang>/.../slides.md` para cada idioma?
 - ¿El usuario quiere **añadir**, **reordenar**, **ocultar temporalmente** o **eliminar definitivamente**?
 - ¿Habrá citas bibliográficas? Si las hay, usar bibliografía global por defecto o bibliografía local con `{bibliography}` filtrada dentro de `{only} html` solo si el usuario lo pide.
 
@@ -262,6 +265,15 @@ book/en/02_degrees/biology_degree/biology_example.md
 ```markdown
 *(Traducción pendiente)*
 ```
+
+Si se está creando un capítulo padre, crear también las decks Slidev:
+
+```
+slides/es/02_grados/grado_biologia/intro/slides.md
+slides/en/02_degrees/biology_degree/intro/slides.md
+```
+
+Si las diapositivas aún no están listas, usar una plantilla mínima con título, objetivos y aviso de contenido pendiente.
 
 ### Paso 3: Actualizar TODOS los `_toc_<lang>.yml`
 
@@ -347,7 +359,8 @@ El agente DEBE ejecutar estas verificaciones ANTES de commit:
 4. Confirmar que cada `_toc_<lang>.yml` tiene la **misma forma**: mismas partes, mismos capítulos, mismas secciones y mismo orden.
 5. Confirmar que cada entrada `file:` apunta a un archivo `.md` o `.ipynb` existente.
 6. Confirmar que no hay archivos huérfanos en `book/<lang>/` fuera del TOC.
-7. **Reportar** cualquier diferencia de menú, archivo huérfano, entrada rota, problema de codificación o asset estático sin fallback. No ocultes el problema.
+7. Si se han creado o tocado decks, ejecutar `python scripts/check_slides_integrity.py` y confirmar que no hay decks huérfanas ni idiomas incompletos.
+8. **Reportar** cualquier diferencia de menú, archivo huérfano, entrada rota, problema de codificación, deck Slidev faltante o asset estático sin fallback. No ocultes el problema.
 
 La comprobación automática es obligatoria aunque el cambio parezca pequeño. En un libro multi-idioma, “solo he tocado una página” puede romper el menú lateral de otro idioma.
 
@@ -383,6 +396,7 @@ Si se necesita un idioma completamente nuevo (ej: portugués `pt`):
 | Caso | Acción recomendada |
 |---|---|
 | Añadir capítulo nuevo | Crear archivos en todos los idiomas + actualizar TOCs |
+| Añadir capítulo padre nuevo | Crear contenido del libro + deck Slidev en todos los idiomas |
 | Reordenar capítulos | Cambiar el orden en todos los TOCs |
 | Ocultar temporalmente contenido de ejemplo | **Comentar entradas en todos los TOCs** y conservar archivos |
 | Borrar contenido definitivamente | Solo si el usuario lo pide explícitamente |

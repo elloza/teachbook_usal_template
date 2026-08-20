@@ -40,7 +40,7 @@ que no coinciden con la web final.
 2. Ejecuta `scripts/build_book.py` antes de abrir el navegador.
 3. Sirve exactamente `book/_build/html`.
 4. Añade cabeceras HTTP `no-cache` para evitar HTML viejo del navegador.
-5. Vigila cambios en `book/` mediante sondeo portable y recompila con el mismo
+5. Vigila cambios en `book/` y `slides/` mediante sondeo portable y recompila con el mismo
    `build_book.py`.
 6. Abre el navegador automáticamente en Windows, macOS, Linux y WSL.
 
@@ -132,8 +132,18 @@ No hacer nada de esto:
 - La primera vez tarda porque compila el libro completo en todos los idiomas.
 - Después, cada cambio en `.md`, `.ipynb`, `.yml`, imágenes, CSS, JS o BibTeX
   provoca una recompilación completa usando `build_book.py`.
+- Si existe `slides/package.json`, los cambios en `slides/**/*.md`, `slides/components/`, `slides/layouts/`, `slides/styles/` o `slides/public/` también deben recompilar el sitio y actualizar `_static/slides_manifest.json`.
 - La URL habitual es `http://localhost:8000`.
 - Si el puerto está ocupado, usa automáticamente el siguiente libre.
+
+## Verificar diapositivas en preview
+
+Cuando se hayan tocado diapositivas:
+
+1. Esperar a que el log muestre `✅ Build correcto`.
+2. Abrir una página de un capítulo con deck.
+3. Comprobar que el botón superior `Slides` abre la presentación contextual.
+4. Abrir una página sin deck contextual y comprobar que el botón cae al hub `slides/<idioma>/`.
 
 ## Si el usuario ve contenido viejo
 

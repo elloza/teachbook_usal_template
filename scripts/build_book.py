@@ -169,6 +169,7 @@ LANG_DISPLAY_NAMES = {
 BOOK_DIR = "book"
 BUILD_ROOT = os.path.join(BOOK_DIR, "_build")
 FINAL_HTML_DIR = os.path.join(BUILD_ROOT, "html")
+SLIDES_PACKAGE_JSON = os.path.join("slides", "package.json")
 
 
 def get_project_default_language():
@@ -307,6 +308,68 @@ def fix_html_asset_paths(html_file):
         print(f"   🔧 Fixed asset paths in {os.path.basename(html_file)}")
     else:
         print(f"   ℹ️ No path fixes needed in {os.path.basename(html_file)}")
+
+
+def fix_language_page_searchindex_refs(language_dir):
+    """Point language pages to per-language search and index files.
+
+    Standalone Sphinx builds reference the build-root searchindex.js from pages
+    under /<lang>/. After moving /<lang>/ to the final language root, the
+    valid searchindex.js, search.html, and genindex.html live in that same
+    language root.
+    """
+    import re
+
+    language_root_files = {
+        "searchindex.js": os.path.join(language_dir, "searchindex.js"),
+        "search.html": os.path.join(language_dir, "search.html"),
+        "genindex.html": os.path.join(language_dir, "genindex.html"),
+    }
+    if not os.path.isfile(language_root_files["searchindex.js"]):
+        print("   ℹ️ searchindex.js not found; skipping search reference fixes")
+        return
+
+    fixed_count = 0
+    for root, _dirs, files in os.walk(language_dir):
+        for filename in files:
+            if not filename.endswith(".html"):
+                continue
+
+            html_file = os.path.join(root, filename)
+            with open(html_file, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            original = content
+            html_dir = os.path.dirname(html_file)
+
+            for target_name, target_path in language_root_files.items():
+                if not os.path.isfile(target_path):
+                    continue
+
+                relative_target = os.path.relpath(target_path, html_dir).replace(
+                    "\\", "/"
+                )
+                escaped_name = re.escape(target_name)
+
+                if target_name == "searchindex.js":
+                    content = re.sub(
+                        rf'<script src="(?:\.\./)+{escaped_name}"></script>',
+                        f'<script src="{relative_target}"></script>',
+                        content,
+                    )
+                else:
+                    content = re.sub(
+                        rf'(href|action)="(?:\.\./)+{escaped_name}"',
+                        rf'\1="{relative_target}"',
+                        content,
+                    )
+
+            if content != original:
+                with open(html_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                fixed_count += 1
+
+    print(f"   🔧 Fixed language-local search references in {fixed_count} pages")
 
 
 def fix_searchindex_paths(searchindex_file, lang):
@@ -534,6 +597,8 @@ def build_language(lang):
                 if search_file == "searchindex.js":
                     fix_searchindex_paths(dst, lang)
 
+        fix_language_page_searchindex_refs(final_dest)
+
         # CRITICAL FIX: Merge the generated _static folder (containing theme assets)
         # from the temp build to the final root _static folder.
         temp_static_dir = os.path.join(temp_build_root, "_build", "html", "_static")
@@ -691,6 +756,26 @@ def create_redirect_index(default_lang="es"):
     print(f"🔀 Redirección raíz creada apuntando a: /{default_lang}/")
 
 
+def build_slides_if_configured():
+    """Build Slidev decks after the book HTML exists."""
+    if not os.path.isfile(SLIDES_PACKAGE_JSON):
+        return
+
+    site_base = os.environ.get("TEACHBOOK_SITE_BASE", "/")
+    cmd = [
+        sys.executable,
+        os.path.join("scripts", "build_slides.py"),
+        "--site-base",
+        site_base,
+    ]
+    print("\n🎞️  Construyendo diapositivas Slidev...")
+    try:
+        subprocess.check_call(cmd)
+    except subprocess.CalledProcessError:
+        print("❌ Error construyendo las diapositivas Slidev.")
+        sys.exit(1)
+
+
 def main():
     print("📚 Iniciando proceso de construcción multi-idioma...")
     languages = get_languages()
@@ -761,15 +846,17 @@ def main():
             f.write(search_redirect)
         print(f"🔍 Root search redirect created.")
 
-    print("\n✅ ¡Construcción completa!")
-    print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")
-
     # Ensure .nojekyll exists to prevent GitHub Pages from ignoring _static
     nojekyll_path = os.path.join(FINAL_HTML_DIR, ".nojekyll")
     if not os.path.exists(nojekyll_path):
         with open(nojekyll_path, "w") as f:
             pass
         print("✅ Archivo .nojekyll creado para GitHub Pages.")
+
+    build_slides_if_configured()
+
+    print("\n✅ ¡Construcción completa!")
+    print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")
 
 
 if __name__ == "__main__":

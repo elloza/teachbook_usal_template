@@ -25,6 +25,7 @@ description: >
 4. **Fusiona los assets estáticos** (CSS, JS, logos) de todos los idiomas en un `_static` global.
 5. **Crea un `index.html`** raíz que redirige al idioma principal (español por defecto).
 6. **Genera `.nojekyll`** para compatibilidad con GitHub Pages.
+7. **Compila las diapositivas Slidev** si existe `slides/package.json`, generando hubs, decks y `_static/slides_manifest.json`.
 
 ## Ubicación de salida
 
@@ -33,7 +34,9 @@ book/_build/html/           ← Raíz del sitio web
 ├── index.html              ← Redirección al idioma principal
 ├── es/                     ← Versión en español
 ├── en/                     ← Versión en inglés
+├── slides/                 ← Diapositivas Slidev publicadas
 ├── _static/                ← Assets compartidos (CSS, JS, imágenes)
+│   └── slides_manifest.json ← Mapa página → deck contextual
 └── .nojekyll               ← Para GitHub Pages
 ```
 
@@ -59,6 +62,13 @@ Si se han añadido o cambiado imágenes, GIFs o logos, comprobar también que lo
 | Linux / macOS | `.venv/bin/python scripts/optimize_static_assets.py --check` |
 | Windows | `.venv\Scripts\python.exe scripts\optimize_static_assets.py --check` |
 
+Si existe `slides/package.json` o se han tocado diapositivas, comprobar antes la integridad de Slidev:
+
+| Sistema | Comando |
+|---|---|
+| Linux / macOS | `.venv/bin/python scripts/check_slides_integrity.py` |
+| Windows | `.venv\Scripts\python.exe scripts\check_slides_integrity.py` |
+
 | Sistema | Comando |
 |---|---|
 | Linux / macOS | `.venv/bin/python scripts/build_book.py` |
@@ -81,7 +91,11 @@ Si se han añadido o cambiado imágenes, GIFs o logos, comprobar también que lo
 | `EISDIR` error | El TOC apunta a un directorio en vez de un archivo | Usar `file: ruta/al/archivo` sin la extensión `.md` |
 | YAML parse error | Sintaxis YAML incorrecta en config o TOC | Revisar indentación (2 espacios) y comillas |
 | Build exit code 1 | Contenido MyST con directivas mal cerradas | Revisar que los bloques ```` ```{directive} ```` estén bien cerrados |
+| No aparece el botón Slides | Falta `_static/slides_manifest.json` o no existe deck/hub para el idioma | Ejecutar `scripts/check_slides_integrity.py` y `scripts/build_slides.py` |
+| Slidev falla al compilar | Node/npm no instalado o dependencias de `slides/` sin instalar | Ejecutar `python scripts/setup_env.py --yes` y revisar la versión de Node |
 
 ## Después de la compilación
 
 El resultado está en `book/_build/html/`. Se puede abrir `book/_build/html/index.html` en un navegador para verificar visualmente, o usar la skill `teachbook-live-preview` para una vista previa interactiva.
+
+Si hay diapositivas, verificar además que existen `book/_build/html/slides/<lang>/` y `book/_build/html/_static/slides_manifest.json`, y que el botón superior `Slides` abre la deck contextual desde una página de capítulo o sección.

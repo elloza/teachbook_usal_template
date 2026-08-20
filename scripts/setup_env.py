@@ -33,6 +33,10 @@ EXTRA_REQUIREMENTS = {
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 VENV_PATH = PROJECT_ROOT / VENV_DIR
 BUILD_LOGS = PROJECT_ROOT / ".build_logs"
+SLIDES_DIR = PROJECT_ROOT / "slides"
+SLIDES_PACKAGE_JSON = SLIDES_DIR / "package.json"
+SLIDES_PACKAGE_LOCK = SLIDES_DIR / "package-lock.json"
+MIN_NODE_VERSION = (22, 18, 0)
 
 SKILLS_SOURCE = PROJECT_ROOT / ".github" / "skills"
 SKILLS_DESTINATIONS = [
@@ -375,6 +379,63 @@ def install_playwright_browsers(python_cmd):
         print("AVISO: no se pudieron instalar navegadores Playwright.")
 
 
+def parse_node_version(output):
+    import re
+
+    match = re.search(r"v?(\d+)\.(\d+)\.(\d+)", output.strip())
+    if not match:
+        return None
+    return tuple(int(part) for part in match.groups())
+
+
+def ensure_node_for_slides():
+    if not SLIDES_PACKAGE_JSON.is_file():
+        return
+
+    print("\nVerificando Node.js para Slidev:")
+    try:
+        node_result = run(["node", "--version"], capture=True, check=False)
+    except FileNotFoundError:
+        node_result = None
+
+    if node_result is None or node_result.returncode != 0:
+        print("ERROR: Node.js no esta instalado y es necesario para Slidev.")
+        print("Instala Node.js >= 22.18.0 desde https://nodejs.org/ y ejecuta de nuevo:")
+        print("  python scripts/setup_env.py --yes")
+        raise SystemExit(1)
+
+    node_version = parse_node_version(node_result.stdout)
+    if node_version is None or node_version < MIN_NODE_VERSION:
+        print(f"ERROR: Node.js demasiado antiguo: {node_result.stdout.strip() or 'desconocido'}")
+        print("Se requiere Node.js >= 22.18.0 para compilar las diapositivas Slidev.")
+        print("Instala una version actual desde https://nodejs.org/ y ejecuta de nuevo:")
+        print("  python scripts/setup_env.py --yes")
+        raise SystemExit(1)
+
+    try:
+        npm_result = run(["npm", "--version"], capture=True, check=False)
+    except FileNotFoundError:
+        npm_result = None
+    if npm_result is None or npm_result.returncode != 0:
+        print("ERROR: npm no esta disponible. Reinstala Node.js desde https://nodejs.org/.")
+        raise SystemExit(1)
+
+    print(f"  Node.js: {node_result.stdout.strip()}")
+    print(f"  npm:     {npm_result.stdout.strip()}")
+
+
+def install_slidev_dependencies():
+    if not SLIDES_PACKAGE_JSON.is_file():
+        return
+    ensure_node_for_slides()
+    if not SLIDES_PACKAGE_LOCK.is_file():
+        print("ERROR: falta slides/package-lock.json.")
+        print("Genera el lockfile con: npm --prefix slides install --package-lock-only")
+        raise SystemExit(1)
+    print("\nInstalando dependencias Slidev con npm ci...")
+    run(["npm", "--prefix", "slides", "ci"])
+
+
 def verify_installation(dev_mode=False, target_python=TARGET_PYTHON_VERSION, extras=None):
     python_cmd = str(get_venv_python())
     print("\nVerificando entorno:")
@@ -441,6 +502,12 @@ def verify_runtime_tools():
     else:
         print("  Tectonic: no encontrado. Para PDF ejecuta:")
         print("    python scripts/setup_latex.py --yes --full")
+
+    if SLIDES_PACKAGE_JSON.is_file():
+        if shutil.which("node") and shutil.which("npm"):
+            print("  Node/npm: disponible para Slidev")
+        else:
+            print("  Node/npm: no encontrado. Necesario para Slidev: https://nodejs.org/")
 
 
 def sync_skills():
@@ -585,6 +652,9 @@ def main():
 
     with profiler.phase("requirements"):
         install_requirements(dev_mode=args.dev, extras=extras)
+
+    with profiler.phase("slidev"):
+        install_slidev_dependencies()
 
     with profiler.phase("verification"):
         verify_installation(dev_mode=args.dev, target_python=args.python, extras=extras)

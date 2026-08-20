@@ -1,0 +1,39 @@
+.teachbook-slidev {
+  --slidev-theme-primary: #005a8b;
+}
+
+.teachbook-cover {
+  align-items: flex-start;
+  background:
+    linear-gradient(120deg, rgba(0, 90, 139, 0.92), rgba(20, 95, 67, 0.86)),
+    url("/teachbook-slide-bg.svg");
+  background-position: center;
+  background-size: cover;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  padding: 4rem;
+}
+
+.teachbook-cover h1 {
+  color: white;
+  font-size: 3rem;
+  line-height: 1.05;
+  max-width: 840px;
+}
+
+.teachbook-cover .subtitle {
+  font-size: 1.35rem;
+  max-width: 760px;
+  opacity: 0.92;
+}
+
+.teachbook-footer {
+  bottom: 1rem;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.82rem;
+  left: 4rem;
+  position: absolute;
+}

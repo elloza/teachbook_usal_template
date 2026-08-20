@@ -30,6 +30,14 @@ _temp_build_*
 _temp_pdf_*
 .build_logs/
 
+# --- Slidev ---
+slides/node_modules/
+slides/dist/
+slides/**/dist/
+slides/.slidev/
+slides/.vite/
+slides/.cache/
+
 # --- LaTeX (build artifacts) ---
 latex_templates/_sphinx_design_static/
 latex_exports/

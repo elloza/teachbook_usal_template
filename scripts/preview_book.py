@@ -53,6 +53,7 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BOOK_DIR = PROJECT_ROOT / "book"
+SLIDES_DIR = PROJECT_ROOT / "slides"
 BUILD_SCRIPT = PROJECT_ROOT / "scripts" / "build_book.py"
 HTML_DIR = BOOK_DIR / "_build" / "html"
 PID_FILE = PROJECT_ROOT / ".preview.pid"
@@ -71,12 +72,19 @@ WATCH_EXTENSIONS = {
     ".jpeg",
     ".gif",
     ".svg",
+    ".vue",
+    ".ts",
+    ".json",
 }
 
 IGNORED_DIR_NAMES = {
     "_build",
     ".ipynb_checkpoints",
     "__pycache__",
+    "node_modules",
+    "dist",
+    ".slidev",
+    ".vite",
 }
 
 IGNORED_FILE_NAMES = {
@@ -252,15 +260,16 @@ def is_watchable(path: Path) -> bool:
 
 def snapshot_sources() -> dict[str, float]:
     snapshot: dict[str, float] = {}
-    if not BOOK_DIR.exists():
-        return snapshot
 
-    for path in BOOK_DIR.rglob("*"):
-        if path.is_file() and is_watchable(path):
-            try:
-                snapshot[str(path)] = path.stat().st_mtime
-            except OSError:
-                pass
+    for source_dir in (BOOK_DIR, SLIDES_DIR):
+        if not source_dir.exists():
+            continue
+        for path in source_dir.rglob("*"):
+            if path.is_file() and is_watchable(path):
+                try:
+                    snapshot[str(path)] = path.stat().st_mtime
+                except OSError:
+                    pass
     return snapshot
 
 

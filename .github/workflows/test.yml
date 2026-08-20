@@ -45,6 +45,12 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: '3.12' }
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22.18.0
+          cache: npm
+          cache-dependency-path: slides/package-lock.json
+
       # GitHub runners have Python pre-installed, but we test the script
       # still works correctly as if it were a fresh Mac
       - name: Remove pre-existing venv if any
@@ -125,6 +131,12 @@ jobs:
 
       - uses: actions/setup-python@v6
         with: { python-version: '3.12' }
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22.18.0
+          cache: npm
+          cache-dependency-path: slides/package-lock.json
 
       - name: Remove pre-existing venv if any
         shell: pwsh

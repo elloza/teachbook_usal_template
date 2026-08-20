@@ -1,10 +1,14 @@
-// Custom UI Injection (Language Switcher + PDF Button)
+// Custom UI Injection (Language Switcher + PDF + Slides Button)
 document.addEventListener("DOMContentLoaded", function () {
     const TEACHBOOK_VERSION = "3.0";
     if (window.TEACHBOOK_LOADED_VERSION === TEACHBOOK_VERSION) return;
     window.TEACHBOOK_LOADED_VERSION = TEACHBOOK_VERSION;
 
-    console.log(`TeachBook v${TEACHBOOK_VERSION}: Loading UI components...`);
+    const TEACHBOOK_DEBUG = new URLSearchParams(window.location.search).has("teachbook_debug")
+        || localStorage.getItem("teachbook-debug") === "true";
+    const debugLog = (...args) => {
+        if (TEACHBOOK_DEBUG) console.log(...args);
+    };
 
     // 1. Find languages.json by climbing directories
     // From /repo/es/intro.html:       ../_static/languages.json → found (prefix = "../")
@@ -13,25 +17,43 @@ document.addEventListener("DOMContentLoaded", function () {
     // The prefix that works IS the relative path to the book root.
 
     async function findLanguagesJson() {
+        const candidates = [];
+        const addCandidate = (prefix) => {
+            if (typeof prefix !== "string") return;
+            const normalized = prefix === "." || prefix === "./" ? "" : prefix;
+            if (!candidates.includes(normalized)) candidates.push(normalized);
+        };
+
+        // Sphinx writes the relative path to the HTML root here. Trying it
+        // first avoids a predictable 404 on /<lang>/ pages in GitHub Pages.
+        addCandidate(document.documentElement.dataset.content_root);
+        if (window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.URL_ROOT) {
+            addCandidate(window.DOCUMENTATION_OPTIONS.URL_ROOT);
+        }
+
         let prefix = '';
         for (let depth = 0; depth < 10; depth++) {
+            addCandidate(prefix);
+            prefix = '../' + prefix;
+        }
+
+        for (const candidate of candidates) {
             try {
-                const url = prefix + '_static/languages.json';
+                const url = candidate + '_static/languages.json';
                 const res = await fetch(url);
                 if (res.ok) {
                     const languages = await res.json();
-                    console.log(`TeachBook: Found languages.json at depth ${depth}, rootPrefix="${prefix}"`);
-                    return { languages, rootPrefix: prefix };
+                    debugLog(`TeachBook: Found languages.json at rootPrefix="${candidate}"`);
+                    return { languages, rootPrefix: candidate };
                 }
             } catch (e) { /* continue */ }
-            prefix = '../' + prefix;
         }
         return null;
     }
 
     findLanguagesJson().then(result => {
         if (!result) {
-            console.log("TeachBook: Language switcher disabled (languages.json not found).");
+            debugLog("TeachBook: Language switcher disabled (languages.json not found).");
             return;
         }
 
@@ -40,17 +62,20 @@ document.addEventListener("DOMContentLoaded", function () {
         if (languages.length > 1) {
             injectLanguageSwitcher(languages, rootPrefix);
         } else {
-            console.log("TeachBook: Single language detected. Hiding switcher.");
+            debugLog("TeachBook: Single language detected. Hiding switcher.");
         }
 
         // Inject PDF Button
         injectPDFButton(languages, rootPrefix);
 
+        // Inject contextual Slidev button when a slides manifest is available.
+        injectSlidesButton(languages, rootPrefix, debugLog);
+
         // Search page fix: Sphinx search sometimes generates duplicated language prefixes
         // like /es/es/page.html or sidebar links like es/intro.html inside /es/search.html.
         // We normalize those links client-side to keep search usable even if Sphinx emits
         // inconsistent paths in standalone multilingual builds.
-        fixSearchPageLinks(rootPrefix, languages);
+        fixSearchPageLinks(rootPrefix, languages, debugLog);
     });
 
     // 3. Robust Sidebar Toggle (Manual Handler with Polling)
@@ -59,49 +84,32 @@ document.addEventListener("DOMContentLoaded", function () {
     // POLLING: We run this check multiple times to catch elements rendered late by theme JS.
 
     function applySidebarFix() {
-        const primaryCheckbox = document.getElementById('pst-primary-sidebar-checkbox');
         // Find toggles that haven't been fixed yet
         const primaryToggles = document.querySelectorAll('label[for="__primary"]:not([data-fixed]), .primary-toggle:not([data-fixed])');
 
         primaryToggles.forEach(toggle => {
-            console.log("TeachBook: Applying fix to primary toggle", toggle);
+            toggle.setAttribute('data-fixed', 'true');
 
-            primaryToggles.forEach(toggle => {
-                console.log("TeachBook: Attaching desktop fix to primary toggle", toggle);
+            // Do NOT remove 'for' or clone node. Let native/theme behavior persist.
+            // Just ADD our listener for the desktop class toggle.
+            toggle.addEventListener('click', () => {
+                // Do NOT prevent default or stop propagation.
+                // Let the theme handle the mobile logic.
 
-                // Mark as fixed
-                toggle.setAttribute('data-fixed', 'true');
-
-                // Do NOT remove 'for' or clone node. Let native/theme behavior persist.
-                // Just ADD our listener for the desktop class toggle.
-                toggle.addEventListener('click', (e) => {
-                    // Do NOT prevent default or stop propagation.
-                    // Let the theme handle the mobile logic.
-
-                    // Toggle custom class for desktop support
-                    // We typically only care about this on desktop, but toggling the class
-                    // is harmless on mobile because our CSS is media-queried.
-                    document.documentElement.classList.toggle('teachbook-sidebar-hidden');
-                    console.log("TeachBook: Toggled 'teachbook-sidebar-hidden'");
-                });
+                // Toggle custom class for desktop support. This is harmless on
+                // mobile because the CSS rule is media-queried.
+                document.documentElement.classList.toggle('teachbook-sidebar-hidden');
+                debugLog("TeachBook: Toggled 'teachbook-sidebar-hidden'");
             });
         });
 
         // Secondary sidebar (if needed, same logic)
-        const secondaryCheckbox = document.getElementById('pst-secondary-sidebar-checkbox');
         const secondaryToggles = document.querySelectorAll('label[for="__secondary"]:not([data-fixed]), .secondary-toggle:not([data-fixed])');
 
         secondaryToggles.forEach(toggle => {
-            console.log("TeachBook: Applying fix to secondary toggle", toggle);
-            secondaryToggles.forEach(toggle => {
-                console.log("TeachBook: Attaching fix to secondary toggle", toggle);
-                toggle.setAttribute('data-fixed', 'true');
-                // Do NOT clone or strip. Just add listener if we needed custom logic.
-                // Currently we don't need custom logic for secondary, as it usually works fine?
-                // But if we wanted to be safe, we could add logic here.
-
-                // For now, removing the cloneNode is the most important part to restore mobile.
-            });
+            toggle.setAttribute('data-fixed', 'true');
+            // Do NOT clone or strip. Marking the element prevents duplicated work
+            // while preserving the theme's native secondary sidebar behavior.
         });
     }
 
@@ -151,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })();
 });
 
-function fixSearchPageLinks(rootPrefix, languages) {
+function fixSearchPageLinks(rootPrefix, languages, debugLog = () => {}) {
     if (!window.location.pathname.endsWith('/search.html')) return;
 
     const langCodes = languages.map(l => l.code);
@@ -201,7 +209,7 @@ function fixSearchPageLinks(rootPrefix, languages) {
     const observer = new MutationObserver(() => patchLinks(document));
     observer.observe(target, { childList: true, subtree: true });
 
-    console.log('TeachBook: search link fixer enabled');
+    debugLog('TeachBook: search link fixer enabled');
 }
 
 function injectLanguageSwitcher(languages, rootPrefix) {
@@ -290,4 +298,77 @@ function injectPDFButton(languages, rootPrefix) {
         div.innerHTML = btnHtml.trim();
         sidebar.appendChild(div.firstChild);
     }
+}
+
+async function injectSlidesButton(languages, rootPrefix, debugLog = () => {}) {
+    const header = document.querySelector(".article-header-buttons");
+    if (!header || document.getElementById("teachbook-slides-btn")) return;
+
+    let manifest;
+    try {
+        const res = await fetch(rootPrefix + "_static/slides_manifest.json");
+        if (!res.ok) {
+            debugLog("TeachBook: Slides button disabled (slides_manifest.json not found).");
+            return;
+        }
+        manifest = await res.json();
+    } catch (e) {
+        debugLog("TeachBook: Slides button disabled (could not load slides manifest).", e);
+        return;
+    }
+
+    const path = window.location.pathname;
+    const langCodes = Array.isArray(manifest.languages) && manifest.languages.length
+        ? manifest.languages
+        : languages.map(l => l.code);
+    let currentLangCode = langCodes[0] || (languages[0] && languages[0].code) || "es";
+    langCodes.forEach(code => {
+        if (path.includes(`/${code}/`)) currentLangCode = code;
+    });
+
+    const currentPage = getCurrentPageKey(rootPrefix);
+    const pages = manifest.pages || {};
+    const hubs = manifest.hubs || {};
+    const targetPath = pages[currentPage] || hubs[currentLangCode];
+
+    if (!targetPath) {
+        debugLog(`TeachBook: Slides button disabled (no deck or hub for "${currentPage}").`);
+        return;
+    }
+
+    const strings = {
+        es: { text: "Slides", title: "Abrir diapositivas del tema" },
+        en: { text: "Slides", title: "Open chapter slides" }
+    };
+    const label = strings[currentLangCode] || strings.en;
+
+    const btn = document.createElement("a");
+    btn.id = "teachbook-slides-btn";
+    btn.className = "btn btn-sm teachbook-slides-btn";
+    btn.href = rootPrefix + targetPath;
+    btn.title = label.title;
+    btn.setAttribute("aria-label", label.title);
+    btn.innerHTML = `<i class="fa-solid fa-display"></i><span>${label.text}</span>`;
+
+    header.prepend(btn);
+}
+
+function getCurrentPageKey(rootPrefix) {
+    const rootUrl = new URL(rootPrefix || ".", window.location.href);
+    let rootPath = rootUrl.pathname;
+    if (!rootPath.endsWith("/")) rootPath += "/";
+
+    let currentPath = window.location.pathname;
+    if (currentPath.startsWith(rootPath)) {
+        currentPath = currentPath.slice(rootPath.length);
+    } else {
+        currentPath = currentPath.replace(/^\/+/, "");
+    }
+
+    currentPath = currentPath.replace(/^\/+/, "");
+    if (!currentPath || currentPath.endsWith("/")) {
+        currentPath += "index.html";
+    }
+
+    return decodeURI(currentPath);
 }

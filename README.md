@@ -50,10 +50,11 @@ Antes de abrir la plantilla con tu agente de IA, necesitas tener instalado **com
 ### Recomendado (no obligatorio, el agente te ayudará a instalarlo)
 2. **Git** → [Descargar](https://git-scm.com/) (necesario para publicar en GitHub)
 3. **uv** (gestor de paquetes ultrarrápido) → El agente te preguntará si quieres instalarlo
+4. **Node.js 22.18 o superior** → [Descargar](https://nodejs.org/) (necesario para compilar las diapositivas web)
 
 ### Para publicar en la web
-4. **Cuenta en GitHub** → [Crear cuenta](https://github.com/signup)
-5. **Un repositorio** creado a partir de esta plantilla (botón "Use this template" en GitHub)
+5. **Cuenta en GitHub** → [Crear cuenta](https://github.com/signup)
+6. **Un repositorio** creado a partir de esta plantilla (botón "Use this template" en GitHub)
 
 ---
 
@@ -77,6 +78,7 @@ El agente:
 - Instalará `uv` (gestor de paquetes rápido) si no lo tienes
 - Creará el entorno virtual `.venv`
 - Instalará todas las dependencias
+- Si usas diapositivas, comprobará Node.js y preparará `slides/`
 - Sincronizará las instrucciones para que funcione con tu herramienta
 
 ⏱️ **Tarda 1-3 minutos** la primera vez.
@@ -86,6 +88,8 @@ El agente:
 > **"Compila el libro"** o **"Genera la web"**
 
 Esto crea la versión HTML navegable en `book/_build/html/`. Puedes abrirla en cualquier navegador.
+
+Si el proyecto tiene la carpeta `slides/` y Node.js cumple el requisito mínimo, el mismo comando también integra las diapositivas en la web final.
 
 ### 3️⃣ Ver cambios en tiempo real (desarrollo)
 
@@ -99,13 +103,23 @@ Se abrirá tu navegador en `localhost:8000` y los cambios se reflejarán automá
 
 El agente instalará LaTeX (Tectonic) si es necesario y generará `ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf` y `CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf`.
 
-### 5️⃣ Guardar cambios en GitHub
+### 5️⃣ Generar diapositivas para clase
+
+> **"Crea diapositivas para este capítulo"** o **"Actualiza las slides del tema de Física"**
+
+El agente usará `slides/` para crear una presentación Slidev por cada capítulo principal. En la web aparecerá un botón **Slides** arriba: desde una página del capítulo abrirá sus diapositivas, y desde otras páginas abrirá el índice de diapositivas del idioma.
+
+Las diapositivas también son multi-idioma: si se crean en español, debe existir su equivalente en inglés. Se escriben en Markdown, como el libro, para que el agente pueda generarlas y mantenerlas sin que tengas que aprender una herramienta nueva.
+
+> Nota: descargar las diapositivas como PDF está planificado para una versión futura. Ahora la funcionalidad estable es la publicación web de las diapositivas.
+
+### 6️⃣ Guardar cambios en GitHub
 
 > **"Guarda y publica los cambios"** o **"Haz commit y push"**
 
 El agente hará `git add` + `commit` + `push` automáticamente con un mensaje descriptivo.
 
-### 6️⃣ Publicar en GitHub Pages (solo la primera vez)
+### 7️⃣ Publicar en GitHub Pages (solo la primera vez)
 
 **Esto lo haces tú manualmente, una sola vez:**
 
@@ -116,7 +130,7 @@ El agente hará `git add` + `commit` + `push` automáticamente con un mensaje de
 
 > La URL de tu libro será: `https://<tu-usuario>.github.io/<nombre-del-repo>/`
 
-### 7️⃣ Empezar con un libro mínimo sin borrar los ejemplos
+### 8️⃣ Empezar con un libro mínimo sin borrar los ejemplos
 
 Si al principio quieres que el libro muestre **solo una parte** (por ejemplo, un único capítulo que te interese), no hace falta borrar todo el contenido de ejemplo.
 
@@ -159,6 +173,10 @@ teachbook_usal_template/
 │   ├── _config_es.yml       # Configuración español
 │   ├── _toc_es.yml          # Índice español
 │   └── _static/             # Imágenes, CSS, logos
+├── slides/                  # ← Diapositivas Slidev del libro
+│   ├── package.json         # Configuración técnica de Slidev
+│   ├── es/                  # Presentaciones en español
+│   └── en/                  # Presentaciones en inglés
 ├── scripts/                 # Scripts de automatización (no editar)
 ├── latex_templates/         # Plantillas PDF (personalizable)
 ├── AGENTS.md                # Instrucciones para el agente de IA
@@ -171,11 +189,13 @@ teachbook_usal_template/
 - `book/_config_es.yml` y `book/_config_en.yml` — título, autor, etc.
 - `book/_static/` — imágenes y logos
 - `book/_static/references.bib` — bibliografía global del libro
+- `slides/es/**/slides.md` y `slides/en/**/slides.md` — diapositivas de cada capítulo principal, preferiblemente con ayuda del agente
 
 ### Archivos que NO debes tocar:
 - `scripts/` — los ejecuta el agente automáticamente
 - `.github/skills/` — instrucciones para el agente
 - `AGENTS.md`, `CLAUDE.md` — configuración del agente
+- `slides/package.json` y `slides/package-lock.json` — configuración técnica de las diapositivas
 
 ---
 
@@ -188,6 +208,12 @@ El libro genera versiones en **español** e **inglés** automáticamente con un 
 > **"Añade un nuevo capítulo de Biología al libro"**
 
 El agente se encargará de crear el contenido en `book/es/` Y `book/en/`, y de actualizar ambos índices.
+
+Las diapositivas siguen la misma regla. Cada capítulo principal puede tener una deck en `slides/<idioma>/.../slides.md`; las secciones del capítulo usan esa misma presentación. El botón **Slides** de la web abre automáticamente la presentación adecuada para la página que estás leyendo.
+
+Para revisar que no falta ninguna presentación multi-idioma, dile al agente:
+
+> **"Comprueba que las slides están en todos los idiomas"**
 
 ---
 
@@ -215,6 +241,8 @@ Esa página imprime la bibliografía global del libro y sirve también para la e
 | Compilar la web | *"Compila el libro"* |
 | Ver cambios en vivo | *"Abre la vista previa"* |
 | Generar PDFs | *"Genera los PDFs"* |
+| Crear diapositivas | *"Crea las slides de este capítulo"* |
+| Revisar diapositivas | *"Comprueba que las slides están en todos los idiomas"* |
 | Guardar cambios | *"Guarda y publica los cambios"* |
 | Añadir un capítulo | *"Añade un capítulo de [tema]"* |
 | Añadir una imagen | *"Inserta una imagen en [sección]"* |
@@ -246,6 +274,8 @@ Estos tests verifican que:
 ### Qué sí se ejecuta automáticamente
 
 El **deploy de GitHub Pages** sí se ejecuta automáticamente al hacer `push` a `main`.
+
+Los workflows están preparados para usar Node.js 22.18 y publicar también la carpeta `/slides/` cuando el build se complete correctamente. No edites la web generada a mano: el flujo recomendado sigue siendo guardar cambios, hacer push y dejar que GitHub Actions reconstruya el libro.
 
 ---
 

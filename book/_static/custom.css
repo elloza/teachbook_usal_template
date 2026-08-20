@@ -55,6 +55,39 @@ html {
     font-weight: 600;
 }
 
+/* Slidev Slides Button */
+.teachbook-slides-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.6rem !important;
+    height: 32px !important;
+    border: none !important;
+    background-color: transparent !important;
+    color: var(--pst-color-text-main) !important;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+}
+
+.teachbook-slides-btn:hover {
+    background-color: var(--pst-color-background-soft) !important;
+    border-radius: 4px;
+    color: var(--pst-color-link) !important;
+    text-decoration: none !important;
+}
+
+/* Hide only the desktop search button injected in the top theme header.
+   Keep the primary sidebar search and the mobile header search available. */
+@media (min-width: 992px) {
+    #pst-header .navbar-header-items .navbar-persistent--container .search-button__button,
+    #pst-header .navbar-header-items .navbar-persistent--container .bd-search {
+        display: none !important;
+    }
+}
+
 /* The actual dropdown list */
 .teachbook-lang-dropdown {
     display: none;

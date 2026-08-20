@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Fondo abstracto docente">
+  <rect width="1600" height="900" fill="#eef6f8"/>
+  <path d="M0 660 C 260 540, 410 760, 690 615 C 940 485, 1080 570, 1600 390 L1600 900 L0 900 Z" fill="#0f6f66" opacity="0.38"/>
+  <path d="M0 210 C 240 145, 390 235, 650 150 C 940 55, 1180 160, 1600 80 L1600 0 L0 0 Z" fill="#005a8b" opacity="0.32"/>
+  <circle cx="1260" cy="350" r="190" fill="#f0b429" opacity="0.22"/>
+  <g fill="none" stroke="#ffffff" stroke-width="6" opacity="0.38">
+    <path d="M1030 650 h300"/>
+    <path d="M1080 705 h210"/>
+    <path d="M1115 595 h150"/>
+  </g>
+</svg>

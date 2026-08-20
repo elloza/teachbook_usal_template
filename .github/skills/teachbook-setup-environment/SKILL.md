@@ -19,6 +19,7 @@ description: >
 - Algo no funciona (`ModuleNotFoundError`, `command not found`, errores raros).
 - Se ha cambiado de ordenador o se ha clonado el repositorio de nuevo.
 - Se han añadido dependencias nuevas a `requirements.txt`.
+- Se ha añadido o cambiado `slides/package.json` para las diapositivas Slidev.
 - El usuario dice: "no tengo python", "no me compila", "falta algo".
 
 ## Política estricta para agentes/IDEs
@@ -58,6 +59,8 @@ systeminfo | findstr /B /C:"OS Name" /C:"OS Architecture"   # Windows CMD
 python --version 2>&1 || python3 --version 2>&1 || py --version 2>&1 || echo "NO PYTHON"
 git --version 2>&1 || echo "NO GIT"
 uv --version 2>&1 || echo "NO UV"
+node --version 2>&1 || echo "NO NODE"
+npm --version 2>&1 || echo "NO NPM"
 
 # Arquitectura del procesador
 uname -m                    # Linux/macOS: "arm64" = ARM, "x86_64" = Intel
@@ -149,6 +152,22 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 > **Nota**: uv funciona nativamente en Apple Silicon y Windows ARM.
 > `scripts/setup_env.py --yes` usa el instalador oficial de uv y, si este falla en Windows/CI, aplica fallback automático con `python -m pip install uv` y actualiza el `PATH` de la sesión.
 
+### Escenario C2: Hay `slides/package.json` pero no hay Node/npm
+
+Slidev requiere Node.js. Si el proyecto tiene carpeta `slides/`, debe existir Node.js 22.18 o superior y `npm`:
+
+```bash
+node --version
+npm --version
+```
+
+Si falta Node o la versión es antigua:
+
+- Windows/macOS: instalar la versión LTS desde https://nodejs.org/
+- Linux: usar el gestor recomendado del sistema o NodeSource
+
+Después de instalar Node, cerrar y reabrir la terminal para actualizar el `PATH`. No instalar paquetes Node globales para este proyecto; las dependencias deben quedar dentro de `slides/node_modules/` mediante `npm ci`.
+
 ### Escenario D: Python no es 3.12
 
 **Si uv está disponible:**
@@ -190,9 +209,10 @@ El script hace todo automáticamente:
 6. Verifica paquetes clave con `importlib.metadata`, sin depender de `pip freeze`
 7. Comprueba que `pip` existe y que `manim` no está instalado
 8. Instala extras opcionales solo si se piden (`pdf`, `notebooks`, `pdf-import`, `dev`)
-9. Sincroniza skills a `.claude/skills/`, `.agents/skills/`, `.agent/skills/`
-10. Sincroniza `AGENTS.md` a `.github/copilot-instructions.md`
-11. Muestra resumen final con el estado de todo
+9. Si existe `slides/package.json`, comprueba Node/npm y ejecuta `npm ci` dentro de `slides/`
+10. Sincroniza skills a `.claude/skills/`, `.agents/skills/`, `.agent/skills/`
+11. Sincroniza `AGENTS.md` a `.github/copilot-instructions.md`
+12. Muestra resumen final con el estado de todo
 
 ### Capas de dependencias
 
@@ -219,7 +239,12 @@ Después del setup, el agente DEBE verificar que todo está bien:
 .venv/bin/python -c "import jupyter_book; print('OK')"          # Linux/macOS
 .venv\Scripts\python.exe -c "import jupyter_book; print('OK')"  # Windows
 
-# 3. Skills sincronizadas (carpetas existen con contenido)
+# 3. Si hay slides, Node y dependencias locales funcionan
+node --version
+npm --prefix slides --version
+npm --prefix slides exec -- slidev --version
+
+# 4. Skills sincronizadas (carpetas existen con contenido)
 ls .claude/skills/ .agents/skills/ .agent/skills/
 ```
 
@@ -248,6 +273,8 @@ Resultado esperado:
 | Python del sistema no es 3.12 | Normal en muchos equipos | `setup_env.py --yes` usará uv para instalar/localizar Python 3.12 |
 | numpy/pandas fallan en ARM | Ruedas binarias no disponibles | `uv pip install numpy pandas` (uv resuelve ruedas compatibles automáticamente) |
 | `jupyter-book: not found` tras setup | venv no activado o PATH | Usar siempre la ruta completa del venv: `.venv/bin/jupyter-book` o `.venv\Scripts\jupyter-book.exe` |
+| `node: command not found` con slides | Node.js no instalado o PATH sin recargar | Instalar Node LTS desde nodejs.org y abrir una terminal nueva |
+| `npm ci` falla en `slides/` | `package-lock.json` no coincide o Node es antiguo | Revisar `slides/package-lock.json` y usar Node 22.18 o superior |
 | macOS: "developer tools" popup | Falta Xcode CLI | `xcode-select --install` y esperar a que termine |
 | Windows: CRLF vs LF | Git convierte saltos de línea | No afecta funcionalidad. Ignorar los warnings de git |
 
