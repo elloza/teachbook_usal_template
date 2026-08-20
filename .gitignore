@@ -32,6 +32,7 @@ _temp_pdf_*
 
 # --- Slidev ---
 slides/node_modules/
+slides/**/node_modules/
 slides/dist/
 slides/**/dist/
 slides/.slidev/
