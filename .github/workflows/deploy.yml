@@ -64,11 +64,11 @@ jobs:
         run: |
           .venv/bin/python scripts/optimize_static_assets.py --check
 
-      - name: Install PDF toolchain (same as local full setup)
+      - name: Install Tectonic PDF engine
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          .venv/bin/python scripts/setup_latex.py --yes --full
+          .venv/bin/python scripts/setup_latex.py --yes
 
       - name: Generate PDF with CI/CD engine policy
         run: |
