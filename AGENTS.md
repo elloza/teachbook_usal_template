@@ -106,6 +106,7 @@ Reglas obligatorias:
 - El botón superior `Slides` de la web lee ese manifest. Si la página actual tiene deck asociada, abre esa deck; si no, abre el hub `slides/<lang>/index.html`.
 - No usar frameworks JS adicionales fuera de Slidev. Slidev queda aislado dentro de `slides/` y el libro sigue compilándose con Jupyter Book.
 - Antes de cerrar cambios de diapositivas, ejecutar `python scripts/check_slides_integrity.py` y `python scripts/check_encoding.py`.
+- `scripts/build_slides.py` compila decks en paralelo con un límite conservador. Usar `TEACHBOOK_SLIDEV_JOBS=1` si una máquina tiene poca memoria; subirlo solo de forma controlada en CI o equipos potentes.
 
 ## Protocolo OBLIGATORIO para Añadir Contenido
 

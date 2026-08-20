@@ -74,6 +74,8 @@ Si existe `slides/package.json` o se han tocado diapositivas, comprobar antes la
 | Linux / macOS | `.venv/bin/python scripts/build_book.py` |
 | Windows | `.venv\Scripts\python.exe scripts/build_book.py` |
 
+`scripts/build_slides.py` compila varias decks en paralelo con un límite conservador de 2 jobs. Para equipos con poca memoria se puede forzar ejecución secuencial con `TEACHBOOK_SLIDEV_JOBS=1`; para CI o máquinas potentes se puede aumentar de forma controlada con `TEACHBOOK_SLIDEV_JOBS=<n>`.
+
 ### Si el build falla
 
 1. **Verificar `_toc_<lang>.yml`**: Comprobar que la sintaxis YAML es correcta (indentación con 2 espacios, sin tabs).

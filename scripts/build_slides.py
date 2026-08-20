@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
@@ -22,6 +23,7 @@ SLIDES_DIR = PROJECT_ROOT / "slides"
 HTML_DIR = BOOK_DIR / "_build" / "html"
 STATIC_DIR = HTML_DIR / "_static"
 MIN_NODE_VERSION = (22, 18, 0)
+DEFAULT_SLIDEV_JOBS = 2
 
 
 @dataclass(frozen=True)
@@ -233,7 +235,7 @@ def slidev_supports_without_notes() -> bool:
     return "--without-notes" in ((result.stdout or "") + (result.stderr or ""))
 
 
-def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> None:
+def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> str:
     out_dir = HTML_DIR / "slides" / deck.book_file
     if out_dir.exists():
         shutil.rmtree(out_dir)
@@ -251,7 +253,7 @@ def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> None:
     ]
     if without_notes:
         cmd.append("--without-notes")
-    print(f"Construyendo slides: {deck.lang} {deck.position} -> {deck.url}")
+    output = [f"Construyendo slides: {deck.lang} {deck.position} -> {deck.url}\n"]
     result = subprocess.run(
         cmd,
         cwd=SLIDES_DIR,
@@ -262,11 +264,49 @@ def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> None:
         check=False,
     )
     if result.stdout:
-        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+        output.append(result.stdout if result.stdout.endswith("\n") else result.stdout + "\n")
     if result.stderr:
-        print(result.stderr, end="" if result.stderr.endswith("\n") else "\n")
+        output.append(result.stderr if result.stderr.endswith("\n") else result.stderr + "\n")
     if result.returncode != 0:
+        print("".join(output), end="")
         raise subprocess.CalledProcessError(result.returncode, cmd)
+    return "".join(output)
+
+
+def parse_jobs(value: str | None) -> int:
+    if value is None or not value.strip():
+        return DEFAULT_SLIDEV_JOBS
+    try:
+        jobs = int(value)
+    except ValueError:
+        raise SystemExit(f"ERROR: valor de jobs no valido: {value!r}.")
+    if jobs < 1:
+        raise SystemExit("ERROR: jobs debe ser >= 1.")
+    return jobs
+
+
+def build_decks(decks: list[Deck], site_base: str, *, without_notes: bool, jobs: int) -> None:
+    jobs = min(jobs, len(decks)) if decks else 1
+    print(f"Paralelismo Slidev: {jobs} job(s).")
+    if jobs == 1:
+        for deck in decks:
+            print(build_deck(deck, site_base, without_notes=without_notes), end="")
+        return
+
+    with ThreadPoolExecutor(max_workers=jobs) as executor:
+        future_to_deck = {
+            executor.submit(build_deck, deck, site_base, without_notes=without_notes): deck
+            for deck in decks
+        }
+        for future in as_completed(future_to_deck):
+            deck = future_to_deck[future]
+            try:
+                print(future.result(), end="")
+            except subprocess.CalledProcessError as exc:
+                raise SystemExit(
+                    f"ERROR: fallo construyendo slides {deck.lang} {deck.position} "
+                    f"({deck.source.relative_to(PROJECT_ROOT)})."
+                ) from exc
 
 
 def hub_title(lang: str) -> str:
@@ -363,6 +403,15 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Valida, genera hubs y manifest sin ejecutar Slidev.",
     )
+    parser.add_argument(
+        "--jobs",
+        type=parse_jobs,
+        default=parse_jobs(os.environ.get("TEACHBOOK_SLIDEV_JOBS")),
+        help=(
+            "Numero de decks Slidev a compilar en paralelo. "
+            "Tambien puede definirse con TEACHBOOK_SLIDEV_JOBS. Por defecto: 2."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -382,8 +431,7 @@ def main() -> int:
         without_notes = slidev_supports_without_notes()
         if not without_notes:
             print("AVISO: esta version de Slidev no soporta --without-notes; se compila sin esa bandera.")
-        for deck in decks:
-            build_deck(deck, site_base, without_notes=without_notes)
+        build_decks(decks, site_base, without_notes=without_notes, jobs=args.jobs)
     else:
         print("Modo --skip-build: no se ejecuta Slidev.")
 

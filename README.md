@@ -111,6 +111,8 @@ El agente usará `slides/` para crear una presentación Slidev por cada capítul
 
 Las diapositivas también son multi-idioma: si se crean en español, debe existir su equivalente en inglés. Se escriben en Markdown, como el libro, para que el agente pueda generarlas y mantenerlas sin que tengas que aprender una herramienta nueva.
 
+Para acelerar la publicación, las decks se compilan en paralelo con un valor conservador. Si un equipo va justo de memoria, se puede usar `TEACHBOOK_SLIDEV_JOBS=1`; en CI o equipos potentes se puede subir de forma controlada.
+
 > Nota: descargar las diapositivas como PDF está planificado para una versión futura. Ahora la funcionalidad estable es la publicación web de las diapositivas.
 
 ### 6️⃣ Guardar cambios en GitHub
