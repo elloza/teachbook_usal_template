@@ -235,6 +235,18 @@ def slidev_supports_without_notes() -> bool:
     return "--without-notes" in ((result.stdout or "") + (result.stderr or ""))
 
 
+def ensure_temporary_deck_style(deck_source: Path) -> Path | None:
+    """Make shared Slidev styles visible when compiling a nested deck."""
+    deck_dir = deck_source.parent
+    deck_style = deck_dir / "style.css"
+    if deck_style.exists():
+        return None
+    shared_style = SLIDES_DIR / "style.css"
+    relative_style = os.path.relpath(shared_style, deck_dir).replace("\\", "/")
+    deck_style.write_text(f'@import "{relative_style}";\n', encoding="utf-8", newline="\n")
+    return deck_style
+
+
 def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> str:
     out_dir = HTML_DIR / "slides" / deck.book_file
     if out_dir.exists():
@@ -254,15 +266,20 @@ def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> str:
     if without_notes:
         cmd.append("--without-notes")
     output = [f"Construyendo slides: {deck.lang} {deck.position} -> {deck.url}\n"]
-    result = subprocess.run(
-        cmd,
-        cwd=SLIDES_DIR,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-        check=False,
-    )
+    temporary_style = ensure_temporary_deck_style(deck.source)
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=SLIDES_DIR,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
+        )
+    finally:
+        if temporary_style is not None and temporary_style.exists():
+            temporary_style.unlink()
     if result.stdout:
         output.append(result.stdout if result.stdout.endswith("\n") else result.stdout + "\n")
     if result.stderr:

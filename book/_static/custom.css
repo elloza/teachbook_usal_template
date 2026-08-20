@@ -88,6 +88,65 @@ html {
     }
 }
 
+/* Mobile keeps the theme header as the single navigation bar.
+   The article header duplicates sidebar/search/theme/download controls and
+   custom buttons; on narrow screens it can occupy the whole row and block the
+   primary sidebar toggle. */
+@media (max-width: 991.98px) {
+    .bd-header-article {
+        display: none !important;
+    }
+
+    #pst-header {
+        position: sticky;
+        top: 0;
+        z-index: 1082;
+        min-height: 3.5rem;
+        background: var(--pst-color-background);
+    }
+
+    #pst-header .bd-header__inner {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        min-width: 0;
+        width: 100%;
+    }
+
+    #pst-header .primary-toggle,
+    #pst-header .secondary-toggle {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 2.75rem;
+        width: 2.75rem;
+        min-width: 2.75rem;
+        height: 2.75rem;
+        pointer-events: auto;
+        z-index: 1084 !important;
+    }
+
+    #pst-header .navbar-header-items,
+    #pst-header .navbar-header-items__end,
+    #pst-header .navbar-persistent--mobile {
+        min-width: 0;
+    }
+
+    #pst-header .navbar-header-items {
+        flex: 1 1 auto;
+        overflow: hidden;
+    }
+
+    #pst-header .navbar-persistent--mobile {
+        flex: 0 1 auto;
+    }
+
+    #pst-header .search-button__default-text,
+    #pst-header .search-button__kbd-shortcut {
+        display: none !important;
+    }
+}
+
 /* The actual dropdown list */
 .teachbook-lang-dropdown {
     display: none;
