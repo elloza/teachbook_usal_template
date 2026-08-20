@@ -49,6 +49,7 @@ teachbook_usal_template/
 │   ├── preview_book.py            # Vista previa usando el MISMO build que producción
 │   ├── export_pdf.py              # Exportación a PDF
 │   ├── setup_latex.py             # Instalación de LaTeX (Tectonic)
+│   ├── local/deploy_sftp_from_env.py # Publicación local USAL por SFTP con .env privado
 │   └── git_helper.py              # Guardar y publicar
 ├── latex_templates/               # Plantillas LaTeX personalizadas
 │   ├── common/                    # Estilos compartidos (jupyterBook.cls)
@@ -415,7 +416,8 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Convertir PDF a MD | `python scripts/pdf_to_markdown.py <ruta>` | Convierte PDFs a Markdown para el libro |
 | Verificar codificación | `python scripts/check_encoding.py` | Comprueba UTF-8 y detecta mojibake en contenido, scripts y skills |
 | Guardar y publicar | `python scripts/git_helper.py` | git add + commit + push; GitHub Actions regenera HTML y PDFs nuevos |
-| Publicar en servidor propio | GitHub Actions → `sftp-deploy-book` → `Run workflow` | Compila PDFs/HTML y sincroniza `book/_build/html` por SFTP |
+| Planificar publicación USAL local | `python scripts/local/deploy_sftp_from_env.py --plan-only` | Valida un `.env` privado sin conectar, construir ni subir archivos |
+| Publicar en servidor propio (GitHub Actions) | GitHub Actions → `sftp-deploy-book` → `Run workflow` | Compila PDFs/HTML y sincroniza `book/_build/html` por SFTP |
 
 **IMPORTANTE**: En Windows, si `python` no funciona, probar con `py`. Los scripts manejan ambas opciones.
 
@@ -477,6 +479,24 @@ Para que GitHub Pages funcione, el usuario debe:
 2. Ir a Settings → Pages → Source: `GitHub Actions`.
 3. Hacer el primer `push`.
 
+## Publicación Local en Servidor USAL con eduVPN
+
+Para publicar desde el ordenador del docente a un servidor USAL que solo sea accesible con eduVPN, usar la skill `teachbook-publish-usal-server` y el script local:
+
+```bash
+python scripts/local/deploy_sftp_from_env.py --plan-only
+python scripts/local/deploy_sftp_from_env.py --dry-run
+python scripts/local/deploy_sftp_from_env.py --apply
+```
+
+Reglas estrictas:
+
+- No guardar secretos reales en Git. `.env` debe seguir ignorado y `.env.example` solo contiene placeholders.
+- No ejecutar `--apply` salvo petición explícita del usuario.
+- No modificar workflows de GitHub Actions para este flujo local.
+- `--plan-only` valida el `.env` y muestra un plan sin conectar al servidor, sin construir y sin subir archivos.
+- `--dry-run` requiere eduVPN, comprueba SFTP/directorio remoto y construye sin subir archivos.
+
 ## Publicación en Servidor Propio por SFTP
 
 El proyecto también incluye un workflow manual (`.github/workflows/sftp-deploy.yml`) para desplegar el mismo build HTML en un servidor propio, por ejemplo un alojamiento institucional con dominio como `libro.usal.es`.
@@ -517,6 +537,7 @@ Las skills están en `.github/skills/` (fuente de verdad) y se sincronizan a `.c
 | `teachbook-multimedia` | Insertar imágenes, videos, ecuaciones |
 | `teachbook-optimize-static-assets` | Revisar y optimizar assets estáticos para web sin romper PDF |
 | `teachbook-pdf-to-markdown` | Convertir PDFs existentes a Markdown |
+| `teachbook-publish-usal-server` | Publicar desde un ordenador local a servidor USAL por SFTP con `.env` privado y eduVPN |
 | `teachbook-generate-diagram` | Crear diagramas Kroki (Mermaid, PlantUML, GraphViz, etc.) compatibles con HTML y PDF |
 | `teachbook-generate-schemdraw-circuit` | Crear diagramas de circuitos eléctricos |
 | `teachbook-generate-circuitikz` | Crear circuitos precisos con CircuitikZ exportados a imagen |

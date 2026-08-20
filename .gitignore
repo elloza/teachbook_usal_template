@@ -58,6 +58,7 @@ desktop.ini
 .ruff_cache/
 .mypy_cache/
 .cache/
+.atl/
 
 # --- Test artifacts ---
 sidebar_verification.png
