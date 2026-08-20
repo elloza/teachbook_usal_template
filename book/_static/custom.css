@@ -145,6 +145,11 @@ html {
     #pst-header .search-button__kbd-shortcut {
         display: none !important;
     }
+
+    .bd-article h1:first-child,
+    .bd-article .section > h1:first-child {
+        padding-top: 0.75rem;
+    }
 }
 
 /* The actual dropdown list */

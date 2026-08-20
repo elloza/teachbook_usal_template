@@ -241,10 +241,57 @@ def ensure_temporary_deck_style(deck_source: Path) -> Path | None:
     deck_style = deck_dir / "style.css"
     if deck_style.exists():
         return None
-    shared_style = SLIDES_DIR / "style.css"
+    shared_style = SLIDES_DIR / "styles" / "teachbook.css"
     relative_style = os.path.relpath(shared_style, deck_dir).replace("\\", "/")
     deck_style.write_text(f'@import "{relative_style}";\n', encoding="utf-8", newline="\n")
     return deck_style
+
+
+def count_slides(deck_source: Path) -> int:
+    """Count top-level Slidev slide separators in a deck source."""
+    lines = deck_source.read_text(encoding="utf-8").splitlines()
+    separator_count = 0
+    in_fence = False
+    fence_marker = ""
+    first_content_line = ""
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped and not first_content_line:
+            first_content_line = stripped
+
+        fence_match = re.match(r"^(`{3,}|~{3,})", stripped)
+        if fence_match:
+            marker = fence_match.group(1)
+            if in_fence and marker.startswith(fence_marker[0]) and len(marker) >= len(fence_marker):
+                in_fence = False
+                fence_marker = ""
+            elif not in_fence:
+                in_fence = True
+                fence_marker = marker
+            continue
+
+        if not in_fence and stripped == "---":
+            separator_count += 1
+
+    if separator_count == 0:
+        return 1
+    if first_content_line == "---":
+        return max(1, separator_count - 1)
+    return separator_count + 1
+
+
+def write_clean_slide_entrypoints(deck: Deck, out_dir: Path) -> None:
+    """Create GitHub Pages-safe clean URLs like /slides/.../4."""
+    index_path = out_dir / "index.html"
+    if not index_path.is_file():
+        return
+    index_html = index_path.read_text(encoding="utf-8")
+    slide_count = count_slides(deck.source)
+    for slide_number in range(1, slide_count + 1):
+        slide_dir = out_dir / str(slide_number)
+        slide_dir.mkdir(parents=True, exist_ok=True)
+        (slide_dir / "index.html").write_text(index_html, encoding="utf-8", newline="\n")
 
 
 def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> str:
@@ -287,6 +334,8 @@ def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> str:
     if result.returncode != 0:
         print("".join(output), end="")
         raise subprocess.CalledProcessError(result.returncode, cmd)
+    write_clean_slide_entrypoints(deck, out_dir)
+    output.append(f"Entradas limpias generadas: {count_slides(deck.source)} slides\n")
     return "".join(output)
 
 
