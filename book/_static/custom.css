@@ -27,9 +27,7 @@ html {
     z-index: 2000000 !important;
 }
 
-/* Dropdown visibility on hover */
-.teachbook-lang-container:hover .teachbook-lang-dropdown,
-.teachbook-lang-container:focus-within .teachbook-lang-dropdown,
+/* Dropdown visibility is controlled by Bootstrap on desktop and custom.js on mobile. */
 .teachbook-lang-dropdown.show {
     display: block;
 }
@@ -237,6 +235,13 @@ html {
         z-index: 1085 !important;
     }
 
+    .teachbook-mobile-lang-dropdown {
+        position: fixed !important;
+        right: auto !important;
+        z-index: 2000001 !important;
+        max-width: calc(100vw - 16px);
+    }
+
     .bd-article h1:first-child,
     .bd-article .section > h1:first-child {
         padding-top: 1rem;
@@ -248,11 +253,12 @@ html {
     display: none;
     position: absolute;
     right: 0;
-    top: 32px;
+    left: auto;
+    top: calc(100% + 0.25rem);
+    transform: none;
     margin: 0 !important;
     min-width: 140px;
-    z-index: 1030 !important;
-    /* Slightly higher than header */
+    z-index: 2000000 !important;
     border: 1px solid var(--pst-color-border);
     background-color: #ffffff !important;
     /* Solid white background */
@@ -261,6 +267,13 @@ html {
     padding: 0.4rem 0;
     list-style: none;
     animation: fadeInDown 0.2s ease-out;
+}
+
+.teachbook-lang-container > .teachbook-lang-dropdown {
+    left: 0 !important;
+    right: auto !important;
+    top: calc(100% + 0.5rem) !important;
+    transform: none !important;
 }
 
 .teachbook-lang-dropdown.dropdown-menu {

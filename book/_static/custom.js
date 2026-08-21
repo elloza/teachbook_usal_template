@@ -241,6 +241,116 @@ function setupMobileHeaderTools(debugLog = () => {}) {
     }
 }
 
+function setupMobileLanguageDropdown(container) {
+    const button = container.querySelector(".teachbook-lang-btn");
+    const menu = container.querySelector(".teachbook-lang-dropdown");
+    if (!button || !menu) return;
+
+    const media = window.matchMedia("(max-width: 991.98px)");
+    let isOpen = false;
+
+    function isMobileHeader() {
+        return media.matches && Boolean(container.closest("#pst-header"));
+    }
+
+    function resetMenuPosition() {
+        menu.classList.remove("teachbook-mobile-lang-dropdown");
+        menu.style.left = "";
+        menu.style.right = "";
+        menu.style.top = "";
+        menu.style.transform = "";
+    }
+
+    function restoreMenu() {
+        if (menu.parentElement !== container) {
+            container.appendChild(menu);
+        }
+        resetMenuPosition();
+    }
+
+    function positionMobileMenu() {
+        const buttonRect = button.getBoundingClientRect();
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const menuWidth = Math.min(Math.max(menu.offsetWidth || 140, 140), viewportWidth - 16);
+        const left = Math.min(
+            Math.max(buttonRect.left + (buttonRect.width / 2) - (menuWidth / 2), 8),
+            viewportWidth - menuWidth - 8
+        );
+
+        menu.style.left = `${left}px`;
+        menu.style.right = "auto";
+        menu.style.top = `${buttonRect.bottom + 6}px`;
+        menu.style.transform = "none";
+    }
+
+    function closeMobileMenu() {
+        if (!isOpen) return;
+        isOpen = false;
+        button.classList.remove("show");
+        button.setAttribute("aria-expanded", "false");
+        container.classList.remove("show");
+        menu.classList.remove("show");
+        restoreMenu();
+        document.removeEventListener("click", onDocumentClick);
+        document.removeEventListener("keydown", onKeydown);
+        window.removeEventListener("resize", positionMobileMenu);
+        window.removeEventListener("scroll", positionMobileMenu, true);
+    }
+
+    function openMobileMenu() {
+        isOpen = true;
+        if (menu.parentElement !== document.body) {
+            document.body.appendChild(menu);
+        }
+        menu.classList.add("teachbook-mobile-lang-dropdown", "show");
+        button.classList.add("show");
+        button.setAttribute("aria-expanded", "true");
+        container.classList.add("show");
+        positionMobileMenu();
+        document.addEventListener("click", onDocumentClick);
+        document.addEventListener("keydown", onKeydown);
+        window.addEventListener("resize", positionMobileMenu);
+        window.addEventListener("scroll", positionMobileMenu, true);
+    }
+
+    function onDocumentClick(event) {
+        if (button.contains(event.target) || menu.contains(event.target)) return;
+        closeMobileMenu();
+    }
+
+    function onKeydown(event) {
+        if (event.key === "Escape") {
+            closeMobileMenu();
+            button.focus();
+        }
+    }
+
+    button.addEventListener("click", event => {
+        if (!isMobileHeader()) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (isOpen) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
+        }
+    });
+
+    menu.addEventListener("click", event => {
+        if (event.target.closest("a")) {
+            closeMobileMenu();
+        }
+    });
+
+    const onMediaChange = () => closeMobileMenu();
+    if (media.addEventListener) {
+        media.addEventListener("change", onMediaChange);
+    } else if (media.addListener) {
+        media.addListener(onMediaChange);
+    }
+}
+
 function fixSearchPageLinks(rootPrefix, languages, debugLog = () => {}) {
     if (!window.location.pathname.endsWith('/search.html')) return;
 
@@ -309,8 +419,9 @@ function injectLanguageSwitcher(languages, rootPrefix) {
                     type="button" 
                     id="teachbook-language-menu"
                     data-bs-toggle="dropdown"
+                    data-bs-display="static"
                     aria-expanded="false"
-                    title="Change Language / Cambiar Idioma">
+                    aria-label="Change Language / Cambiar Idioma">
                 <i class="fa-solid fa-language"></i>
                 <span class="lang-text">${currentLangCode.toUpperCase()}</span>
             </button>
@@ -338,6 +449,7 @@ function injectLanguageSwitcher(languages, rootPrefix) {
         div.innerHTML = dropdownHtml.trim();
         const switcherElement = div.firstChild;
         header.prepend(switcherElement);
+        setupMobileLanguageDropdown(switcherElement);
     }
 }
 
