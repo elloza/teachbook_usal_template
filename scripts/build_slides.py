@@ -375,6 +375,18 @@ def build_decks(decks: list[Deck], site_base: str, *, without_notes: bool, jobs:
                 ) from exc
 
 
+def copy_shared_public_assets() -> None:
+    """Expose shared Slidev public assets at /slides/public/."""
+    source_dir = SLIDES_DIR / "public"
+    if not source_dir.is_dir():
+        return
+    target_dir = HTML_DIR / "slides" / "public"
+    if target_dir.exists():
+        shutil.rmtree(target_dir)
+    shutil.copytree(source_dir, target_dir)
+    print(f"Assets publicos de Slidev copiados: {target_dir.relative_to(PROJECT_ROOT)}")
+
+
 def hub_title(lang: str) -> str:
     return "Slides" if lang == "en" else "Diapositivas"
 
@@ -501,6 +513,7 @@ def main() -> int:
     else:
         print("Modo --skip-build: no se ejecuta Slidev.")
 
+    copy_shared_public_assets()
     write_hubs(decks)
     write_manifest(decks)
     print("Build Slidev completado.")
