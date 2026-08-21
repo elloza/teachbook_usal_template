@@ -28,7 +28,8 @@ html {
 }
 
 /* Dropdown visibility on hover */
-.teachbook-lang-container:hover .teachbook-lang-dropdown {
+.teachbook-lang-container:hover .teachbook-lang-dropdown,
+.teachbook-lang-container:focus-within .teachbook-lang-dropdown {
     display: block;
 }
 
@@ -88,13 +89,18 @@ html {
     }
 }
 
-/* Mobile keeps the theme header as the single navigation bar.
-   The article header duplicates sidebar/search/theme/download controls and
-   custom buttons; on narrow screens it can occupy the whole row and block the
-   primary sidebar toggle. */
+/* Mobile keeps #pst-header as the real navigation bar and shows article tools
+   in a separate compact row. This preserves custom controls without letting
+   them cover the primary sidebar toggle. */
 @media (max-width: 991.98px) {
     .bd-header-article {
-        display: none !important;
+        display: block !important;
+        position: sticky;
+        top: 3.5rem;
+        z-index: 1081;
+        min-height: 2.35rem;
+        border-bottom: 1px solid var(--pst-color-border);
+        background: var(--pst-color-background);
     }
 
     #pst-header {
@@ -146,9 +152,97 @@ html {
         display: none !important;
     }
 
+    .bd-header-article .header-article__inner,
+    .bd-header-article .header-article-items {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 2.35rem;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .bd-header-article .header-article-items__start {
+        display: none !important;
+    }
+
+    .bd-header-article .header-article-items__end,
+    .bd-header-article .header-article-item,
+    .bd-header-article .article-header-buttons {
+        min-width: 0;
+    }
+
+    .bd-header-article .header-article-items__end {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .bd-header-article .article-header-buttons {
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.15rem;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 0.15rem 0.45rem;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .bd-header-article .article-header-buttons::-webkit-scrollbar {
+        display: none;
+    }
+
+    .bd-header-article .article-header-buttons > *,
+    .bd-header-article .article-header-buttons .btn,
+    .bd-header-article .article-header-buttons .pst-navbar-icon,
+    .bd-header-article .article-header-buttons .teachbook-a11y-btn,
+    .bd-header-article .article-header-buttons .teachbook-lang-btn,
+    .bd-header-article .article-header-buttons .teachbook-slides-btn {
+        flex: 0 0 auto;
+    }
+
+    .bd-header-article .article-header-buttons .btn,
+    .bd-header-article .article-header-buttons .pst-navbar-icon,
+    .bd-header-article .article-header-buttons .teachbook-a11y-btn,
+    .bd-header-article .article-header-buttons .teachbook-lang-btn,
+    .bd-header-article .article-header-buttons .teachbook-slides-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 2rem !important;
+        min-width: 2rem !important;
+        height: 2rem !important;
+        padding: 0 !important;
+        border-radius: 6px;
+        font-size: 0.92rem;
+        line-height: 1;
+    }
+
+    .bd-header-article .article-header-buttons .teachbook-lang-container {
+        height: 2rem;
+    }
+
+    .bd-header-article .article-header-buttons .dropdown-toggle::after,
+    .bd-header-article .article-header-buttons .lang-text,
+    .bd-header-article .article-header-buttons .teachbook-slides-btn span,
+    .bd-header-article .article-header-buttons .btn__text-container,
+    .bd-header-article .article-header-buttons .search-button__default-text,
+    .bd-header-article .article-header-buttons .search-button__kbd-shortcut {
+        display: none !important;
+    }
+
+    .bd-header-article .article-header-buttons .teachbook-lang-dropdown {
+        top: 2.1rem;
+        right: 0;
+        z-index: 1085 !important;
+    }
+
     .bd-article h1:first-child,
     .bd-article .section > h1:first-child {
-        padding-top: 0.75rem;
+        padding-top: 1rem;
     }
 }
 
