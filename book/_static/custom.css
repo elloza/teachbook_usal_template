@@ -89,34 +89,30 @@ html {
     }
 }
 
-/* Mobile keeps #pst-header as the real navigation bar and shows article tools
-   in a separate compact row. This preserves custom controls without letting
-   them cover the primary sidebar toggle. */
+/* Mobile uses a single compact header. Custom article tools are moved into
+   #pst-header by custom.js, so .bd-header-article must not create a second row. */
 @media (max-width: 991.98px) {
     .bd-header-article {
-        display: block !important;
-        position: sticky;
-        top: 3.5rem;
-        z-index: 1081;
-        min-height: 2.35rem;
-        border-bottom: 1px solid var(--pst-color-border);
-        background: var(--pst-color-background);
+        display: none !important;
     }
 
     #pst-header {
         position: sticky;
         top: 0;
         z-index: 1082;
-        min-height: 3.5rem;
+        min-height: 3.25rem;
         background: var(--pst-color-background);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
     #pst-header .bd-header__inner {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.15rem;
         min-width: 0;
         width: 100%;
+        min-height: 3.25rem;
+        padding: 0 0.35rem;
     }
 
     #pst-header .primary-toggle,
@@ -124,10 +120,10 @@ html {
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
-        flex: 0 0 2.75rem;
-        width: 2.75rem;
-        min-width: 2.75rem;
-        height: 2.75rem;
+        flex: 0 0 2.45rem;
+        width: 2.45rem;
+        min-width: 2.45rem;
+        height: 2.45rem;
         pointer-events: auto;
         z-index: 1084 !important;
     }
@@ -139,12 +135,32 @@ html {
     }
 
     #pst-header .navbar-header-items {
+        display: flex !important;
         flex: 1 1 auto;
         overflow: hidden;
     }
 
+    #pst-header .navbar-header-items__end {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 auto;
+        gap: 0.1rem;
+        overflow: hidden;
+    }
+
+    #pst-header .navbar-header-items__end > .navbar-item.navbar-persistent--container {
+        display: none !important;
+    }
+
     #pst-header .navbar-persistent--mobile {
-        flex: 0 1 auto;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 2rem;
+        width: 2rem;
+        min-width: 2rem;
+        overflow: hidden;
     }
 
     #pst-header .search-button__default-text,
@@ -152,91 +168,71 @@ html {
         display: none !important;
     }
 
-    .bd-header-article .header-article__inner,
-    .bd-header-article .header-article-items {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        min-height: 2.35rem;
-        width: 100%;
-        min-width: 0;
-    }
-
-    .bd-header-article .header-article-items__start {
-        display: none !important;
-    }
-
-    .bd-header-article .header-article-items__end,
-    .bd-header-article .header-article-item,
-    .bd-header-article .article-header-buttons {
-        min-width: 0;
-    }
-
-    .bd-header-article .header-article-items__end {
-        flex: 1 1 auto;
-        width: 100%;
-    }
-
-    .bd-header-article .article-header-buttons {
+    #teachbook-mobile-header-tools {
         display: flex !important;
         align-items: center;
-        justify-content: flex-end;
-        gap: 0.15rem;
+        justify-content: center;
+        gap: 0.1rem;
+        flex: 1 1 auto;
+        min-width: 0;
         width: 100%;
         max-width: 100%;
         overflow-x: auto;
         overflow-y: visible;
-        padding: 0.15rem 0.45rem;
+        padding: 0;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
     }
 
-    .bd-header-article .article-header-buttons::-webkit-scrollbar {
+    #teachbook-mobile-header-tools::-webkit-scrollbar {
         display: none;
     }
 
-    .bd-header-article .article-header-buttons > *,
-    .bd-header-article .article-header-buttons .btn,
-    .bd-header-article .article-header-buttons .pst-navbar-icon,
-    .bd-header-article .article-header-buttons .teachbook-a11y-btn,
-    .bd-header-article .article-header-buttons .teachbook-lang-btn,
-    .bd-header-article .article-header-buttons .teachbook-slides-btn {
+    #teachbook-mobile-header-tools > *,
+    #teachbook-mobile-header-tools .btn,
+    #teachbook-mobile-header-tools .pst-navbar-icon,
+    #teachbook-mobile-header-tools .teachbook-a11y-btn,
+    #teachbook-mobile-header-tools .teachbook-lang-btn,
+    #teachbook-mobile-header-tools .teachbook-slides-btn,
+    #pst-header .navbar-persistent--mobile .search-button__button {
         flex: 0 0 auto;
     }
 
-    .bd-header-article .article-header-buttons .btn,
-    .bd-header-article .article-header-buttons .pst-navbar-icon,
-    .bd-header-article .article-header-buttons .teachbook-a11y-btn,
-    .bd-header-article .article-header-buttons .teachbook-lang-btn,
-    .bd-header-article .article-header-buttons .teachbook-slides-btn {
+    #teachbook-mobile-header-tools .btn,
+    #teachbook-mobile-header-tools .pst-navbar-icon,
+    #teachbook-mobile-header-tools .teachbook-a11y-btn,
+    #teachbook-mobile-header-tools .teachbook-lang-btn,
+    #teachbook-mobile-header-tools .teachbook-slides-btn,
+    #pst-header .navbar-persistent--mobile .search-button__button {
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
-        width: 2rem !important;
-        min-width: 2rem !important;
-        height: 2rem !important;
+        width: 1.85rem !important;
+        min-width: 1.85rem !important;
+        height: 1.85rem !important;
         padding: 0 !important;
         border-radius: 6px;
-        font-size: 0.92rem;
+        font-size: 0.88rem;
         line-height: 1;
     }
 
-    .bd-header-article .article-header-buttons .teachbook-lang-container {
-        height: 2rem;
+    #teachbook-mobile-header-tools .teachbook-lang-container {
+        position: relative;
+        height: 1.85rem;
     }
 
-    .bd-header-article .article-header-buttons .dropdown-toggle::after,
-    .bd-header-article .article-header-buttons .lang-text,
-    .bd-header-article .article-header-buttons .teachbook-slides-btn span,
-    .bd-header-article .article-header-buttons .btn__text-container,
-    .bd-header-article .article-header-buttons .search-button__default-text,
-    .bd-header-article .article-header-buttons .search-button__kbd-shortcut {
+    #teachbook-mobile-header-tools .dropdown-toggle::after,
+    #teachbook-mobile-header-tools .lang-text,
+    #teachbook-mobile-header-tools .teachbook-slides-btn span,
+    #teachbook-mobile-header-tools .btn__text-container {
         display: none !important;
     }
 
-    .bd-header-article .article-header-buttons .teachbook-lang-dropdown {
-        top: 2.1rem;
-        right: 0;
+    #teachbook-mobile-header-tools .teachbook-lang-dropdown {
+        top: 2rem;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
         z-index: 1085 !important;
     }
 

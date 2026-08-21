@@ -51,9 +51,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return null;
     }
 
-    findLanguagesJson().then(result => {
+    findLanguagesJson().then(async result => {
         if (!result) {
             debugLog("TeachBook: Language switcher disabled (languages.json not found).");
+            setupMobileHeaderTools(debugLog);
             return;
         }
 
@@ -69,7 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
         injectPDFButton(languages, rootPrefix);
 
         // Inject contextual Slidev button when a slides manifest is available.
-        injectSlidesButton(languages, rootPrefix, debugLog);
+        await injectSlidesButton(languages, rootPrefix, debugLog);
+        setupMobileHeaderTools(debugLog);
 
         // Search page fix: Sphinx search sometimes generates duplicated language prefixes
         // like /es/es/page.html or sidebar links like es/intro.html inside /es/search.html.
@@ -156,8 +158,88 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Insert at the beginning of header buttons (before language switcher)
         header.prepend(btn);
+        setupMobileHeaderTools(debugLog);
     })();
 });
+
+function setupMobileHeaderTools(debugLog = () => {}) {
+    const articleButtons = document.querySelector(".article-header-buttons");
+    const headerEnd = document.querySelector("#pst-header .navbar-header-items__end");
+    if (!articleButtons || !headerEnd) return;
+
+    const media = window.matchMedia("(max-width: 991.98px)");
+    let mobileTools = document.getElementById("teachbook-mobile-header-tools");
+    if (!mobileTools) {
+        mobileTools = document.createElement("div");
+        mobileTools.id = "teachbook-mobile-header-tools";
+        mobileTools.className = "teachbook-mobile-header-tools";
+    }
+
+    const movableSelectors = [
+        "#teachbook-slides-btn",
+        ".teachbook-lang-container",
+        ".teachbook-a11y-btn",
+        ".dropdown-download-buttons",
+        ".btn-fullscreen-button",
+        ".theme-switch-button"
+    ];
+
+    function movableControls() {
+        const controls = [];
+        movableSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(control => {
+                if (!controls.includes(control)) controls.push(control);
+            });
+        });
+        return controls;
+    }
+
+    function moveToMobile() {
+        if (!headerEnd.contains(mobileTools)) {
+            headerEnd.appendChild(mobileTools);
+        }
+
+        movableControls().forEach(control => {
+            mobileTools.appendChild(control);
+        });
+
+        debugLog("TeachBook: mobile header tools moved into #pst-header");
+    }
+
+    function moveToArticle() {
+        movableControls().slice().reverse().forEach(control => {
+            if (!articleButtons.contains(control)) {
+                articleButtons.prepend(control);
+            }
+        });
+
+        if (mobileTools.parentElement) {
+            mobileTools.remove();
+        }
+
+        debugLog("TeachBook: mobile header tools restored to article header");
+    }
+
+    function apply() {
+        if (media.matches) {
+            moveToMobile();
+        } else {
+            moveToArticle();
+        }
+    }
+
+    apply();
+
+    if (!window.TEACHBOOK_MOBILE_HEADER_LISTENER) {
+        const onChange = () => setupMobileHeaderTools(debugLog);
+        if (media.addEventListener) {
+            media.addEventListener("change", onChange);
+        } else if (media.addListener) {
+            media.addListener(onChange);
+        }
+        window.TEACHBOOK_MOBILE_HEADER_LISTENER = true;
+    }
+}
 
 function fixSearchPageLinks(rootPrefix, languages, debugLog = () => {}) {
     if (!window.location.pathname.endsWith('/search.html')) return;
