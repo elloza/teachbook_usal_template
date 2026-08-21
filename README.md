@@ -5,6 +5,8 @@
 
 Material y plantilla del curso **Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial**, dirigido a las **Facultades de Ciencias y de Ciencias Químicas de la USAL** y diseñado para que profesores sin conocimientos de informática puedan crear y publicar libros digitales usando **agentes de código con IA**.
 
+👉 **Demo rápida para docentes:** [http://elloza.com/teachbook_usal_template/](http://elloza.com/teachbook_usal_template/)
+
 ---
 
 ## Cita y DOI

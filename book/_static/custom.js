@@ -304,16 +304,17 @@ function injectLanguageSwitcher(languages, rootPrefix) {
     });
 
     const dropdownHtml = `
-        <div class="teachbook-lang-container">
+        <div class="dropdown teachbook-lang-container">
             <button class="btn btn-sm teachbook-lang-btn dropdown-toggle" 
                     type="button" 
+                    id="teachbook-language-menu"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                     title="Change Language / Cambiar Idioma">
                 <i class="fa-solid fa-language"></i>
                 <span class="lang-text">${currentLangCode.toUpperCase()}</span>
             </button>
-            <ul class="teachbook-lang-dropdown">
+            <ul class="dropdown-menu teachbook-lang-dropdown" aria-labelledby="teachbook-language-menu">
                 ${languages.map(l => {
         // rootPrefix is the relative path to the book root (e.g., "../" from /es/intro.html)
         // So rootPrefix + "en/intro.html" = "../en/intro.html" which resolves correctly

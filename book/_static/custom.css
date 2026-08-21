@@ -29,7 +29,8 @@ html {
 
 /* Dropdown visibility on hover */
 .teachbook-lang-container:hover .teachbook-lang-dropdown,
-.teachbook-lang-container:focus-within .teachbook-lang-dropdown {
+.teachbook-lang-container:focus-within .teachbook-lang-dropdown,
+.teachbook-lang-dropdown.show {
     display: block;
 }
 
@@ -260,6 +261,14 @@ html {
     padding: 0.4rem 0;
     list-style: none;
     animation: fadeInDown 0.2s ease-out;
+}
+
+.teachbook-lang-dropdown.dropdown-menu {
+    --bs-dropdown-min-width: 140px;
+    --bs-dropdown-padding-x: 0;
+    --bs-dropdown-padding-y: 0.4rem;
+    --bs-dropdown-border-color: var(--pst-color-border);
+    --bs-dropdown-bg: #ffffff;
 }
 
 .teachbook-lang-dropdown li {

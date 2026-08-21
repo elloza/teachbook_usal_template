@@ -743,6 +743,7 @@ def create_redirect_index(default_lang="es"):
     <!DOCTYPE html>
     <html>
     <head>
+        <link rel="icon" href="_static/favicon.ico" />
         <meta http-equiv="refresh" content="0; url={default_lang}/intro.html" />
         <script>window.location.href = "{default_lang}/intro.html";</script>
     </head>
@@ -830,6 +831,7 @@ def main():
         search_redirect = f"""<!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" href="_static/favicon.ico" />
     <script>
       var query = window.location.search;
       window.location.href = "{default_lang}/search.html" + query;
