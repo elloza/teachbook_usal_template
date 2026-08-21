@@ -30,6 +30,9 @@ html {
 /* Dropdown visibility is controlled by Bootstrap on desktop and custom.js on mobile. */
 .teachbook-lang-dropdown.show {
     display: block;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
 }
 
 .teachbook-lang-btn {
