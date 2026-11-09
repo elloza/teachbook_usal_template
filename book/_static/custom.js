@@ -1,4 +1,4 @@
-// Custom UI Injection (Language Switcher + PDF + Slides Button)
+// Custom UI Injection (Language Switcher, Book Downloads and Slides)
 document.addEventListener("DOMContentLoaded", function () {
     const TEACHBOOK_VERSION = "3.0";
     if (window.TEACHBOOK_LOADED_VERSION === TEACHBOOK_VERSION) return;
@@ -68,8 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
             debugLog("TeachBook: Single language detected. Hiding switcher.");
         }
 
-        // Inject PDF Button
-        injectPDFButton(languages, rootPrefix);
+        injectBookDownloads(languages, rootPrefix);
 
         // Inject contextual Slidev button when a slides manifest is available.
         if (languages.some(language => language.slides !== false)) {
@@ -457,45 +456,48 @@ function injectLanguageSwitcher(languages, rootPrefix) {
     }
 }
 
-function injectPDFButton(languages, rootPrefix) {
+function injectBookDownloads(languages, rootPrefix) {
+    const code = getCurrentPageKey(rootPrefix).split("/")[0];
+    const language = languages.find(lang => lang.code === code) || languages[0];
+    if (!language?.downloads) return;
+
+    const es = language.code === "es";
+    const formats = [
+        ["pdf", es ? "Libro completo (PDF)" : "Complete book (PDF)"],
+        ["epub", es ? "Libro electrónico (EPUB)" : "Ebook (EPUB)"]
+    ].filter(([format]) => language.downloads[format]);
+    if (!formats.length) return;
+
+    function appendDownloads(menu, linkClass = "") {
+        for (const [format, label] of formats) {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.className = linkClass;
+            link.href = `${rootPrefix}_static/${encodeURIComponent(language.downloads[format])}`;
+            link.download = "";
+            link.textContent = label;
+            item.append(link);
+            menu.append(item);
+        }
+    }
+
+    const headerMenu = document.querySelector(".dropdown-download-buttons .dropdown-menu");
+    if (headerMenu) {
+        const separator = document.createElement("li");
+        separator.innerHTML = '<hr class="dropdown-divider">';
+        headerMenu.append(separator);
+        appendDownloads(headerMenu, "dropdown-item");
+        headerMenu.previousElementSibling?.setAttribute("aria-label", es ? "Descargas" : "Downloads");
+    }
+
     const sidebar = document.querySelector(".bd-sidebar-primary");
     if (sidebar) {
-        if (document.getElementById("custom-pdf-btn")) return;
-
-        // Detect current language from URL using languages.json codes
-        const path = window.location.pathname;
-        let lang = languages[0].code;
-        languages.forEach(l => {
-            if (path.includes(`/${l.code}/`)) lang = l.code;
-        });
-
-        const pdfFilenames = {
-            "es": "ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf",
-            "en": "CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf"
-        };
-        const pdfFilename = pdfFilenames[lang] || `TeachBook_${lang}.pdf`;
-        const pdfUrl = rootPrefix + `_static/${pdfFilename}`;
-
-        const langStrings = {
-            "es": { "text": "Libro Completo (PDF)", "title": "Descargar PDF completo" },
-            "en": { "text": "Complete Book (PDF)", "title": "Download complete PDF" }
-        };
-        const strings = langStrings[lang] || langStrings["en"];
-
-        const btnHtml = `
-            <div class="sidebar-footer-pdf">
-                <div class="custom-sidebar-pdf-container">
-                    <a href="${pdfUrl}" id="custom-pdf-btn" class="btn btn-sm" download title="${strings.title}">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>${strings.text}</span>
-                    </a>
-                </div>
-            </div>
-        `;
-
-        const div = document.createElement("div");
-        div.innerHTML = btnHtml.trim();
-        sidebar.appendChild(div.firstChild);
+        const menu = document.createElement("details");
+        menu.className = "sidebar-book-downloads";
+        menu.innerHTML = `<summary><i class="fa-solid fa-download" aria-hidden="true"></i>
+            ${es ? "Descargar libro" : "Download book"}</summary><ul></ul>`;
+        appendDownloads(menu.querySelector("ul"));
+        sidebar.append(menu);
     }
 }
 

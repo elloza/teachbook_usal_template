@@ -116,6 +116,8 @@ python scripts/launch_preview.py --no-browser
 python scripts/launch_preview.py --no-watch
 ```
 
+Si el usuario quiere comprobar la descarga de EPUB, prepara el extra `epub` con el setup y añade `--epub` al lanzador.
+
 ## Prohibido para agentes
 
 No hacer nada de esto:

@@ -315,37 +315,45 @@ html {
     text-decoration: none;
 }
 
-/* Sidebar Footer PDF Button */
-.sidebar-footer-pdf {
+/* Book downloads in the primary sidebar */
+.sidebar-book-downloads {
     padding: 1.2rem;
     border-top: 1px solid var(--pst-color-border);
     margin-top: auto;
 }
 
-.custom-sidebar-pdf-container a {
+.sidebar-book-downloads summary {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
     width: 100%;
     padding: 0.7rem;
-    background-color: var(--usal-blue) !important;
-    color: white !important;
+    background-color: var(--usal-blue);
+    color: white;
     border-radius: 8px;
     font-weight: 600;
     font-size: 0.9em;
-    text-decoration: none !important;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    border: none;
+    cursor: pointer;
 }
 
-.custom-sidebar-pdf-container a:hover {
-    background-color: var(--usal-blue-light) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.sidebar-book-downloads summary::-webkit-details-marker {
+    display: none;
 }
 
-.custom-sidebar-pdf-container a:active {
-    transform: scale(0.98);
+.sidebar-book-downloads summary:hover {
+    background-color: var(--usal-blue-light);
+}
+
+.sidebar-book-downloads ul {
+    list-style: none;
+    padding: 0.35rem 0 0;
+    margin: 0;
+}
+
+.sidebar-book-downloads a {
+    display: block;
+    padding: 0.35rem 0.5rem;
 }
 
 @keyframes fadeInDown {

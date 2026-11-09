@@ -89,7 +89,9 @@ Puedes decirle **«Prepara la plantilla sin diapositivas»** antes de instalar. 
 
 Esto crea la versión HTML navegable en `book/_build/html/`. Puedes abrirla en cualquier navegador.
 
-El build reutiliza el HTML por idioma y las presentaciones que siguen al día. Con Slidev activado, integra las diapositivas en la web final. Para comprobar un build desde cero usa `python scripts/build_book.py --clean`.
+El build reutiliza el sitio completo si las fuentes y los archivos generados siguen intactos. Cuando cambia el contenido, reutiliza el HTML por idioma y las presentaciones que siguen al día. Para comprobar un build desde cero usa `python scripts/build_book.py --clean`.
+
+Al pulsar una figura en la web se abre un visor con su pie y controles de zoom, ajuste y tamaño original.
 
 ### 3️⃣ Ver cambios en tiempo real (desarrollo)
 
@@ -97,13 +99,29 @@ El build reutiliza el HTML por idioma y las presentaciones que siguen al día. C
 
 Se abrirá tu navegador en `localhost:8000`. Tras guardar, la vista previa prepara los cambios con el mismo build que producción. Si una compilación falla durante la edición, puedes seguir consultando la última compilación correcta y ver el error en el registro.
 
-### 4️⃣ Generar los PDFs
+### 4️⃣ Generar PDF y EPUB
 
 > **"Genera los PDFs del libro"** o **"Exportar a PDF"**
 
 El agente instalará LaTeX (Tectonic) si es necesario y generará `ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf` y `CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf`.
 
 Tras exportar ambos PDF una vez con conexión, puedes volver a generarlos con `python scripts/export_pdf.py --offline` mientras Tectonic tenga los recursos necesarios en la caché del proyecto.
+
+> **«Genera los EPUB del libro»**
+
+La cabecera y el botón **Descargar libro** del lateral ofrecen el PDF y el EPUB del idioma actual. El EPUB adapta el texto al tamaño de pantalla e incluye el índice, las figuras y las ecuaciones. Los vídeos y las actividades interactivas se consultan en la web.
+
+Para generar o previsualizar EPUB en local, ejecuta estos comandos desde `.venv`.
+
+```bash
+python scripts/setup_env.py --yes --extras epub
+python scripts/build_book.py --epub
+python scripts/launch_preview.py --epub
+```
+
+El extra instala el conversor Pandoc en el entorno del proyecto. En Windows ARM64, instala la versión x64 de Pandoc 3.2 o posterior y déjala disponible en el `PATH` antes de ejecutar el setup. [Instalación de Pandoc](https://pandoc.org/installing.html)
+
+Los EPUB se guardan en `book/_build/html/_static/`. Si publicas en otro servidor, configura `TEACHBOOK_SITE_URL` con la URL pública para incluir enlaces a los vídeos y actividades. El workflow de Pages la define automáticamente.
 
 ### 5️⃣ Generar diapositivas para clase
 
@@ -281,7 +299,7 @@ Estos tests verifican que:
 
 El **deploy de GitHub Pages** sí se ejecuta automáticamente al hacer `push` a `main`.
 
-Los workflows de Pages y SFTP regeneran los PDF y reutilizan la caché de Tectonic. Con Slidev activado en `teachbook.json`, también preparan Node.js y publican las presentaciones dentro del mismo sitio.
+Los workflows de Pages y SFTP regeneran los PDF, reutilizan la caché de Tectonic y exportan los EPUB desde el HTML recién compilado. Cuando la caché de Tectonic está disponible, generan hasta dos idiomas de PDF en paralelo. Con Slidev activado en `teachbook.json`, también preparan Node.js y publican las presentaciones dentro del mismo sitio.
 
 Las ediciones archivables se publican como releases de GitHub tras validar el despliegue. La integración de Zenodo archiva el código etiquetado con los metadatos de `.zenodo.json`. [Releases del proyecto](https://github.com/elloza/teachbook_usal_template/releases)
 

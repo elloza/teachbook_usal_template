@@ -28,6 +28,7 @@ Tras el push, **GitHub Actions** se ejecuta automáticamente:
 - Compila el libro HTML para todos los idiomas.
 - Integra las diapositivas Slidev cuando se activan en `teachbook.json`.
 - Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
+- Genera un EPUB por idioma durante `scripts/build_book.py --epub`.
 - Despliega todo a GitHub Pages.
 
 La publicación correcta NO consiste en subir solo HTML. El workflow de Pages debe regenerar primero los PDFs finales de `book/_static/` y después compilar la web que enlaza esos PDFs recientes.
@@ -78,7 +79,7 @@ Significa que no se ha modificado ningún archivo desde el último commit. No es
 Después de ejecutar `git_helper.py`:
 1. Ir al repositorio en GitHub → pestaña **Actions**.
 2. Verificar que el workflow se ha ejecutado correctamente (icono verde).
-3. Una vez completado, el libro estará disponible en `https://<usuario>.github.io/<repo>/`.
+3. Una vez completado, comprueba la web publicada y las descargas PDF y EPUB del desplegable en cada idioma.
 
 ## Solución de problemas
 

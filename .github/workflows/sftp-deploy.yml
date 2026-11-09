@@ -103,9 +103,10 @@ jobs:
 
       - name: Set up TeachBook environment
         run: |
-          python scripts/setup_env.py --yes --profile --extras pdf
+          python scripts/setup_env.py --yes --profile --extras pdf,epub
 
       - name: Cache Tectonic resources
+        id: tectonic-cache
         uses: actions/cache@v6
         with:
           path: .venv/tools/tectonic-cache
@@ -129,14 +130,15 @@ jobs:
 
       - name: Generate PDFs
         run: |
-          .venv/bin/python scripts/export_pdf.py --engine auto
+          .venv/bin/python scripts/export_pdf.py --engine auto --jobs "${{ steps.tectonic-cache.outputs.cache-hit == 'true' && '2' || '1' }}"
 
-      - name: Build HTML book
+      - name: Build HTML and EPUB books
         env:
           TEACHBOOK_SITE_BASE: /
+          TEACHBOOK_SITE_URL: ${{ vars.TEACHBOOK_SITE_URL }}
           TEACHBOOK_SLIDEV_JOBS: "4"
         run: |
-          .venv/bin/python scripts/build_book.py
+          .venv/bin/python scripts/build_book.py --epub
 
       - name: Verify build output
         run: |

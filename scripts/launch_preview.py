@@ -163,6 +163,7 @@ Opciones pasadas a preview_book.py:
   --port 8010       usar otro puerto
   --no-browser      no abrir navegador
   --no-watch        compilar una vez y servir sin vigilar cambios
+  --epub            generar los EPUB durante la vista previa
 
 Regla: este lanzador NO crea entornos. Si .venv no corresponde al sistema
 actual, se detiene y muestra diagnóstico.

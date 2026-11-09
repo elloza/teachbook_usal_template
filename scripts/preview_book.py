@@ -175,15 +175,18 @@ def choose_port(requested: int) -> int:
 # ---------------------------------------------------------------------------
 
 
-def run_real_build(reason: str) -> bool:
+def run_real_build(reason: str, *, with_epub: bool = False) -> bool:
     """Run scripts/build_book.py exactly like production."""
     py = venv_python() or Path(sys.executable)
     started = time.perf_counter()
     print(f"\n🔨 Compilando el libro ({reason})", flush=True)
 
     env = {**os.environ, "PYTHONUTF8": "1", "PYTHONUNBUFFERED": "1"}
+    command = [str(py), str(BUILD_SCRIPT)]
+    if with_epub:
+        command.append("--epub")
     with subprocess.Popen(
-        [str(py), str(BUILD_SCRIPT)],
+        command,
         cwd=PROJECT_ROOT,
         env=env,
         stdout=subprocess.PIPE,
@@ -233,7 +236,7 @@ def snapshot_sources() -> dict[Path, tuple[int, int]]:
     return snapshot
 
 
-def watcher_loop(stop_event: threading.Event, previous, interval: float = 0.5) -> None:
+def watcher_loop(stop_event: threading.Event, previous, interval: float = 0.5, *, with_epub: bool = False) -> None:
     pending = False
 
     while not stop_event.wait(interval):
@@ -246,7 +249,7 @@ def watcher_loop(stop_event: threading.Event, previous, interval: float = 0.5) -
 
         if pending:
             pending = False
-            if not run_real_build("cambio detectado"):
+            if not run_real_build("cambio detectado", with_epub=with_epub):
                 print("   Se sigue sirviendo el último build correcto.", flush=True)
 
 
@@ -290,6 +293,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--port", type=int, default=8000, help="Puerto local (por defecto: 8000)")
     parser.add_argument("--no-browser", action="store_true", help="No abrir el navegador automáticamente")
     parser.add_argument("--no-watch", action="store_true", help="Compilar una vez y servir sin vigilar cambios")
+    parser.add_argument("--epub", action="store_true", help="Incluir EPUB en cada compilación")
     return parser.parse_args()
 
 
@@ -309,7 +313,7 @@ def main() -> int:
 
     # Capture edits made during the initial build as well as later edits.
     previous = snapshot_sources() if not args.no_watch else None
-    if not run_real_build("arranque inicial"):
+    if not run_real_build("arranque inicial", with_epub=args.epub):
         return 1
 
     server = start_server(port)
@@ -329,7 +333,9 @@ def main() -> int:
 
     watcher_thread: threading.Thread | None = None
     if not args.no_watch:
-        watcher_thread = threading.Thread(target=watcher_loop, args=(stop_event, previous), daemon=True)
+        watcher_thread = threading.Thread(
+            target=watcher_loop, args=(stop_event, previous), kwargs={"with_epub": args.epub}, daemon=True,
+        )
         watcher_thread.start()
 
     url = f"http://localhost:{port}"

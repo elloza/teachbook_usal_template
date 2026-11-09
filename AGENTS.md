@@ -75,11 +75,12 @@ La instalación inicial debe ser ligera. No mezcles dependencias científicas o 
 |---|---|---|
 | `requirements.txt` | Siempre | Build HTML, preview, citas, Kroki, Thebe y assets básicos |
 | `requirements-pdf.txt` | `--extras pdf` | Exportación PDF y conversión SVG para LaTeX |
+| `requirements-epub.txt` | `--extras epub` | EPUB desde el HTML del libro con Pandoc |
 | `requirements-notebooks.txt` | `--extras notebooks` | Ejecución local de notebooks científicos |
 | `requirements-pdf-import.txt` | `--extras pdf-import` | Conversión de PDFs a Markdown; puede arrastrar paquetes pesados |
 | `requirements-dev.txt` | `--dev` | Tests y herramientas de desarrollo |
 
-Regla práctica: para un docente que abre la plantilla por primera vez, usar `python scripts/setup_env.py --yes`. Para publicar con PDF, CI usa `python scripts/setup_env.py --yes --extras pdf`.
+Para preparar la plantilla por primera vez usa `python scripts/setup_env.py --yes`. Los workflows de publicación añaden los extras con `python scripts/setup_env.py --yes --extras pdf,epub`.
 Si falla el instalador oficial de `uv`, `setup_env.py` usa pip con destino local en `.build_logs/tools` y añade esa ubicación al `PATH` del proceso.
 
 ## Idiomas Configurados
@@ -414,6 +415,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 |---|---|---|
 | Configurar entorno base | `python scripts/setup_env.py --yes` | Crea `.venv` con Python 3.12 e instala solo lo necesario para web/preview |
 | Añadir soporte PDF | `python scripts/setup_env.py --yes --extras pdf` | Instala dependencias Python para exportar PDF |
+| Añadir soporte EPUB | `python scripts/setup_env.py --yes --extras epub` | Prepara el conversor EPUB en `.venv` |
 | Añadir notebooks científicos | `python scripts/setup_env.py --yes --extras notebooks` | Instala NumPy, Matplotlib, pandas, SciPy, SymPy, Schemdraw, ipywidgets y JupyterQuiz |
 | Añadir importación de PDFs | `python scripts/setup_env.py --yes --extras pdf-import` | Instala el conversor PDF→Markdown bajo demanda |
 | Instalar todo | `python scripts/setup_env.py --yes --all` | Instala base + todos los extras opcionales |
@@ -425,6 +427,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Compilar libro | `python scripts/build_book.py` | Genera HTML multi-idioma y reutiliza resultados por idioma y deck. Añadir `--clean` para reconstruir desde cero |
 | Vista previa | `python scripts/launch_preview.py` | Lanza la preview segura en `localhost:8000` usando el mismo build que producción |
 | Exportar PDF | `python scripts/export_pdf.py` | Genera PDF para cada idioma en `book/_static/` |
+| Exportar EPUB | `python scripts/build_book.py --epub` | Genera el sitio y un EPUB por idioma en `book/_build/html/_static/` |
 | Exportar PDF sin conexión | `python scripts/export_pdf.py --offline` | Usa la caché de Tectonic tras una exportación previa con conexión |
 | Exportar LaTeX editable | `python scripts/export_latex_project.py --output latex_exports` | Genera carpetas LaTeX y ZIPs Overleaf-ready para retoques editoriales finales |
 | Instalar LaTeX | `python scripts/setup_latex.py` | Instala Tectonic (motor LaTeX ligero) |
@@ -492,10 +495,10 @@ Reglas estrictas:
 El proyecto incluye un GitHub Action (`.github/workflows/deploy.yml`) que:
 1. Se ejecuta automáticamente al hacer `push` a la rama principal.
 2. Instala/prepara el entorno TeachBook.
-3. Instala las dependencias Python de PDF con `scripts/setup_env.py --yes --extras pdf`.
+3. Instala las dependencias de PDF y EPUB con `scripts/setup_env.py --yes --extras pdf,epub`.
 4. Prepara Tectonic con `scripts/setup_latex.py --yes` y restaura su caché.
-5. Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
-6. Compila el libro HTML con `scripts/build_book.py` e integra las diapositivas si `teachbook.json` activa Slidev.
+5. Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`. Con caché de Tectonic se pueden compilar dos idiomas en paralelo con `--jobs 2`.
+6. Compila el libro con `scripts/build_book.py --epub`. Incluye las diapositivas cuando Slidev está activado.
 7. Despliega el sitio resultante a GitHub Pages.
 
 **Regla crítica de publicación:** no se debe publicar una versión nueva subiendo solo HTML. La ruta soportada es `commit + push` a `main`, porque el workflow regenera primero los PDFs finales de `book/_static/` y después construye la web que enlaza esos PDFs recientes. Si se cambia contenido, diagramas, imágenes o notebooks, el deploy debe producir PDFs nuevos en la misma ejecución.

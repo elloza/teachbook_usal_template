@@ -1,0 +1,2 @@
+beautifulsoup4>=4.12,<5
+pypandoc_binary==1.17; platform_system != "Windows" or platform_machine != "ARM64"

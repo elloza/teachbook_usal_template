@@ -6,11 +6,14 @@ import shutil
 import sys
 import glob
 import re
+import time
 import importlib.metadata as metadata
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
-# Determine script/project directories once, before any chdir.
+# Determine script/project directories once.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 
@@ -254,7 +257,7 @@ def write_command_log(cmd, stdout, stderr):
     """Persist full command output so quiet mode never hides errors."""
     log_dir = os.path.join(PROJECT_ROOT, ".build_logs")
     os.makedirs(log_dir, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     safe_name = os.path.basename(cmd[0]).replace(".", "_")
     log_path = os.path.join(log_dir, f"latex-{timestamp}-{safe_name}.log")
     with open(log_path, "w", encoding="utf-8", newline="\n") as f:
@@ -280,7 +283,7 @@ def print_output_tail(stdout, stderr, lines=80):
         print("\n".join(tail))
 
 
-def compile_latex_with_engine(tex_engine_path, main_tex, *, offline=False):
+def compile_latex_with_engine(tex_engine_path, main_tex, *, cwd, offline=False):
     """Compile a LaTeX file with one concrete engine path."""
     print(f"🔧 Usando motor: {tex_engine_path}")
     env = latex_env(tex_engine_path)
@@ -317,12 +320,13 @@ def compile_latex_with_engine(tex_engine_path, main_tex, *, offline=False):
         try:
             print(f"🚀 Ejecutando ({attempt}/{len(commands)}): {' '.join(cmd)}")
             if VERBOSE:
-                subprocess.run(cmd, check=True, env=env)
+                subprocess.run(cmd, check=True, env=env, cwd=cwd)
             else:
                 result = subprocess.run(
                     cmd,
                     check=False,
                     env=env,
+                    cwd=cwd,
                     capture_output=True,
                     text=True,
                     encoding="utf-8",
@@ -863,7 +867,7 @@ def copy_root_latex_support_files(latex_build_dir):
             shutil.copy2(source, dest)
 
 
-def build_pdf_for_lang(lang, engine_name, *, offline=False):
+def build_pdf_for_lang(lang, engine_name, *, offline=False, output_dir=None):
     """Builds the PDF for a specific language using a standalone temporary project."""
     print(f"\n🚀 Iniciando generación de PDF STANDALONE para: {lang.upper()}...")
 
@@ -927,7 +931,8 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
     output_root = Path(src_dir) if temp_mode else Path(PROJECT_ROOT) / BOOK_DIR / "_build" / ".pdf-default"
     build_dir = str(output_root / "_build")
     latex_build_dir = os.path.join(build_dir, "latex")
-    dest_pdf_path = os.path.join(STATIC_DIR, pdf_filename)
+    destination = Path(output_dir or STATIC_DIR)
+    dest_pdf_path = destination / pdf_filename
 
     if os.path.exists(build_dir):
         shutil.rmtree(build_dir)
@@ -990,13 +995,11 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
     mirror_shared_asset_paths_for_latex(latex_build_dir)
 
     print(f"📂 Compilando PDF en {latex_build_dir}...")
-    current_dir = os.getcwd()
     try:
-        os.chdir(latex_build_dir)
         tex_files = [
-            f
-            for f in glob.glob("*.tex")
-            if f not in ["bookmetadata.tex", "language_support.tex"]
+            path.name
+            for path in Path(latex_build_dir).glob("*.tex")
+            if path.name not in {"bookmetadata.tex", "language_support.tex"}
         ]
         if not tex_files:
             print("❌ No se encontró archivo .tex compatible.")
@@ -1018,7 +1021,7 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
                         f"🔁 Motor candidato {candidate_index}/{len(engine_candidates)}: "
                         f"{candidate_name}"
                     )
-                compile_latex_with_engine(tex_engine_path, main_tex, offline=offline)
+                compile_latex_with_engine(tex_engine_path, main_tex, cwd=latex_build_dir, offline=offline)
                 last_error = None
                 break
             except subprocess.CalledProcessError as exc:
@@ -1030,10 +1033,9 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
         if last_error is not None:
             raise last_error
 
-        found_pdf = Path(main_tex).with_suffix(".pdf").resolve()
+        found_pdf = (Path(latex_build_dir) / main_tex).with_suffix(".pdf")
         if found_pdf.is_file() and found_pdf.stat().st_size > 0:
-            os.chdir(current_dir)
-            ensure_static_dir()
+            destination.mkdir(parents=True, exist_ok=True)
             found_pdf.replace(dest_pdf_path)
             print(f"🎉 PDF de '{lang}' exportado a: {dest_pdf_path}")
             return True
@@ -1045,7 +1047,6 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
         # print(f"DEBUG: log log log...")
         return False
     finally:
-        os.chdir(current_dir)
         if temp_mode and os.path.exists(src_dir):
             shutil.rmtree(src_dir)
 
@@ -1276,6 +1277,7 @@ def main():
     allow_existing = "--allow-existing" in sys.argv
     offline = "--offline" in sys.argv
     engine = "tectonic"
+    jobs = 1
 
     if "--engine" in sys.argv:
         try:
@@ -1298,6 +1300,7 @@ Uso:
   python scripts/export_pdf.py --engine latexmk                  # fallback avanzado explícito
   python scripts/export_pdf.py --engine auto                     # diagnóstico: Tectonic → latexmk → pdflatex
   python scripts/export_pdf.py --offline                         # Tectonic con los recursos locales
+  python scripts/export_pdf.py --engine auto --jobs 2           # hasta dos idiomas en paralelo
   python scripts/export_pdf.py --allow-existing                  # en CI, permite continuar si ya existen PDFs publicados
   python scripts/export_pdf.py --verbose                         # muestra el log completo en pantalla
 
@@ -1310,6 +1313,14 @@ guardan en `.build_logs/` y, si algo falla, se imprime la cola relevante del err
 """
         )
         return
+
+    if "--jobs" in sys.argv:
+        try:
+            jobs = int(sys.argv[sys.argv.index("--jobs") + 1])
+        except (IndexError, ValueError):
+            jobs = 0
+        if jobs < 1:
+            raise SystemExit("ERROR: --jobs requiere un número entero positivo.")
 
     if offline:
         if engine not in {"tectonic", "auto"}:
@@ -1345,13 +1356,30 @@ guardan en `.build_logs/` y, si algo falla, se imprime la cola relevante del err
     languages = get_languages()
     print(f"🔍 Idiomas detectados para PDF: {languages}")
 
-    success_count: int = 0
-    for lang in languages:
-        if build_pdf_for_lang(lang, engine, offline=offline):
-            success_count = success_count + 1  # type: ignore
+    started = time.perf_counter()
+
+    def export(lang, output_dir=None):
+        language_start = time.perf_counter()
+        success = build_pdf_for_lang(lang, engine, offline=offline, output_dir=output_dir)
+        print(f"⏱️ PDF {lang}: {time.perf_counter() - language_start:.2f}s.")
+        return success
+
+    if jobs > 1 and len(languages) > 1:
+        # Keep shared book/_static read-only until both language builds finish.
+        with TemporaryDirectory(prefix="_temp_pdf_outputs_", dir=PROJECT_ROOT) as staging:
+            with ThreadPoolExecutor(max_workers=min(jobs, len(languages))) as executor:
+                results = list(executor.map(lambda lang: export(lang, staging), languages))
+            ensure_static_dir()
+            for lang, success in zip(languages, results, strict=True):
+                if success:
+                    filename = pdf_filename_for_lang(lang)
+                    (Path(staging) / filename).replace(Path(STATIC_DIR) / filename)
+            success_count = sum(results)
+    else:
+        success_count = sum(export(lang) for lang in languages)
 
     if success_count == len(languages):
-        print(f"\n✅ Todos los PDFs ({success_count}) se generaron correctamente.")
+        print(f"\n✅ Todos los PDFs ({success_count}) se generaron en {time.perf_counter() - started:.2f}s.")
         sys.exit(0)
     else:
         print(f"\n⚠️ Se generaron {success_count} de {len(languages)} PDFs.")

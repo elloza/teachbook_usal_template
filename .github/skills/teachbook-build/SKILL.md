@@ -79,6 +79,8 @@ Con Slidev activado, comprueba antes la integridad de las presentaciones.
 
 Usa `scripts/build_book.py --clean` para regenerar todos los resultados. Si el usuario trabaja sin presentaciones, conserva `"slides": false` y compila el libro con el mismo comando.
 
+Con las entradas y la salida intactas, el build reutiliza el sitio completo. Usa `scripts/build_book.py --epub` para incluir el ebook de cada idioma en la misma salida. Prepara el conversor con `scripts/setup_env.py --yes --extras epub`.
+
 ### Si el build falla
 
 1. **Verificar `_toc_<lang>.yml`**: Comprobar que la sintaxis YAML es correcta (indentación con 2 espacios, sin tabs).

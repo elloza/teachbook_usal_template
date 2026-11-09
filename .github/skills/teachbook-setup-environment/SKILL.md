@@ -190,6 +190,7 @@ Solo después de que los prerrequisitos estén cubiertos:
 | Primera instalación guiada | `python scripts/setup_env.py --yes` (o `py scripts/setup_env.py --yes` en Windows) |
 | Instalar y medir tiempos | `python scripts/setup_env.py --yes --profile` |
 | Añadir soporte PDF | `python scripts/setup_env.py --yes --extras pdf` |
+| Añadir soporte EPUB | `python scripts/setup_env.py --yes --extras epub` |
 | Añadir notebooks científicos | `python scripts/setup_env.py --yes --extras notebooks` |
 | Añadir importación PDF→Markdown | `python scripts/setup_env.py --yes --extras pdf-import` |
 | Instalar todos los extras | `python scripts/setup_env.py --yes --all` |
@@ -208,7 +209,7 @@ El script hace todo automáticamente:
 5. Instala las dependencias base y los extras solicitados en una sola llamada a uv
 6. Verifica paquetes clave con `importlib.metadata`, sin depender de `pip freeze`
 7. Comprueba que `pip` existe y que `manim` no está instalado
-8. Instala extras opcionales solo si se piden (`pdf`, `notebooks`, `pdf-import`, `dev`)
+8. Instala extras opcionales solo si se piden (`pdf`, `epub`, `notebooks`, `pdf-import`, `dev`)
 9. Si Slidev está activado, comprueba Node y npm. Reutiliza las dependencias locales o ejecuta `npm ci` si cambió el lockfile o el entorno
 10. Sincroniza skills a `.claude/skills/`, `.agents/skills/`, `.agent/skills/`
 11. Sincroniza `AGENTS.md` a `.github/copilot-instructions.md`
@@ -220,6 +221,7 @@ El script hace todo automáticamente:
 |---|---|
 | `requirements.txt` | Instalación base ligera: build HTML, preview, citas, Kroki, Thebe y assets |
 | `requirements-pdf.txt` | Exportación PDF y conversión SVG/LaTeX |
+| `requirements-epub.txt` | Conversión a EPUB con Pandoc |
 | `requirements-notebooks.txt` | Ejecución local de notebooks científicos |
 | `requirements-pdf-import.txt` | Conversión PDF→Markdown; puede arrastrar dependencias pesadas |
 | `requirements-dev.txt` | Tests y herramientas de desarrollo |

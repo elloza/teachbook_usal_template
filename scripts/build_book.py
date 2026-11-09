@@ -38,8 +38,8 @@ from build_cache import (
     BUILD_ROOT, CACHE_ROOT, build_lock, file_hash, fingerprint, read_cache_state,
     remove_build_tree, tree_hashes,
 )
-from pdf_names import pdf_filename_for_lang
-from project_options import PROJECT_ROOT, slides_enabled
+from pdf_names import DEFAULT_PDF_FILENAME, epub_filename_for_lang, pdf_filename_for_lang
+from project_options import PROJECT_ROOT, SLIDEV_CLI, SLIDES_DIR, node_runtime, slides_enabled
 
 VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 
@@ -196,10 +196,15 @@ def generate_languages_json(languages, target_dir, with_slides):
     """Generates a JSON file with available languages for the JS switcher."""
     lang_data = []
     for lang in languages:
-        if lang == "default":
-            lang = get_project_default_language()
+        code = get_project_default_language() if lang == "default" else lang
+        pdf_name = DEFAULT_PDF_FILENAME if lang == "default" else pdf_filename_for_lang(lang)
+        downloads = {}
+        for filename in (pdf_name, epub_filename_for_lang(lang)):
+            if (Path(target_dir) / filename).is_file():
+                downloads[Path(filename).suffix[1:]] = filename
         lang_data.append(
-            {"code": lang, "name": LANG_DISPLAY_NAMES.get(lang, lang.upper()), "slides": with_slides}
+            {"code": code, "name": LANG_DISPLAY_NAMES.get(code, code.upper()),
+             "slides": with_slides, "downloads": downloads}
         )
 
 
@@ -612,7 +617,7 @@ def create_redirect_index(site_dir, default_lang="es"):
     print(f"🔀 Redirección raíz creada apuntando a: /{default_lang}/")
 
 
-def build_site(site_dir, *, clean, with_slides):
+def build_site(site_dir, *, clean, with_slides, with_epub, environment_key):
     print("📚 Iniciando proceso de construcción multi-idioma...")
     languages = get_languages()
     if not languages:
@@ -621,7 +626,6 @@ def build_site(site_dir, *, clean, with_slides):
 
     custom_static = BOOK_DIR / "_static"
     static_key = fingerprint(tree_hashes(custom_static, ignored_files={"languages.json"}))
-    environment_key = sphinx_environment_key()
     with ThreadPoolExecutor(max_workers=min(2, len(languages))) as executor:
         builds = {
             lang: executor.submit(build_sphinx_language, lang, static_key, environment_key, clean)
@@ -634,6 +638,10 @@ def build_site(site_dir, *, clean, with_slides):
     final_static = site_dir / "_static"
     if custom_static.is_dir():
         shutil.copytree(custom_static, final_static, dirs_exist_ok=True)
+    if with_epub:
+        from export_epub import export_books
+
+        export_books(site_dir, BOOK_DIR, languages)
     generate_languages_json(languages, final_static, with_slides)
 
     # Preserve the language manifest for pages whose Sphinx root is language-local.
@@ -696,9 +704,54 @@ def publish_site(site_dir, backup):
         raise
 
 
+def site_input_key(environment_key, with_slides, with_epub):
+    scripts = ["build_cache.py", "collect_used_bibliography.py", "pdf_names.py", "project_options.py"]
+    inputs = [
+        environment_key,
+        tree_hashes(
+            BOOK_DIR, ignored_dirs={"_build", "__pycache__", ".ipynb_checkpoints"},
+            ignored_files={"languages.json"},
+        ),
+        with_slides,
+        with_epub,
+    ]
+    if with_slides:
+        from build_slides import IGNORED_SLIDE_DIRS, normalize_site_base
+
+        scripts.append("build_slides.py")
+        inputs.extend((
+            normalize_site_base(os.environ.get("TEACHBOOK_SITE_BASE")),
+            node_runtime(),
+            file_hash(SLIDEV_CLI) if SLIDEV_CLI.is_file() else None,
+            tree_hashes(SLIDES_DIR, ignored_dirs=IGNORED_SLIDE_DIRS),
+        ))
+    if with_epub:
+        from export_epub import find_pandoc
+
+        scripts.append("export_epub.py")
+        pandoc = Path(find_pandoc())
+        info = pandoc.stat()
+        inputs.extend((str(pandoc), info.st_size, info.st_mtime_ns, os.environ.get("TEACHBOOK_SITE_URL")))
+    return fingerprint([inputs, [file_hash(Path(__file__).with_name(name)) for name in scripts]])
+
+
+def site_output_stamp(site_dir):
+    """Detect deleted or edited output without reading all its assets again."""
+    if site_dir.is_symlink() or site_dir.is_junction() or not (site_dir / "index.html").is_file():
+        return None
+    files = {}
+    for folder, _, names in os.walk(site_dir):
+        for name in names:
+            file = Path(folder) / name
+            info = file.lstat()
+            files[file.relative_to(site_dir).as_posix()] = (info.st_size, info.st_mtime_ns, info.st_mode)
+    return fingerprint(files)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Compila el sitio del TeachBook.")
     parser.add_argument("--clean", action="store_true", help="Reconstruir el libro y Slidev desde cero.")
+    parser.add_argument("--epub", action="store_true", help="Generar EPUB de cada idioma junto al sitio.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Mostrar los registros de Jupyter Book.")
     args = parser.parse_args()
     with_slides = slides_enabled()
@@ -709,14 +762,33 @@ def main():
             backup = BUILD_ROOT / ".html-previous"
             if backup.is_dir() and not FINAL_HTML_DIR.exists():
                 backup.replace(FINAL_HTML_DIR)
+            environment_key = sphinx_environment_key()
+            inputs = site_input_key(environment_key, with_slides, args.epub)
+            stamp = BUILD_ROOT / ".teachbook-site.json"
+            previous = read_cache_state(stamp)
+            if (
+                not args.clean and isinstance(previous, dict) and previous.get("inputs") == inputs
+                and previous.get("output") and previous["output"] == site_output_stamp(FINAL_HTML_DIR)
+            ):
+                print(f"♻️ Sitio sin cambios. Reutilizado en {time.perf_counter() - started:.2f}s.")
+                print(f"🌍 Web disponible en: {FINAL_HTML_DIR}")
+                return
             with TemporaryDirectory(prefix=".site-", dir=BUILD_ROOT, ignore_cleanup_errors=True) as stage:
                 site = Path(stage) / "html"
                 site.mkdir()
-                build_site(site, clean=args.clean, with_slides=with_slides)
+                build_site(
+                    site, clean=args.clean, with_slides=with_slides,
+                    with_epub=args.epub, environment_key=environment_key,
+                )
                 if not (site / "index.html").is_file():
                     raise ValueError("La compilación no generó index.html.")
                 publish_site(site, backup)
             remove_build_tree(backup)
+            try:
+                state = {"inputs": inputs, "output": site_output_stamp(FINAL_HTML_DIR)}
+                stamp.write_text(json.dumps(state), encoding="utf-8")
+            except OSError as exc:
+                print(f"⚠️ No se pudo guardar la caché del sitio: {exc}")
     except (BibliographyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         raise SystemExit(f"ERROR: compilación incompleta. {exc}") from exc
 

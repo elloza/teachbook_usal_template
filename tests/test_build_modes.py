@@ -43,6 +43,18 @@ class BuildModesTest(unittest.TestCase):
             build_book.publish_site(self.root / "missing", self.root / "previous")
         self.assertEqual((public / "index.html").read_text(encoding="utf-8"), "last successful build")
 
+    def test_site_stamp_detects_missing_published_assets(self):
+        public = self.root / "html"
+        public.mkdir()
+        self.assertIsNone(build_book.site_output_stamp(public))
+        (public / "index.html").write_text("<h1>TeachBook</h1>", encoding="utf-8")
+        asset = public / "chapter.epub"
+        asset.write_bytes(b"ebook")
+        complete = build_book.site_output_stamp(public)
+        self.assertEqual(complete, build_book.site_output_stamp(public))
+        asset.unlink()
+        self.assertNotEqual(complete, build_book.site_output_stamp(public))
+
     def test_slide_cache_uses_deck_inputs_shared_assets_and_public_base(self):
         slides = self.root / "slides"
         cli = slides / "node_modules" / "slidev.mjs"

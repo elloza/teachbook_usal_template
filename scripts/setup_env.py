@@ -28,6 +28,7 @@ REQUIREMENTS_FILE = "requirements.txt"
 DEV_REQUIREMENTS_FILE = "requirements-dev.txt"
 EXTRA_REQUIREMENTS = {
     "pdf": "requirements-pdf.txt",
+    "epub": "requirements-epub.txt",
     "notebooks": "requirements-notebooks.txt",
     "pdf-import": "requirements-pdf-import.txt",
 }
@@ -66,6 +67,7 @@ EXTRA_REQUIRED_DISTS = {
         "svglib",
         "reportlab",
     ],
+    "epub": ["beautifulsoup4"],
     "notebooks": [
         "jupyterquiz",
         "matplotlib",
@@ -459,6 +461,8 @@ print(json.dumps({"missing": missing, "versions": versions}, ensure_ascii=False)
 
     print(f"  Paquetes clave: {len(required)} OK")
     print("  Manim: ausente OK")
+    if "epub" in (extras or []):
+        run([python_cmd, "-c", "import sys; sys.path.insert(0, 'scripts'); from export_epub import find_pandoc; print('  Pandoc:', find_pandoc())"])
 
 
 def verify_runtime_tools():
@@ -577,7 +581,7 @@ def parse_args():
         "--extras",
         action="append",
         default=[],
-        help="Extras opcionales separados por coma: pdf,notebooks,pdf-import",
+        help="Extras opcionales separados por coma: pdf,epub,notebooks,pdf-import",
     )
     parser.add_argument("--pdf", action="store_true", help="Alias de --extras pdf")
     parser.add_argument("--notebooks", action="store_true", help="Alias de --extras notebooks")
