@@ -179,7 +179,7 @@ def run_real_build(reason: str) -> bool:
     """Run scripts/build_book.py exactly like production."""
     py = venv_python() or Path(sys.executable)
     started = time.perf_counter()
-    print(f"\n🔨 Compilando el libro ({reason})")
+    print(f"\n🔨 Compilando el libro ({reason})", flush=True)
 
     env = {**os.environ, "PYTHONUTF8": "1", "PYTHONUNBUFFERED": "1"}
     with subprocess.Popen(
@@ -200,9 +200,9 @@ def run_real_build(reason: str) -> bool:
     elapsed = time.perf_counter() - started
     if return_code == 0 and (HTML_DIR / "index.html").is_file():
         print(f"\n✅ Build correcto en {elapsed:.1f}s")
-        print(f"📂 Sirviendo: {HTML_DIR}")
+        print(f"📂 Sirviendo: {HTML_DIR}", flush=True)
         return True
-    print(f"\n❌ Build falló (exit code {return_code}) tras {elapsed:.1f}s")
+    print(f"\n❌ Build falló (exit code {return_code}) tras {elapsed:.1f}s", flush=True)
     return False
 
 
@@ -337,7 +337,7 @@ def main() -> int:
     print(f"🌐 Preview listo: {url}")
     print("   Si ves algo viejo: Ctrl+F5. El servidor manda cabeceras no-cache.")
     print("   Pulsa Ctrl+C para detener.")
-    print("=" * 72 + "\n")
+    print("=" * 72 + "\n", flush=True)
 
     if not args.no_browser:
         open_browser(url)

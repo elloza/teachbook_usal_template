@@ -55,12 +55,6 @@ jobs:
           key: slidev-sftp-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('slides/**', 'scripts/build_slides.py', 'book/_toc*.yml', '.github/workflows/sftp-deploy.yml') }}
           restore-keys: slidev-sftp-v1-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Cache Tectonic resources
-        uses: actions/cache@v6
-        with:
-          path: .venv/tools/tectonic-cache
-          key: tectonic-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/setup_latex.py', 'latex_templates/**') }}
-
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -110,6 +104,12 @@ jobs:
       - name: Set up TeachBook environment
         run: |
           python scripts/setup_env.py --yes --profile --extras pdf
+
+      - name: Cache Tectonic resources
+        uses: actions/cache@v6
+        with:
+          path: .venv/tools/tectonic-cache
+          key: tectonic-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/setup_latex.py', 'latex_templates/**') }}
 
       - name: Check UTF-8 encoding
         env:
