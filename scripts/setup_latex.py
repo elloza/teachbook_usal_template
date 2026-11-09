@@ -716,13 +716,10 @@ def local_resvg_candidates():
 
 
 def get_tectonic_command():
-    found = shutil.which("tectonic")
-    if found:
-        return found
     for candidate in local_tectonic_candidates():
         if os.path.isfile(candidate):
-            return candidate
-    return None
+            return os.path.abspath(candidate)
+    return shutil.which("tectonic")
 
 
 def get_resvg_command():
@@ -733,10 +730,6 @@ def get_resvg_command():
         if os.path.isfile(candidate):
             return candidate
     return None
-
-
-def is_tectonic_installed():
-    return get_tectonic_command() is not None
 
 
 def verify_tectonic(*, only_cached=False):
@@ -806,34 +799,6 @@ def verify_tectonic_minimal_compile(tectonic, env, *, only_cached=False):
             return False
 
 
-def install_tectonic_pip():
-    print("📦 Intentando instalar Tectonic con pip...")
-    python = get_python_launcher()
-    is_venv = python != sys.executable
-    if is_venv:
-        print(f"   Usando entorno virtual: {python}")
-    else:
-        print("   Usando Python del sistema.")
-    try:
-        result = subprocess.run(
-            [python, "-m", "pip", "install", "tectonic"],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-        if result.returncode != 0:
-            print("❌ Tectonic no está disponible como paquete pip para esta plataforma.")
-            print("   Esto es normal en muchos equipos; se usará descarga directa del binario oficial.")
-            return False
-        print("✅ Tectonic instalado correctamente con pip.")
-        return True
-    except Exception as exc:
-        print(f"❌ Error ejecutando pip: {exc}")
-        return False
-
-
 def get_arch_tag():
     machine = platform.machine().lower()
     if machine in ("x86_64", "amd64"):
@@ -850,6 +815,7 @@ def get_platform_target():
         return None, None, None
     targets = {
         ("windows", "amd64"): ("x86_64-pc-windows-msvc", ".zip"),
+        ("windows", "arm64"): ("x86_64-pc-windows-msvc", ".zip"),  # Windows 11 x64 emulation
         ("darwin", "amd64"): ("x86_64-apple-darwin", ".tar.gz"),
         ("darwin", "arm64"): ("aarch64-apple-darwin", ".tar.gz"),
         ("linux", "amd64"): ("x86_64-unknown-linux-musl", ".tar.gz"),
@@ -1095,8 +1061,8 @@ def install_tectonic_binary():
         print("❌ No se pudo obtener la última versión desde GitHub.")
         return False
 
-    version = tag_name.lstrip("tectonic@")
-    print(f"   Última versión disponible: {version}")
+    version = tag_name.removeprefix("tectonic@")
+    print(f"   Versión del proyecto: {version}")
 
     download_url, asset_name = find_asset_url(assets, rust_target, ext)
     if not download_url:
@@ -1346,7 +1312,7 @@ def main():
 Uso:
   python scripts/setup_latex.py            # pregunta antes de instalar Tectonic
   python scripts/setup_latex.py --yes      # instala Tectonic sin preguntar
-  python scripts/setup_latex.py --yes --full # instala el toolchain PDF completo usado por CI/CD
+  python scripts/setup_latex.py --yes --full # añade TinyTeX como fallback avanzado
   python scripts/setup_latex.py --check    # verifica Tectonic y los conversores con recursos locales
   python scripts/setup_latex.py --ci-full  # instala latexmk + XeLaTeX como fallback avanzado
   python scripts/setup_latex.py --check-full # verifica el fallback avanzado
@@ -1355,6 +1321,9 @@ En Windows usa siempre el Python del proyecto:
   .venv\\Scripts\\python.exe scripts\\setup_latex.py --yes
 """)
         return
+
+    if not os.path.isfile(get_venv_python()):
+        raise SystemExit("ERROR: falta .venv. Ejecuta primero scripts/setup_env.py --yes --extras pdf.")
 
     if "--ci-full" in sys.argv:
         print("ℹ️  Modo avanzado: instalando fallback completo latexmk + XeLaTeX.")
@@ -1379,76 +1348,26 @@ En Windows usa siempre el Python del proyecto:
     if not install_pdf_python_requirements():
         sys.exit(1)
 
-    full_mode = "--full" in sys.argv
-
-    def finish_after_tectonic_ready():
-        if not full_mode:
-            return True
-        print("ℹ️  Modo completo: preparando también el fallback latexmk + XeLaTeX usado por CI/CD.")
-        return install_full_latex_ci()
-
-    def finish_with_full_fallback(reason):
-        if not full_mode:
-            return False
-        print(f"⚠️  {reason}")
-        print("ℹ️  Modo --full: continuaré con TinyTeX portable como motor PDF de respaldo.")
-        return install_full_latex_ci()
-
-    if is_tectonic_installed():
-        if verify_tectonic():
-            if verify_svg_converter():
-                if finish_after_tectonic_ready():
-                    return
-                sys.exit(1)
+    executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
+    local_engine = os.path.join(get_venv_bin_dir(), executable_name)
+    ready = os.path.isfile(local_engine) and verify_tectonic()
+    if not ready:
+        print("ℹ️  Preparando el motor Tectonic dentro de .venv.")
+        if "--yes" not in sys.argv and "-y" not in sys.argv:
+            if input("¿Quieres instalarlo ahora? (s/n): ").strip().lower() != "s":
                 return
-            print("⚠️  Tectonic está bien, pero falta el conversor SVG necesario para PDF.")
-            if install_svg_converter():
-                if finish_after_tectonic_ready():
-                    return
-                sys.exit(1)
-                return
+        ready = install_tectonic_binary() and verify_tectonic()
+
+    if not install_svg_converter():
+        sys.exit(1)
+    if "--full" in sys.argv:
+        if not ready:
+            print("⚠️  Tectonic no está operativo. Se instalará el fallback TinyTeX.")
+        if not install_full_latex_ci():
             sys.exit(1)
-        if finish_with_full_fallback("Tectonic encontrado pero no operativo en esta ejecución."):
-            return
-        print("⚠️  Tectonic encontrado pero no funciona. Se reinstalará.")
-
-    auto_confirm = "--yes" in sys.argv or "-y" in sys.argv
-    print("ℹ️  No se encontró Tectonic (motor LaTeX ligero para generar PDFs).")
-
-    if auto_confirm:
-        confirm = "s"
-    else:
-        confirm = input("¿Quieres instalarlo ahora? (s/n): ").strip().lower()
-
-    if confirm != "s":
-        print("⚠️  Instalación cancelada. No se podrán generar PDFs.")
         return
 
-    if install_tectonic_pip():
-        if verify_tectonic() and install_svg_converter():
-            if finish_after_tectonic_ready():
-                return
-            sys.exit(1)
-            return
-
-    print("⚠️  Pip falló. Intentando descarga directa del binario...")
-    if install_tectonic_binary():
-        if verify_tectonic() and install_svg_converter():
-            if finish_after_tectonic_ready():
-                return
-            sys.exit(1)
-            return
-        if finish_with_full_fallback("Tectonic se instaló, pero no pudo compilar el documento mínimo."):
-            return
-        sys.exit(1)
-    else:
-        if finish_with_full_fallback("No se pudo instalar Tectonic automáticamente."):
-            return
-        print()
-        print("❌ No se pudo instalar Tectonic automáticamente.")
-        print("   Puedes instalarlo manualmente:")
-        print("   • pip install tectonic")
-        print("   • https://tectonic-typesetting.github.io/book/latest/installation/")
+    if not ready:
         sys.exit(1)
 
 

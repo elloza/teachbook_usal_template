@@ -494,7 +494,7 @@ def build_sphinx_language(lang, static_key, environment_key, clean):
         shutil.copy2(toc, work_dir / "_toc.yml")
         sanitize_config(work_dir / "_config.yml")
 
-    validate_bibliography_for_language(lang, work_dir / lang, work_dir / "_static" / "references.bib")
+    validate_bibliography_for_language(lang, source, BOOK_DIR / "_static" / "references.bib")
     cmd = [get_jupyter_book(), "build", str(work_dir)]
     if not incremental:
         cmd.append("--all")

@@ -191,7 +191,8 @@ def get_uv_version():
 
 def fix_path_for_uv():
     home = Path.home()
-    extra_dirs = [BOOTSTRAP_TOOLS, BOOTSTRAP_TOOLS / ("Scripts" if os.name == "nt" else "bin")]
+    # pip --target uses bin/ even on Windows. The standalone installer uses the root.
+    extra_dirs = [BOOTSTRAP_TOOLS, BOOTSTRAP_TOOLS / "bin", BOOTSTRAP_TOOLS / "Scripts"]
     scripts_path = sysconfig.get_path("scripts")
     if scripts_path:
         extra_dirs.append(Path(scripts_path))
@@ -219,7 +220,7 @@ def install_uv_noninteractive():
     system = platform.system()
     print("Instalando uv...")
     installer_cmd = (
-        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "irm https://astral.sh/uv/install.ps1 | iex"]
+        [shutil.which("pwsh") or "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "irm https://astral.sh/uv/install.ps1 | iex"]
         if system == "Windows"
         else ["sh", "-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"]
     )

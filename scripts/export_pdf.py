@@ -563,27 +563,6 @@ def prepare_bibliography_for_pdf(temp_root, lang, config_path):
     )
 
 
-def glob_pdf(search_dir):
-    preferred_names = [
-        "projectnamenotset.pdf",
-    ]
-    for preferred in preferred_names:
-        candidate = os.path.join(search_dir, preferred)
-        if os.path.isfile(candidate):
-            return os.path.abspath(candidate)
-
-    candidates = []
-    for file in os.listdir(search_dir):
-        if file.endswith(".pdf"):
-            candidates.append(os.path.abspath(os.path.join(search_dir, file)))
-    if candidates:
-        # Avoid accidentally copying a small SVG-converted figure PDF when the
-        # actual book PDF has a non-standard name. The final book PDF is by far
-        # the largest PDF in the LaTeX build directory.
-        return max(candidates, key=lambda path: os.path.getsize(path))
-    return None
-
-
 def generate_metadata_tex(lang, latex_build_dir):
     """Reads metadata from the language YAML config and generates bookmetadata.tex."""
     if lang == "default":
@@ -945,7 +924,8 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
     else:
         src_dir = os.path.abspath(BOOK_DIR)
 
-    build_dir = os.path.join(src_dir, "_build")
+    output_root = Path(src_dir) if temp_mode else Path(PROJECT_ROOT) / BOOK_DIR / "_build" / ".pdf-default"
+    build_dir = str(output_root / "_build")
     latex_build_dir = os.path.join(build_dir, "latex")
     dest_pdf_path = os.path.join(STATIC_DIR, pdf_filename)
 
@@ -966,7 +946,7 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
                 print("   .venv/bin/python scripts/export_pdf.py")
             return False
 
-        cmd = [jupyter_book, "build", "--builder", "latex", src_dir, "--all"]
+        cmd = [jupyter_book, "build", "--builder", "latex", src_dir, "--all", "--path-output", str(output_root)]
         subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
         print(f"❌ Error en jupyter-book build ({lang}): {e}")
@@ -1050,11 +1030,11 @@ def build_pdf_for_lang(lang, engine_name, *, offline=False):
         if last_error is not None:
             raise last_error
 
-        found_pdf = glob_pdf(".")
-        if found_pdf:
+        found_pdf = Path(main_tex).with_suffix(".pdf").resolve()
+        if found_pdf.is_file() and found_pdf.stat().st_size > 0:
             os.chdir(current_dir)
             ensure_static_dir()
-            shutil.copy(found_pdf, dest_pdf_path)
+            found_pdf.replace(dest_pdf_path)
             print(f"🎉 PDF de '{lang}' exportado a: {dest_pdf_path}")
             return True
         else:

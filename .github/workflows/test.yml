@@ -318,6 +318,10 @@ jobs:
           if (-Not (Test-Path "book\_static\CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf")) { Write-Error "No English PDF generated"; exit 1 }
           Write-Output "✅ PDF export OK on Windows"
 
+      - name: Rebuild PDFs with the local Tectonic cache
+        shell: pwsh
+        run: .venv\Scripts\python.exe scripts/export_pdf.py --offline
+
       - name: Test pdf_to_markdown
         shell: pwsh
         run: |
