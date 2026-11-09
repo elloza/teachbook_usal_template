@@ -30,6 +30,7 @@ PDF_REQUIRED_DISTS = [
     "reportlab",
 ]
 TECTONIC_RELEASE_TAG = os.environ.get("TECTONIC_RELEASE_TAG", "tectonic@0.15.0")
+RESVG_RELEASE_TAG = "v0.49.0"
 TINYTEX_VERSION = os.environ.get("TINYTEX_VERSION", "2026.04")
 TINYTEX_INSTALLER = os.environ.get("TINYTEX_INSTALLER", "TinyTeX-1")
 # TinyTeX-1 already brings the LaTeX base, XeTeX, latexmk, fontspec,
@@ -835,14 +836,6 @@ def fetch_latest_release():
     return None, []
 
 
-def fetch_latest_release_for_repo(repo_slug):
-    api_url = f"https://api.github.com/repos/{repo_slug}/releases/latest"
-    data = fetch_github_json(api_url, f"GitHub API ({repo_slug})")
-    if data:
-        return data.get("tag_name"), data.get("assets", [])
-    return None, []
-
-
 def fetch_github_json(api_url, label):
     """Fetch public GitHub JSON, retrying without GITHUB_TOKEN on auth errors."""
     base_headers = {
@@ -972,10 +965,12 @@ def verify_resvg():
 
 def get_resvg_asset_name(system, arch):
     mapping = {
-        ("windows", "amd64"): ("resvg-win64.zip", ".zip"),
+        ("windows", "amd64"): ("resvg-win-x86_64.zip", ".zip"),
+        ("windows", "arm64"): ("resvg-win-aarch64.zip", ".zip"),
         ("darwin", "amd64"): ("resvg-macos-x86_64.zip", ".zip"),
         ("darwin", "arm64"): ("resvg-macos-aarch64.zip", ".zip"),
         ("linux", "amd64"): ("resvg-linux-x86_64.tar.gz", ".tar.gz"),
+        ("linux", "arm64"): ("resvg-linux-aarch64.tar.gz", ".tar.gz"),
     }
     return mapping.get((system, arch), (None, None))
 
@@ -989,17 +984,7 @@ def install_resvg_binary():
         print(f"⚠️  No hay binario resvg predefinido para {platform.system()} {platform.machine()}.")
         return False
 
-    tag_name, assets = fetch_latest_release_for_repo("linebender/resvg")
-    if not tag_name or not assets:
-        print("❌ No se pudo obtener la última release de resvg.")
-        return False
-
-    asset = next((item for item in assets if item.get("name") == asset_name), None)
-    if not asset:
-        print(f"❌ No se encontró el asset {asset_name} en la release {tag_name}.")
-        return False
-
-    download_url = asset.get("browser_download_url")
+    download_url = f"https://github.com/linebender/resvg/releases/download/{RESVG_RELEASE_TAG}/{asset_name}"
     install_dir = get_binary_install_dir()
     executable_name = "resvg.exe" if system == "windows" else "resvg"
 
