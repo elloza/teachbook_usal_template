@@ -21,7 +21,7 @@ description: >
 
 > Todo asset nuevo en `book/_static/` debe mantener formatos seguros para web y PDF. PNG/JPG/SVG son la base estable; WebP solo como mejora HTML con fallback. Tras añadir imágenes o GIFs, ejecutar `python scripts/optimize_static_assets.py --check` y corregir fallbacks GIF si faltan.
 
-> Si se añade un **capítulo padre** nuevo al TOC, también se debe crear la deck Slidev equivalente en `slides/<lang>/<ruta-del-capitulo>/slides.md` para TODOS los idiomas configurados. Las `sections:` no tienen deck propia en v1; heredan la deck del capítulo padre.
+> Con `"slides": true` en `teachbook.json`, añade la presentación equivalente en `slides/<lang>/<ruta-del-capitulo>/slides.md` para TODOS los idiomas de cada capítulo padre nuevo. Las secciones heredan la presentación del capítulo padre.
 
 > Toda sección nueva con citas bibliográficas debe decidir el alcance antes de escribir: **global por defecto** con `{cite:t}` / `{cite:p}` y la página final `Bibliografía` / `Bibliography` con `:cited:`, o **local solo si el usuario lo pide** con `{bibliography}` filtrada dentro de `{only} html`. En PDF no se generan bibliografías locales por página; `export_pdf.py` crea un `.bib` temporal con las citas usadas.
 
@@ -239,7 +239,7 @@ Determinar ANTES de escribir nada:
 - ¿Es un **capítulo nuevo** (entrada directa en `chapters:`) o una **sección** dentro de un capítulo existente (entrada en `sections:`)?
 - ¿En qué **parte** del TOC va? (Tutorial, Ejemplos por Grado, Información...)
 - ¿Cuál es el **nombre del archivo** y la **ruta** en cada idioma?
-- Si es capítulo padre, ¿cuál será la ruta de la deck en `slides/<lang>/.../slides.md` para cada idioma?
+- Si es capítulo padre y Slidev está activado, ¿cuál será la ruta de la presentación en cada idioma?
 - ¿El usuario quiere **añadir**, **reordenar**, **ocultar temporalmente** o **eliminar definitivamente**?
 - ¿Habrá citas bibliográficas? Si las hay, usar bibliografía global por defecto o bibliografía local con `{bibliography}` filtrada dentro de `{only} html` solo si el usuario lo pide.
 
@@ -266,7 +266,7 @@ book/en/02_degrees/biology_degree/biology_example.md
 *(Traducción pendiente)*
 ```
 
-Si se está creando un capítulo padre, crear también las decks Slidev:
+Con Slidev activado, crea también las presentaciones del capítulo padre.
 
 ```
 slides/es/02_grados/grado_biologia/intro/slides.md
@@ -396,7 +396,7 @@ Si se necesita un idioma completamente nuevo (ej: portugués `pt`):
 | Caso | Acción recomendada |
 |---|---|
 | Añadir capítulo nuevo | Crear archivos en todos los idiomas + actualizar TOCs |
-| Añadir capítulo padre nuevo | Crear contenido del libro + deck Slidev en todos los idiomas |
+| Añadir capítulo padre nuevo | Crear el contenido en todos los idiomas y, con Slidev activado, sus presentaciones |
 | Reordenar capítulos | Cambiar el orden en todos los TOCs |
 | Ocultar temporalmente contenido de ejemplo | **Comentar entradas en todos los TOCs** y conservar archivos |
 | Borrar contenido definitivamente | Solo si el usuario lo pide explícitamente |

@@ -36,6 +36,8 @@ import time
 import json
 from pathlib import Path
 
+from project_options import PROJECT_OPTIONS, SLIDES_DIR, slides_enabled
+
 
 # ---------------------------------------------------------------------------
 # UTF-8 output, important on Windows consoles
@@ -53,29 +55,10 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BOOK_DIR = PROJECT_ROOT / "book"
-SLIDES_DIR = PROJECT_ROOT / "slides"
 BUILD_SCRIPT = PROJECT_ROOT / "scripts" / "build_book.py"
 HTML_DIR = BOOK_DIR / "_build" / "html"
 PID_FILE = PROJECT_ROOT / ".preview.pid"
 STATE_FILE = PROJECT_ROOT / ".preview.json"
-
-WATCH_EXTENSIONS = {
-    ".md",
-    ".ipynb",
-    ".yml",
-    ".yaml",
-    ".bib",
-    ".css",
-    ".js",
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".gif",
-    ".svg",
-    ".vue",
-    ".ts",
-    ".json",
-}
 
 IGNORED_DIR_NAMES = {
     "_build",
@@ -85,11 +68,14 @@ IGNORED_DIR_NAMES = {
     "dist",
     ".slidev",
     ".vite",
+    ".cache",
 }
 
 IGNORED_FILE_NAMES = {
-    # build_book.py regenerates this file; watching it causes rebuild loops
+    # Ignore legacy copies of the generated language manifest.
     "languages.json",
+    "Thumbs.db",
+    ".DS_Store",
 }
 
 
@@ -189,57 +175,35 @@ def choose_port(requested: int) -> int:
 # ---------------------------------------------------------------------------
 
 
-build_lock = threading.Lock()
-last_build_ok = False
-last_build_started = 0.0
-
-
 def run_real_build(reason: str) -> bool:
     """Run scripts/build_book.py exactly like production."""
-    global last_build_ok, last_build_started
-
     py = venv_python() or Path(sys.executable)
-    started = time.time()
-    last_build_started = started
+    started = time.perf_counter()
+    print(f"\n🔨 Compilando el libro ({reason})")
 
-    with build_lock:
-        print("\n" + "=" * 72)
-        print(f"🔨 Recompilando libro completo ({reason})")
-        print("   Pipeline real: scripts/build_book.py -> book/_build/html")
-        print("=" * 72)
-
-        env = os.environ.copy()
-        env.setdefault("PYTHONUTF8", "1")
-
-        process = subprocess.Popen(
-            [str(py), str(BUILD_SCRIPT)],
-            cwd=PROJECT_ROOT,
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            bufsize=1,
-        )
-
-        assert process.stdout is not None
+    env = {**os.environ, "PYTHONUTF8": "1", "PYTHONUNBUFFERED": "1"}
+    with subprocess.Popen(
+        [str(py), str(BUILD_SCRIPT)],
+        cwd=PROJECT_ROOT,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        bufsize=1,
+    ) as process:
         for line in process.stdout:
-            print(line, end="")
-
+            print(line, end="", flush=True)
         return_code = process.wait()
-        elapsed = time.time() - started
 
-        if return_code == 0 and (HTML_DIR / "index.html").exists():
-            last_build_ok = True
-            print(f"\n✅ Build correcto en {elapsed:.1f}s")
-            print(f"📂 Sirviendo: {HTML_DIR}")
-            return True
-
-        last_build_ok = False
-        print(f"\n❌ Build falló (exit code {return_code}) tras {elapsed:.1f}s")
-        print("   No se abrirá una web vieja como si fuera correcta.")
-        return False
+    elapsed = time.perf_counter() - started
+    if return_code == 0 and (HTML_DIR / "index.html").is_file():
+        print(f"\n✅ Build correcto en {elapsed:.1f}s")
+        print(f"📂 Sirviendo: {HTML_DIR}")
+        return True
+    print(f"\n❌ Build falló (exit code {return_code}) tras {elapsed:.1f}s")
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -247,53 +211,43 @@ def run_real_build(reason: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def is_watchable(path: Path) -> bool:
-    if path.name in IGNORED_FILE_NAMES:
-        return False
-    if path.suffix.lower() not in WATCH_EXTENSIONS:
-        return False
-    parts = set(path.parts)
-    if parts.intersection(IGNORED_DIR_NAMES):
-        return False
-    return True
+def snapshot_sources() -> dict[Path, tuple[int, int]]:
+    snapshot = {}
+    try:
+        with_slides = slides_enabled()
+    except SystemExit:
+        # The next build reports an invalid config. Keep watching for its fix.
+        with_slides = False
 
-
-def snapshot_sources() -> dict[str, float]:
-    snapshot: dict[str, float] = {}
-
-    for source_dir in (BOOK_DIR, SLIDES_DIR):
-        if not source_dir.exists():
+    paths = [PROJECT_OPTIONS]
+    for source_dir in (BOOK_DIR, SLIDES_DIR) if with_slides else (BOOK_DIR,):
+        for folder, dirs, names in source_dir.walk():
+            dirs[:] = [name for name in dirs if name not in IGNORED_DIR_NAMES]
+            paths.extend(folder / name for name in names if name not in IGNORED_FILE_NAMES)
+    for path in paths:
+        try:
+            info = path.stat()
+        except OSError:
             continue
-        for path in source_dir.rglob("*"):
-            if path.is_file() and is_watchable(path):
-                try:
-                    snapshot[str(path)] = path.stat().st_mtime
-                except OSError:
-                    pass
+        snapshot[path] = (info.st_mtime_ns, info.st_size)
     return snapshot
 
 
-def watcher_loop(stop_event: threading.Event, interval: float = 2.0) -> None:
-    previous = snapshot_sources()
-    pending_since: float | None = None
+def watcher_loop(stop_event: threading.Event, previous, interval: float = 0.5) -> None:
+    pending = False
 
-    while not stop_event.is_set():
-        time.sleep(interval)
+    while not stop_event.wait(interval):
         current = snapshot_sources()
 
         if current != previous:
             previous = current
-            pending_since = time.time()
-            print("\n📝 Cambio detectado. Esperando a que termine de guardar...")
+            pending = True
             continue
 
-        # debounce: only rebuild once files have been stable for ~2 seconds
-        if pending_since and time.time() - pending_since >= 2.0:
-            pending_since = None
-            if build_lock.locked():
-                print("⏳ Build en curso; se recompilará en el siguiente cambio estable.")
-                continue
-            run_real_build("cambio detectado")
+        if pending:
+            pending = False
+            if not run_real_build("cambio detectado"):
+                print("   Se sigue sirviendo el último build correcto.", flush=True)
 
 
 # ---------------------------------------------------------------------------
@@ -353,7 +307,8 @@ def main() -> int:
     if port != args.port:
         print(f"⚠️  Puerto {args.port} ocupado. Usando {port}.")
 
-    # Initial build first. This prevents opening stale HTML from yesterday.
+    # Capture edits made during the initial build as well as later edits.
+    previous = snapshot_sources() if not args.no_watch else None
     if not run_real_build("arranque inicial"):
         return 1
 
@@ -374,7 +329,7 @@ def main() -> int:
 
     watcher_thread: threading.Thread | None = None
     if not args.no_watch:
-        watcher_thread = threading.Thread(target=watcher_loop, args=(stop_event,), daemon=True)
+        watcher_thread = threading.Thread(target=watcher_loop, args=(stop_event, previous), daemon=True)
         watcher_thread.start()
 
     url = f"http://localhost:{port}"

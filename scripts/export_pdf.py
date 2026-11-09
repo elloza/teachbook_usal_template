@@ -280,17 +280,18 @@ def print_output_tail(stdout, stderr, lines=80):
         print("\n".join(tail))
 
 
-def compile_latex_with_engine(tex_engine_path, main_tex):
+def compile_latex_with_engine(tex_engine_path, main_tex, *, offline=False):
     """Compile a LaTeX file with one concrete engine path."""
     print(f"🔧 Usando motor: {tex_engine_path}")
     env = latex_env(tex_engine_path)
 
     engine_basename = os.path.basename(tex_engine_path).lower()
     if "tectonic" in engine_basename:
-        commands = [
-            [tex_engine_path, "--keep-logs", "--keep-intermediates", main_tex],
-            [tex_engine_path, "-X", "compile", main_tex],
-        ]
+        command = [tex_engine_path, "--keep-logs", "--keep-intermediates"]
+        if offline:
+            commands = [[*command, "--only-cached", main_tex]]
+        else:
+            commands = [[*command, main_tex], [tex_engine_path, "-X", "compile", main_tex]]
     elif "latexmk" in engine_basename:
         commands = [
             [
@@ -854,11 +855,20 @@ def mirror_shared_asset_paths_for_latex(latex_build_dir):
             os.makedirs(parent, exist_ok=True)
             if os.path.exists(dest_dir):
                 continue
-            shutil.copytree(source_dir, dest_dir)
+            shutil.copytree(source_dir, dest_dir, copy_function=link_asset_for_latex)
             print(
                 f"   📁 {asset_dir} replicado para LaTeX: "
                 f"{os.path.relpath(dest_dir, latex_build_dir)}"
             )
+
+
+def link_asset_for_latex(source, destination):
+    """Link read-only assets inside a PDF build when the filesystem supports it."""
+    try:
+        os.link(source, destination)
+    except OSError:
+        shutil.copy2(source, destination)
+    return destination
 
 
 def copy_root_latex_support_files(latex_build_dir):
@@ -874,7 +884,7 @@ def copy_root_latex_support_files(latex_build_dir):
             shutil.copy2(source, dest)
 
 
-def build_pdf_for_lang(lang, engine_name):
+def build_pdf_for_lang(lang, engine_name, *, offline=False):
     """Builds the PDF for a specific language using a standalone temporary project."""
     print(f"\n🚀 Iniciando generación de PDF STANDALONE para: {lang.upper()}...")
 
@@ -957,7 +967,7 @@ def build_pdf_for_lang(lang, engine_name):
             return False
 
         cmd = [jupyter_book, "build", "--builder", "latex", src_dir, "--all"]
-        subprocess.run(cmd, shell=(os.name == "nt"), check=True)
+        subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
         print(f"❌ Error en jupyter-book build ({lang}): {e}")
         return False
@@ -1028,7 +1038,7 @@ def build_pdf_for_lang(lang, engine_name):
                         f"🔁 Motor candidato {candidate_index}/{len(engine_candidates)}: "
                         f"{candidate_name}"
                     )
-                compile_latex_with_engine(tex_engine_path, main_tex)
+                compile_latex_with_engine(tex_engine_path, main_tex, offline=offline)
                 last_error = None
                 break
             except subprocess.CalledProcessError as exc:
@@ -1284,6 +1294,7 @@ def rewrite_gif_references_for_pdf(temp_root, lang):
 def main():
     print("📚 Iniciando exportación de PDF multi-idioma...")
     allow_existing = "--allow-existing" in sys.argv
+    offline = "--offline" in sys.argv
     engine = "tectonic"
 
     if "--engine" in sys.argv:
@@ -1306,6 +1317,7 @@ Uso:
   python scripts/export_pdf.py --engine tectonic                 # flujo normal/simple/portable
   python scripts/export_pdf.py --engine latexmk                  # fallback avanzado explícito
   python scripts/export_pdf.py --engine auto                     # diagnóstico: Tectonic → latexmk → pdflatex
+  python scripts/export_pdf.py --offline                         # Tectonic con los recursos locales
   python scripts/export_pdf.py --allow-existing                  # en CI, permite continuar si ya existen PDFs publicados
   python scripts/export_pdf.py --verbose                         # muestra el log completo en pantalla
 
@@ -1318,6 +1330,11 @@ guardan en `.build_logs/` y, si algo falla, se imprime la cola relevante del err
 """
         )
         return
+
+    if offline:
+        if engine not in {"tectonic", "auto"}:
+            raise SystemExit("ERROR: --offline usa la caché de Tectonic. Selecciona --engine tectonic.")
+        engine = "tectonic"
 
     if not verify_pdf_python_requirements():
         sys.exit(1)
@@ -1350,7 +1367,7 @@ guardan en `.build_logs/` y, si algo falla, se imprime la cola relevante del err
 
     success_count: int = 0
     for lang in languages:
-        if build_pdf_for_lang(lang, engine):
+        if build_pdf_for_lang(lang, engine, offline=offline):
             success_count = success_count + 1  # type: ignore
 
     if success_count == len(languages):
@@ -1358,6 +1375,8 @@ guardan en `.build_logs/` y, si algo falla, se imprime la cola relevante del err
         sys.exit(0)
     else:
         print(f"\n⚠️ Se generaron {success_count} de {len(languages)} PDFs.")
+        if offline:
+            print("   Si faltan recursos en la caché, ejecuta primero la exportación con conexión.")
         if allow_existing:
             missing_or_empty = []
             for lang in languages:

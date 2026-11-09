@@ -739,7 +739,7 @@ def is_tectonic_installed():
     return get_tectonic_command() is not None
 
 
-def verify_tectonic():
+def verify_tectonic(*, only_cached=False):
     tectonic = get_tectonic_command()
     if not tectonic:
         return False
@@ -757,7 +757,7 @@ def verify_tectonic():
         )
         if result.returncode == 0:
             version = result.stdout.strip().split("\n")[0]
-            if not verify_tectonic_minimal_compile(tectonic, env):
+            if not verify_tectonic_minimal_compile(tectonic, env, only_cached=only_cached):
                 return False
             print(f"✅ Tectonic {version} funcionando correctamente.")
             print(f"   Ejecutable: {tectonic}")
@@ -769,7 +769,7 @@ def verify_tectonic():
     return False
 
 
-def verify_tectonic_minimal_compile(tectonic, env):
+def verify_tectonic_minimal_compile(tectonic, env, *, only_cached=False):
     """Compile a tiny document so --check catches broken Tectonic installs."""
     # `tectonic` may be a project-relative path such as `.venv/bin/tectonic`.
     # The compile probe runs with `cwd=tmp`, so a relative executable path would
@@ -780,8 +780,11 @@ def verify_tectonic_minimal_compile(tectonic, env):
         with open(tex_path, "w", encoding="utf-8") as f:
             f.write("\\documentclass{article}\n\\begin{document}\nTeachBook OK\n\\end{document}\n")
         try:
+            cmd = [tectonic, "--keep-logs"]
+            if only_cached:
+                cmd.append("--only-cached")
             result = subprocess.run(
-                [tectonic, "--keep-logs", tex_path],
+                [*cmd, tex_path],
                 cwd=tmp,
                 capture_output=True,
                 text=True,
@@ -1344,7 +1347,7 @@ Uso:
   python scripts/setup_latex.py            # pregunta antes de instalar Tectonic
   python scripts/setup_latex.py --yes      # instala Tectonic sin preguntar
   python scripts/setup_latex.py --yes --full # instala el toolchain PDF completo usado por CI/CD
-  python scripts/setup_latex.py --check    # solo verifica Tectonic
+  python scripts/setup_latex.py --check    # verifica Tectonic y los conversores con recursos locales
   python scripts/setup_latex.py --ci-full  # instala latexmk + XeLaTeX como fallback avanzado
   python scripts/setup_latex.py --check-full # verifica el fallback avanzado
 
@@ -1362,6 +1365,15 @@ En Windows usa siempre el Python del proyecto:
     if "--check-full" in sys.argv:
         if verify_full_latex():
             return
+        sys.exit(1)
+
+    if "--check" in sys.argv:
+        missing = missing_pdf_python_requirements()
+        if missing:
+            print(f"❌ Faltan dependencias PDF: {', '.join(missing)}.")
+        elif verify_tectonic(only_cached=True) and verify_svg_converter() and verify_svg_vector_converter():
+            return
+        print("   Prepara el entorno con: python scripts/setup_latex.py --yes")
         sys.exit(1)
 
     if not install_pdf_python_requirements():
@@ -1390,8 +1402,6 @@ En Windows usa siempre el Python del proyecto:
                 sys.exit(1)
                 return
             print("⚠️  Tectonic está bien, pero falta el conversor SVG necesario para PDF.")
-            if "--check" in sys.argv:
-                sys.exit(1)
             if install_svg_converter():
                 if finish_after_tectonic_ready():
                     return
@@ -1401,10 +1411,6 @@ En Windows usa siempre el Python del proyecto:
         if finish_with_full_fallback("Tectonic encontrado pero no operativo en esta ejecución."):
             return
         print("⚠️  Tectonic encontrado pero no funciona. Se reinstalará.")
-
-    if "--check" in sys.argv:
-        print("❌ Tectonic no está instalado/no funciona, o falta el conversor SVG.")
-        sys.exit(1)
 
     auto_confirm = "--yes" in sys.argv or "-y" in sys.argv
     print("ℹ️  No se encontró Tectonic (motor LaTeX ligero para generar PDFs).")

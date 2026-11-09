@@ -21,11 +21,13 @@ El flujo recomendado para que el alumno vea localmente lo mismo que publicará C
 
 ```bash
 python scripts/setup_env.py --yes --extras pdf
-python scripts/setup_latex.py --yes --full
+python scripts/setup_latex.py --yes
 python scripts/export_pdf.py --engine auto
 ```
 
-Eso instala **Tectonic** y también prepara un fallback **TinyTeX portable ligero** dentro de `.venv` (`latexmk` + XeLaTeX), sin Chocolatey/Homebrew/apt ni permisos de administrador. La exportación con `--engine auto` prueba Tectonic primero y, si el motor falla, usa el fallback. Es la misma política que deben usar deploy y tests.
+El flujo habitual usa **Tectonic**. El modo `--full` de `setup_latex.py` añade TinyTeX portable dentro de `.venv`. La exportación con `--engine auto` prueba Tectonic primero y usa el fallback si está disponible.
+
+Tras la primera exportación con conexión, `python scripts/export_pdf.py --offline` usa los recursos locales de Tectonic. Si falta un paquete, repite primero la exportación con conexión. `scripts/setup_latex.py --check` comprueba el entorno preparado.
 
 TinyTeX debe instalarse de forma quirúrgica: `TinyTeX-1` + paquetes concretos necesarios para las plantillas del libro. No se deben instalar colecciones pesadas como `collection-latexextra`, `collection-xetex`, `collection-latexrecommended`, `collection-fontsrecommended`, `collection-langspanish`, `collection-langenglish` ni `scheme-full`.
 
@@ -71,9 +73,9 @@ python scripts/setup_latex.py --yes
 python scripts/setup_latex.py --check
 ```
 
-### Toolchain completa local/CI: Tectonic + TinyTeX portable ligero
+### Toolchain avanzada con TinyTeX portable
 
-Usar cuando se quiera paridad con CI/CD o generación robusta de PDFs:
+Usar como preparación avanzada del fallback.
 
 ```bash
 python scripts/setup_latex.py --yes --full
@@ -94,8 +96,8 @@ El modo `--full` muestra antes de instalar una estimación sencilla: TinyTeX-1 d
 
 | Sistema | Comando |
 |---|---|
-| Linux / macOS | `.venv/bin/python scripts/setup_latex.py --yes --full` |
-| Windows PowerShell | `.venv\Scripts\python.exe scripts/setup_latex.py --yes --full` |
+| Linux / macOS | `.venv/bin/python scripts/setup_latex.py --yes` |
+| Windows PowerShell | `.venv\Scripts\python.exe scripts/setup_latex.py --yes` |
 
 Si el entorno se instaló en modo base, instalar antes el extra Python de PDF:
 
@@ -135,17 +137,17 @@ El deploy y los tests deben usar la misma política que el alumno:
 
 ```bash
 .venv/bin/python scripts/setup_env.py --yes --extras pdf
-.venv/bin/python scripts/setup_latex.py --yes --full
+.venv/bin/python scripts/setup_latex.py --yes
 .venv/bin/python scripts/export_pdf.py --engine auto
 ```
 
-Si Tectonic falla en CI con un problema del motor, `--engine auto` debe caer al fallback TinyTeX ya instalado en `.venv`. Así no se publica con un camino distinto al que puede reproducir el alumno localmente.
+CI restaura `.venv/tools/tectonic-cache` y vuelve a generar los PDF en cada publicación.
 
 ## Solución de problemas
 
 | Problema | Solución |
 |---|---|
-| "No se detectó un motor LaTeX" | Ejecutar `scripts/setup_latex.py --yes --full` usando el Python de `.venv` |
+| "No se detectó un motor LaTeX" | Ejecutar `scripts/setup_latex.py --yes` usando el Python de `.venv` |
 | `ModuleNotFoundError: No module named 'yaml'` | Ejecutar `.venv\Scripts\python.exe scripts\setup_env.py --yes --extras pdf` en Windows o `.venv/bin/python scripts/setup_env.py --yes --extras pdf` en Linux/macOS |
 | Error con SVG/Kroki | Convertir SVG a PNG antes de compilar; no dejar SVG crudo llegando a LaTeX |
 | Error de rutas `_static` o `_images` | Replicar esas carpetas en rutas anidadas dentro del build LaTeX si Sphinx las serializa así |
@@ -157,6 +159,6 @@ Si Tectonic falla en CI con un problema del motor, `--engine auto` debe caer al 
 
 - [ ] `book/_static/ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf` existe.
 - [ ] `book/_static/CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf` existe.
-- [ ] El flujo local/CI usa `setup_latex.py --yes --full` + `export_pdf.py --engine auto`.
+- [ ] El flujo local/CI usa `setup_latex.py --yes` y `export_pdf.py --engine auto`.
 - [ ] SVG/Kroki no llegan crudos a LaTeX.
 - [ ] El fallback avanzado sigue siendo explícito, no default.

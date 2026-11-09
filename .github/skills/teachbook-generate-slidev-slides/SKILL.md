@@ -9,6 +9,8 @@ description: >
 
 # Skill: Generar Diapositivas Slidev
 
+Comprueba `teachbook.json` antes de generar diapositivas. Si el usuario pide trabajar sin ellas, establece `"slides": false` y conserva las fuentes existentes. Para activarlas, usa `"slides": true`, prepara Node y las dependencias con `scripts/setup_env.py --yes` y verifica todos los idiomas.
+
 ## Regla obligatoria
 
 > Las diapositivas son contenido docente y deben existir en **TODOS los idiomas** configurados. Si se crea o actualiza una deck en `slides/es/`, debe existir la deck equivalente en `slides/en/` y en cualquier otro idioma activo.

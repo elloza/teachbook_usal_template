@@ -70,7 +70,9 @@ document.addEventListener("DOMContentLoaded", function () {
         injectPDFButton(languages, rootPrefix);
 
         // Inject contextual Slidev button when a slides manifest is available.
-        await injectSlidesButton(languages, rootPrefix, debugLog);
+        if (languages.some(language => language.slides !== false)) {
+            await injectSlidesButton(languages, rootPrefix, debugLog);
+        }
         setupMobileHeaderTools(debugLog);
 
         // Search page fix: Sphinx search sometimes generates duplicated language prefixes

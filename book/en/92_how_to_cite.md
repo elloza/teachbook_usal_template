@@ -39,4 +39,4 @@ You can also use the downloadable BibTeX file: {download}`citation.bib <../_stat
 
 ## DOI
 
-Final Zenodo DOI for this version: https://doi.org/10.5281/zenodo.20449102.
+The [book DOI on Zenodo](https://doi.org/10.5281/zenodo.20449102) brings together all archived versions. To cite a specific edition, use that edition's DOI.

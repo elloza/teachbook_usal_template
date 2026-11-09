@@ -4,26 +4,28 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import os
+import platform
 import re
 import shutil
 import subprocess
-import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, asdict
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import yaml
 
+from build_cache import BUILD_ROOT, CACHE_ROOT, build_lock, file_hash, fingerprint, remove_build_tree, tree_hashes
+from project_options import PROJECT_ROOT, SLIDEV_CLI, SLIDES_DIR, node_runtime, slides_enabled
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BOOK_DIR = PROJECT_ROOT / "book"
-SLIDES_DIR = PROJECT_ROOT / "slides"
-HTML_DIR = BOOK_DIR / "_build" / "html"
-STATIC_DIR = HTML_DIR / "_static"
-MIN_NODE_VERSION = (22, 18, 0)
+HTML_DIR = BUILD_ROOT / "html"
+SLIDE_CACHE_DIR = CACHE_ROOT / "slidev"
 DEFAULT_SLIDEV_JOBS = 2
+IGNORED_SLIDE_DIRS = {"node_modules", "dist", ".slidev", ".vite", ".cache"}
 
 
 @dataclass(frozen=True)
@@ -77,7 +79,10 @@ def html_page_for_book_file(book_file: str) -> str:
 
 
 def slide_source_for_book_file(book_file: str) -> Path:
-    return SLIDES_DIR / book_file / "slides.md"
+    path = Path(book_file)
+    if path.is_absolute() or path.drive or ".." in path.parts:
+        raise ValueError(f"Ruta de capítulo no válida para Slidev: {book_file}")
+    return SLIDES_DIR / path / "slides.md"
 
 
 def slide_url_for_book_file(book_file: str) -> str:
@@ -170,6 +175,8 @@ def collect_decks() -> list[Deck]:
 
 
 def validate_decks(decks: list[Deck]) -> None:
+    if not decks or len({deck.book_file for deck in decks}) != len(decks):
+        raise SystemExit("ERROR: el TOC debe definir capítulos con rutas únicas para las diapositivas.")
     missing = [deck for deck in decks if not deck.source.is_file()]
     if missing:
         print("ERROR: faltan diapositivas Slidev.")
@@ -181,58 +188,6 @@ def validate_decks(decks: list[Deck]) -> None:
             )
         print("Ejecuta: python scripts/sync_slide_templates.py")
         raise SystemExit(1)
-
-
-def npx_command() -> str:
-    return "npx.cmd" if os.name == "nt" else "npx"
-
-
-def parse_node_version(output: str) -> tuple[int, int, int] | None:
-    match = re.search(r"v?(\d+)\.(\d+)\.(\d+)", output.strip())
-    if not match:
-        return None
-    return tuple(int(part) for part in match.groups())
-
-
-def ensure_node_available() -> None:
-    try:
-        node = subprocess.run(
-            ["node", "--version"],
-            cwd=PROJECT_ROOT,
-            text=True,
-            capture_output=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-        )
-    except FileNotFoundError:
-        node = None
-    if node is None or node.returncode != 0:
-        raise SystemExit(
-            "ERROR: Node.js no esta instalado. Instala Node.js >= 22.18.0 desde "
-            "https://nodejs.org/ y vuelve a ejecutar scripts/setup_env.py --yes."
-        )
-    version = parse_node_version(node.stdout)
-    if version is None or version < MIN_NODE_VERSION:
-        raise SystemExit(
-            "ERROR: Node.js demasiado antiguo: "
-            f"{node.stdout.strip() or 'desconocido'}. Se requiere >= 22.18.0."
-        )
-    if shutil.which("npm") is None or shutil.which(npx_command()) is None:
-        raise SystemExit("ERROR: npm/npx no esta disponible. Reinstala Node.js desde https://nodejs.org/.")
-
-
-def slidev_supports_without_notes() -> bool:
-    result = subprocess.run(
-        [npx_command(), "slidev", "build", "--help"],
-        cwd=SLIDES_DIR,
-        text=True,
-        capture_output=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
-    return "--without-notes" in ((result.stdout or "") + (result.stderr or ""))
 
 
 def ensure_temporary_deck_style(deck_source: Path) -> Path | None:
@@ -281,38 +236,30 @@ def count_slides(deck_source: Path) -> int:
     return separator_count + 1
 
 
-def write_clean_slide_entrypoints(deck: Deck, out_dir: Path) -> None:
+def write_clean_slide_entrypoints(deck: Deck, out_dir: Path) -> int:
     """Create GitHub Pages-safe clean URLs like /slides/.../4."""
     index_path = out_dir / "index.html"
-    if not index_path.is_file():
-        return
     index_html = index_path.read_text(encoding="utf-8")
     slide_count = count_slides(deck.source)
     for slide_number in range(1, slide_count + 1):
         slide_dir = out_dir / str(slide_number)
         slide_dir.mkdir(parents=True, exist_ok=True)
         (slide_dir / "index.html").write_text(index_html, encoding="utf-8", newline="\n")
+    return slide_count
 
 
-def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> str:
-    out_dir = HTML_DIR / "slides" / deck.book_file
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
-    out_dir.parent.mkdir(parents=True, exist_ok=True)
-
+def build_deck(deck: Deck, base: str, out_dir: Path, node: str) -> None:
     cmd = [
-        npx_command(),
-        "slidev",
+        node,
+        str(SLIDEV_CLI),
         "build",
         str(deck.source.resolve()),
         "--base",
-        deck_base(site_base, deck.url),
+        base,
         "--out",
         str(out_dir.resolve()),
+        "--without-notes",
     ]
-    if without_notes:
-        cmd.append("--without-notes")
-    output = [f"Construyendo slides: {deck.lang} {deck.position} -> {deck.url}\n"]
     temporary_style = ensure_temporary_deck_style(deck.source)
     try:
         result = subprocess.run(
@@ -327,16 +274,12 @@ def build_deck(deck: Deck, site_base: str, *, without_notes: bool) -> str:
     finally:
         if temporary_style is not None and temporary_style.exists():
             temporary_style.unlink()
-    if result.stdout:
-        output.append(result.stdout if result.stdout.endswith("\n") else result.stdout + "\n")
-    if result.stderr:
-        output.append(result.stderr if result.stderr.endswith("\n") else result.stderr + "\n")
     if result.returncode != 0:
-        print("".join(output), end="")
+        print(result.stdout, end="")
+        print(result.stderr, end="")
         raise subprocess.CalledProcessError(result.returncode, cmd)
-    write_clean_slide_entrypoints(deck, out_dir)
-    output.append(f"Entradas limpias generadas: {count_slides(deck.source)} slides\n")
-    return "".join(output)
+    slide_count = write_clean_slide_entrypoints(deck, out_dir)
+    print(f"Slidev {deck.book_file}: {slide_count} diapositivas compiladas.")
 
 
 def parse_jobs(value: str | None) -> int:
@@ -351,38 +294,64 @@ def parse_jobs(value: str | None) -> int:
     return jobs
 
 
-def build_decks(decks: list[Deck], site_base: str, *, without_notes: bool, jobs: int) -> None:
-    jobs = min(jobs, len(decks)) if decks else 1
-    print(f"Paralelismo Slidev: {jobs} job(s).")
-    if jobs == 1:
-        for deck in decks:
-            print(build_deck(deck, site_base, without_notes=without_notes), end="")
-        return
+def build_decks(decks: list[Deck], site_base: str, html_dir: Path, *, jobs: int, clean: bool) -> None:
+    if not SLIDEV_CLI.is_file():
+        raise SystemExit("ERROR: falta Slidev en slides/node_modules. Ejecuta scripts/setup_env.py --yes.")
+    node, node_version = node_runtime()
+    hashes = tree_hashes(SLIDES_DIR, ignored_dirs=IGNORED_SLIDE_DIRS)
+    deck_hashes = {deck.source: hashes.pop(deck.source.relative_to(SLIDES_DIR).as_posix()) for deck in decks}
+    shared_key = fingerprint([node_version, platform.system(), platform.machine(), file_hash(Path(__file__)), hashes])
+    all_deck_sources = fingerprint(sorted((deck.book_file, deck_hashes[deck.source]) for deck in decks))
+    cache = SLIDE_CACHE_DIR / fingerprint(site_base)[:12]
+    cache.mkdir(parents=True, exist_ok=True)
 
-    with ThreadPoolExecutor(max_workers=jobs) as executor:
+    pending = []
+    outputs = {}
+    for deck in decks:
+        base = deck_base(site_base, deck.url)
+        slot = fingerprint(deck.book_file)[:24]
+        out_dir = cache / slot
+        stamp = cache / f"{slot}.key"
+        # Slidev can include another deck with src:, so those decks also depend on the other entries.
+        includes = re.search(r"(?m)^\s*src\s*:", deck.source.read_text(encoding="utf-8"))
+        key = fingerprint([base, shared_key, deck_hashes[deck.source], all_deck_sources if includes else None])
+        outputs[deck] = out_dir
+        reusable = (
+            not clean and (out_dir / "index.html").is_file() and (out_dir / "assets").is_dir()
+            and stamp.is_file() and stamp.read_text(encoding="utf-8") == key
+        )
+        if not reusable:
+            stamp.unlink(missing_ok=True)
+            remove_build_tree(out_dir)
+            pending.append((deck, base, out_dir, stamp, key))
+
+    print(f"Slidev: {len(pending)} para compilar, {len(decks) - len(pending)} en caché.")
+    with ThreadPoolExecutor(max_workers=min(jobs, max(1, len(pending)))) as executor:
         future_to_deck = {
-            executor.submit(build_deck, deck, site_base, without_notes=without_notes): deck
-            for deck in decks
+            executor.submit(build_deck, deck, base, out_dir, node): (deck, stamp, key)
+            for deck, base, out_dir, stamp, key in pending
         }
         for future in as_completed(future_to_deck):
-            deck = future_to_deck[future]
+            deck, stamp, key = future_to_deck[future]
             try:
-                print(future.result(), end="")
-            except subprocess.CalledProcessError as exc:
+                future.result()
+            except (OSError, subprocess.CalledProcessError) as exc:
                 raise SystemExit(
                     f"ERROR: fallo construyendo slides {deck.lang} {deck.position} "
                     f"({deck.source.relative_to(PROJECT_ROOT)})."
                 ) from exc
+            stamp.write_text(key, encoding="utf-8")
+    for deck, out_dir in outputs.items():
+        shutil.copytree(out_dir, html_dir / "slides" / deck.book_file, dirs_exist_ok=True)
 
 
-def copy_shared_public_assets() -> None:
+def copy_shared_public_assets(html_dir: Path) -> None:
     """Expose shared Slidev public assets at /slides/public/."""
     source_dir = SLIDES_DIR / "public"
     if not source_dir.is_dir():
         return
-    target_dir = HTML_DIR / "slides" / "public"
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
+    target_dir = html_dir / "slides" / "public"
+    remove_build_tree(target_dir)
     shutil.copytree(source_dir, target_dir)
     print(f"Assets publicos de Slidev copiados: {target_dir.relative_to(PROJECT_ROOT)}")
 
@@ -391,21 +360,24 @@ def hub_title(lang: str) -> str:
     return "Slides" if lang == "en" else "Diapositivas"
 
 
-def write_hubs(decks: list[Deck]) -> None:
+def write_hubs(decks: list[Deck], html_dir: Path) -> None:
     by_lang: dict[str, list[Deck]] = {}
     for deck in decks:
         by_lang.setdefault(deck.lang, []).append(deck)
 
     for lang, lang_decks in by_lang.items():
-        hub_dir = HTML_DIR / "slides" / lang
+        hub_dir = html_dir / "slides" / lang
         hub_dir.mkdir(parents=True, exist_ok=True)
         title = hub_title(lang)
+        prefix = "slides/" if lang == "default" else f"slides/{lang}/"
+        parent = "../" if lang == "default" else ""
         items = "\n".join(
-            f'<li><a href="{deck.url.removeprefix(f"slides/{lang}/")}">{deck.title}</a>'
+            f'<li><a href="{html.escape(parent + deck.url.removeprefix(prefix))}">'
+            f"{html.escape(deck.title)}</a>"
             f' <span>{deck.position}</span></li>'
             for deck in lang_decks
         )
-        html = f"""<!doctype html>
+        markup = f"""<!doctype html>
 <html lang="{lang}">
 <head>
   <meta charset="utf-8">
@@ -433,12 +405,13 @@ def write_hubs(decks: list[Deck]) -> None:
 </body>
 </html>
 """
-        (hub_dir / "index.html").write_text(html, encoding="utf-8", newline="\n")
+        (hub_dir / "index.html").write_text(markup, encoding="utf-8", newline="\n")
         print(f"Hub generado: {(hub_dir / 'index.html').relative_to(PROJECT_ROOT)}")
 
 
-def write_manifest(decks: list[Deck]) -> None:
-    STATIC_DIR.mkdir(parents=True, exist_ok=True)
+def write_manifest(decks: list[Deck], html_dir: Path) -> None:
+    static_dir = html_dir / "_static"
+    static_dir.mkdir(parents=True, exist_ok=True)
     languages = sorted({deck.lang for deck in decks})
     pages: dict[str, str] = {}
     for deck in decks:
@@ -464,7 +437,7 @@ def write_manifest(decks: list[Deck]) -> None:
             for deck in decks
         ],
     }
-    target = STATIC_DIR / "slides_manifest.json"
+    target = static_dir / "slides_manifest.json"
     target.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8", newline="\n")
     print(f"Manifest generado: {target.relative_to(PROJECT_ROOT)}")
 
@@ -481,6 +454,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Valida, genera hubs y manifest sin ejecutar Slidev.",
     )
+    parser.add_argument("--clean", action="store_true", help="Reconstruir las presentaciones sin reutilizar la caché.")
     parser.add_argument(
         "--jobs",
         type=parse_jobs,
@@ -493,30 +467,49 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> int:
+def build_site_slides(html_dir: Path, site_base: str, *, jobs: int, clean: bool, skip_build: bool = False) -> None:
     if not (SLIDES_DIR / "package.json").is_file():
-        print("No existe slides/package.json; se omite Slidev.")
-        return 0
-
+        raise SystemExit("ERROR: Slidev está activado, pero falta slides/package.json.")
     decks = collect_decks()
     validate_decks(decks)
-    HTML_DIR.mkdir(parents=True, exist_ok=True)
+    if not skip_build:
+        build_decks(decks, normalize_site_base(site_base), html_dir, jobs=jobs, clean=clean)
 
-    args = parse_args()
-    site_base = normalize_site_base(args.site_base)
-    if not args.skip_build:
-        ensure_node_available()
-        without_notes = slidev_supports_without_notes()
-        if not without_notes:
-            print("AVISO: esta version de Slidev no soporta --without-notes; se compila sin esa bandera.")
-        build_decks(decks, site_base, without_notes=without_notes, jobs=args.jobs)
-    else:
-        print("Modo --skip-build: no se ejecuta Slidev.")
-
-    copy_shared_public_assets()
-    write_hubs(decks)
-    write_manifest(decks)
+    copy_shared_public_assets(html_dir)
+    write_hubs(decks, html_dir)
+    write_manifest(decks, html_dir)
     print("Build Slidev completado.")
+
+
+def main() -> int:
+    args = parse_args()
+    if not slides_enabled():
+        print("Slidev desactivado en teachbook.json.")
+        return 0
+
+    with build_lock():
+        if args.skip_build:
+            build_site_slides(HTML_DIR, args.site_base, jobs=args.jobs, clean=args.clean, skip_build=True)
+            return 0
+        with TemporaryDirectory(prefix=".slides-", dir=BUILD_ROOT, ignore_cleanup_errors=True) as stage:
+            stage = Path(stage)
+            build_site_slides(stage, args.site_base, jobs=args.jobs, clean=args.clean)
+            target = HTML_DIR / "slides"
+            manifest = HTML_DIR / "_static" / "slides_manifest.json"
+            manifest.parent.mkdir(parents=True, exist_ok=True)
+            previous = stage / "previous"
+            if target.exists():
+                if target.is_symlink() or target.is_junction():
+                    raise ValueError(f"La salida Slidev no puede ser un enlace: {target}")
+                target.replace(previous)
+            try:
+                (stage / "slides").replace(target)
+                (stage / "_static" / manifest.name).replace(manifest)
+            except OSError:
+                remove_build_tree(target)
+                if previous.exists():
+                    previous.replace(target)
+                raise
     return 0
 
 

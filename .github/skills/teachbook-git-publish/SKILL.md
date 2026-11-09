@@ -26,13 +26,15 @@ description: >
 
 Tras el push, **GitHub Actions** se ejecuta automáticamente:
 - Compila el libro HTML para todos los idiomas.
-- Compila las diapositivas Slidev si existe `slides/package.json`.
+- Integra las diapositivas Slidev cuando se activan en `teachbook.json`.
 - Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
-- Despliega todo a GitHub Pages, incluyendo `/slides/`.
+- Despliega todo a GitHub Pages.
 
 La publicación correcta NO consiste en subir solo HTML. El workflow de Pages debe regenerar primero los PDFs finales de `book/_static/` y después compilar la web que enlaza esos PDFs recientes.
 
-Si se han cambiado diapositivas, la publicación correcta también debe regenerar `book/_build/html/slides/` y `_static/slides_manifest.json` dentro del mismo workflow. No publicar una carpeta Slidev manualmente por separado.
+Con Slidev activado, el mismo workflow debe producir `book/_build/html/slides/` y `_static/slides_manifest.json`. Con Slidev desactivado, comprueba que la web no ofrece el botón Slides.
+
+Para una release solicitada por el usuario, etiqueta el commit validado tras verificar Pages. Publica la release en GitHub con notas de cambios y comprueba el archivado en Zenodo. El depósito toma sus metadatos de `.zenodo.json`; el DOI del conjunto de versiones se mantiene en la citación general.
 
 ## Instrucciones para el agente
 

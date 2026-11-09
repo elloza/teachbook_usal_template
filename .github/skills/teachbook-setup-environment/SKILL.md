@@ -19,7 +19,7 @@ description: >
 - Algo no funciona (`ModuleNotFoundError`, `command not found`, errores raros).
 - Se ha cambiado de ordenador o se ha clonado el repositorio de nuevo.
 - Se han añadido dependencias nuevas a `requirements.txt`.
-- Se ha añadido o cambiado `slides/package.json` para las diapositivas Slidev.
+- Se ha activado Slidev o se han cambiado sus dependencias.
 - El usuario dice: "no tengo python", "no me compila", "falta algo".
 
 ## Política estricta para agentes/IDEs
@@ -59,8 +59,6 @@ systeminfo | findstr /B /C:"OS Name" /C:"OS Architecture"   # Windows CMD
 python --version 2>&1 || python3 --version 2>&1 || py --version 2>&1 || echo "NO PYTHON"
 git --version 2>&1 || echo "NO GIT"
 uv --version 2>&1 || echo "NO UV"
-node --version 2>&1 || echo "NO NODE"
-npm --version 2>&1 || echo "NO NPM"
 
 # Arquitectura del procesador
 uname -m                    # Linux/macOS: "arm64" = ARM, "x86_64" = Intel
@@ -150,11 +148,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 - Windows: cerrar y reabrir la terminal
 
 > **Nota**: uv funciona nativamente en Apple Silicon y Windows ARM.
-> `scripts/setup_env.py --yes` usa el instalador oficial de uv y, si este falla en Windows/CI, aplica fallback automático con `python -m pip install uv` y actualiza el `PATH` de la sesión.
+> `scripts/setup_env.py --yes` instala uv con destino en `.build_logs/tools` cuando falta. Si falla el instalador oficial, usa pip con ese destino local y actualiza el `PATH` del proceso.
 
-### Escenario C2: Hay `slides/package.json` pero no hay Node/npm
+### Escenario C2 — Slidev activado y faltan Node o npm
 
-Slidev requiere Node.js. Si el proyecto tiene carpeta `slides/`, debe existir Node.js 22.18 o superior y `npm`:
+Lee `teachbook.json` antes de comprobar Node. Si el usuario quiere trabajar sin diapositivas, establece `"slides": false` y ejecuta el setup base. Con `"slides": true`, comprueba Node.js 22.18 o superior y npm.
 
 ```bash
 node --version
@@ -167,6 +165,8 @@ Si falta Node o la versión es antigua:
 - Linux: usar el gestor recomendado del sistema o NodeSource
 
 Después de instalar Node, cerrar y reabrir la terminal para actualizar el `PATH`. No instalar paquetes Node globales para este proyecto; las dependencias deben quedar dentro de `slides/node_modules/` mediante `npm ci`.
+
+En PowerShell puedes usar `npm.cmd --version`. Si una instalación de Slidev está dañada, ejecuta `python scripts/setup_env.py --yes --refresh-slides`.
 
 ### Escenario D: Python no es 3.12
 
@@ -203,13 +203,13 @@ Solo después de que los prerrequisitos estén cubiertos:
 El script hace todo automáticamente:
 1. Detecta OS/arquitectura y estado de `.venv`
 2. Detecta/instala uv si hace falta
-3. Instala/localiza Python 3.12 con `uv python install 3.12`
-4. Crea `.venv/` con `uv venv .venv --python 3.12 --seed`
-5. Instala dependencias base con uv
+3. Reutiliza el Python 3.12 de `.venv/` si ya existe
+4. Crea `.venv/` con `uv venv .venv --python 3.12 --seed` si hace falta. uv localiza Python 3.12 o lo descarga.
+5. Instala las dependencias base y los extras solicitados en una sola llamada a uv
 6. Verifica paquetes clave con `importlib.metadata`, sin depender de `pip freeze`
 7. Comprueba que `pip` existe y que `manim` no está instalado
 8. Instala extras opcionales solo si se piden (`pdf`, `notebooks`, `pdf-import`, `dev`)
-9. Si existe `slides/package.json`, comprueba Node/npm y ejecuta `npm ci` dentro de `slides/`
+9. Si Slidev está activado, comprueba Node y npm. Reutiliza las dependencias locales o ejecuta `npm ci` si cambió el lockfile o el entorno
 10. Sincroniza skills a `.claude/skills/`, `.agents/skills/`, `.agent/skills/`
 11. Sincroniza `AGENTS.md` a `.github/copilot-instructions.md`
 12. Muestra resumen final con el estado de todo
@@ -239,7 +239,7 @@ Después del setup, el agente DEBE verificar que todo está bien:
 .venv/bin/python -c "import jupyter_book; print('OK')"          # Linux/macOS
 .venv\Scripts\python.exe -c "import jupyter_book; print('OK')"  # Windows
 
-# 3. Si hay slides, Node y dependencias locales funcionan
+# 3. Solo con Slidev activado
 node --version
 npm --prefix slides --version
 npm --prefix slides exec -- slidev --version

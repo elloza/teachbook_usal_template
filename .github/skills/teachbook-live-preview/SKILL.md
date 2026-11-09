@@ -40,7 +40,7 @@ que no coinciden con la web final.
 2. Ejecuta `scripts/build_book.py` antes de abrir el navegador.
 3. Sirve exactamente `book/_build/html`.
 4. Añade cabeceras HTTP `no-cache` para evitar HTML viejo del navegador.
-5. Vigila cambios en `book/` y `slides/` mediante sondeo portable y recompila con el mismo
+5. Vigila cambios en `teachbook.json` y `book/`, y en `slides/` cuando la opción está activada. Recompila con el mismo
    `build_book.py`.
 6. Abre el navegador automáticamente en Windows, macOS, Linux y WSL.
 
@@ -129,10 +129,10 @@ No hacer nada de esto:
 
 ## Comportamiento esperado
 
-- La primera vez tarda porque compila el libro completo en todos los idiomas.
-- Después, cada cambio en `.md`, `.ipynb`, `.yml`, imágenes, CSS, JS o BibTeX
-  provoca una recompilación completa usando `build_book.py`.
-- Si existe `slides/package.json`, los cambios en `slides/**/*.md`, `slides/components/`, `slides/layouts/`, `slides/styles/` o `slides/public/` también deben recompilar el sitio y actualizar `_static/slides_manifest.json`.
+- Un arranque con caché reutiliza el HTML de cada idioma y las presentaciones que estén al día.
+- Al editar una página, se reconstruye el idioma afectado. Los cambios de configuración o recursos compartidos invalidan los resultados que los usan.
+- Con Slidev activado, editar una presentación reconstruye esa presentación. Los estilos, componentes o assets compartidos pueden invalidar varias.
+- Si una compilación falla durante la edición, el servidor sigue mostrando la última compilación correcta y registra el fallo.
 - La URL habitual es `http://localhost:8000`.
 - Si el puerto está ocupado, usa automáticamente el siguiente libre.
 
@@ -150,7 +150,7 @@ Cuando se hayan tocado diapositivas:
 1. Confirmar que está entrando en la URL que imprime el script.
 2. Pedir `Ctrl+F5` en el navegador.
 3. Verificar que el log dice `✅ Build correcto` antes de `🌐 Preview listo`.
-4. Si el build falla, NO confiar en la web anterior: arreglar primero el error.
+4. Si el build falla, corrige el error del registro y comprueba la nueva compilación.
 
 ## WSL y entornos virtuales
 

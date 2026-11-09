@@ -11,6 +11,8 @@ from pathlib import Path
 
 import yaml
 
+from project_options import slides_enabled
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BOOK_DIR = PROJECT_ROOT / "book"
@@ -236,6 +238,9 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if not slides_enabled():
+        print("Slidev desactivado en teachbook.json.")
+        return 0
     created = sync_templates(dry_run=args.dry_run)
     if created == 0:
         print("Plantillas Slidev ya sincronizadas.")

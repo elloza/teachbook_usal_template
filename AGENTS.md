@@ -63,6 +63,7 @@ teachbook_usal_template/
 │   ├── skills/                    # Skills del proyecto (FUENTE DE VERDAD)
 │   └── workflows/deploy.yml       # GitHub Actions: build + deploy
 ├── AGENTS.md                      # Este archivo
+├── teachbook.json                 # Activa o desactiva Slidev
 └── requirements.txt               # Dependencias Python
 ```
 
@@ -79,7 +80,7 @@ La instalación inicial debe ser ligera. No mezcles dependencias científicas o 
 | `requirements-dev.txt` | `--dev` | Tests y herramientas de desarrollo |
 
 Regla práctica: para un docente que abre la plantilla por primera vez, usar `python scripts/setup_env.py --yes`. Para publicar con PDF, CI usa `python scripts/setup_env.py --yes --extras pdf`.
-Si el instalador oficial de `uv` falla en Windows/CI, `setup_env.py` debe usar fallback automático con `python -m pip install uv` y añadir el directorio de scripts al `PATH` de la sesión.
+Si falla el instalador oficial de `uv`, `setup_env.py` usa pip con destino local en `.build_logs/tools` y añade esa ubicación al `PATH` del proceso.
 
 ## Idiomas Configurados
 
@@ -95,9 +96,9 @@ Para añadir un nuevo idioma (ej: portugués `pt`):
 
 ## Diapositivas Slidev
 
-El proyecto puede incluir una carpeta `slides/` con diapositivas web generadas con Slidev. Las diapositivas son material docente asociado al libro y se publican dentro del mismo sitio HTML, bajo `book/_build/html/slides/`.
+La opción `"slides"` de `teachbook.json` controla Slidev en setup, build, vista previa y publicación. Si el usuario pide trabajar sin diapositivas, configura `"slides": false` antes del setup. Conserva las fuentes existentes para que se puedan reactivar. Con la opción desactivada se omiten Node/npm, la creación y validación de decks, el botón web y la salida `/slides/`. La demo trae la opción activada.
 
-Reglas obligatorias:
+Reglas cuando Slidev está activado:
 
 - Las diapositivas siguen soporte multi-idioma igual que `book/`: si existe una deck en español, debe existir su equivalente en inglés y en cualquier otro idioma configurado.
 - La unidad de trabajo es **una deck por capítulo padre del TOC**. Las entradas `sections:` no tienen deck propia en v1; heredan la deck del capítulo al que pertenecen.
@@ -106,7 +107,7 @@ Reglas obligatorias:
 - El botón superior `Slides` de la web lee ese manifest. Si la página actual tiene deck asociada, abre esa deck; si no, abre el hub `slides/<lang>/index.html`.
 - No usar frameworks JS adicionales fuera de Slidev. Slidev queda aislado dentro de `slides/` y el libro sigue compilándose con Jupyter Book.
 - Antes de cerrar cambios de diapositivas, ejecutar `python scripts/check_slides_integrity.py` y `python scripts/check_encoding.py`.
-- `scripts/build_slides.py` compila decks en paralelo con un límite conservador. Usar `TEACHBOOK_SLIDEV_JOBS=1` si una máquina tiene poca memoria; subirlo solo de forma controlada en CI o equipos potentes.
+- `scripts/build_slides.py` reutiliza decks y compila en paralelo las que han cambiado. Usar `TEACHBOOK_SLIDEV_JOBS=1` si una máquina tiene poca memoria.
 
 ## Protocolo OBLIGATORIO para Añadir Contenido
 
@@ -115,7 +116,7 @@ Cuando añadas un capítulo o sección, DEBES seguir estos pasos EN ORDEN:
 ### 1. Crear el archivo de contenido en TODOS los idiomas
 - Si creas `book/es/02_grados/grado_biologia/intro.md`, TAMBIÉN creas `book/en/02_degrees/grado_biology/intro.md`.
 - Si un idioma no está traducido aún, crea el archivo con un placeholder: `*(Traducción pendiente)*`.
-- Si creas un capítulo padre nuevo, crea también `slides/<lang>/<ruta-del-capitulo>/slides.md` en TODOS los idiomas configurados. Si la deck aún no está escrita, usa una plantilla mínima con aviso de contenido pendiente.
+- Si Slidev está activado y creas un capítulo padre nuevo, crea también `slides/<lang>/<ruta-del-capitulo>/slides.md` en TODOS los idiomas configurados. Si la deck aún no está escrita, usa una plantilla mínima con aviso de contenido pendiente.
 
 ### 2. Actualizar TODOS los `_toc_<lang>.yml`
 - Añadir la entrada en `_toc_es.yml` Y en `_toc_en.yml` (y cualquier otro idioma).
@@ -124,7 +125,7 @@ Cuando añadas un capítulo o sección, DEBES seguir estos pasos EN ORDEN:
 ### 3. Verificar que no hay contenido huérfano
 - Ningún archivo `.md` en `book/es/` o `book/en/` debe existir sin estar referenciado en su `_toc.yml`.
 - Ninguna entrada en `_toc.yml` debe apuntar a un archivo que no existe.
-- Ninguna deck `slides/<lang>/**/slides.md` debe quedar huérfana respecto a los capítulos padre del TOC.
+- Con Slidev activado, ninguna deck `slides/<lang>/**/slides.md` debe quedar huérfana respecto a los capítulos padre del TOC.
 
 ### 4. Verificar codificación UTF-8
 - Ejecutar `python scripts/check_encoding.py` con el Python de `.venv`.
@@ -421,9 +422,10 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Perfilar instalación | `python scripts/setup_env.py --yes --profile` | Mide tiempos por fase y guarda `.build_logs/setup_env_profile.json` |
 | Perfilar dependencias | `python scripts/profile_dependencies.py --dry-run --requirements requirements.txt requirements-pdf.txt` | Mide resolución de uno o varios grupos sin instalar |
 | Solo sincronizar skills | `python scripts/setup_env.py --sync-only` | Copia skills a .claude/, .agents/, .agent/ sin tocar deps |
-| Compilar libro | `python scripts/build_book.py` | Genera HTML multi-idioma en `book/_build/html/` |
+| Compilar libro | `python scripts/build_book.py` | Genera HTML multi-idioma y reutiliza resultados por idioma y deck. Añadir `--clean` para reconstruir desde cero |
 | Vista previa | `python scripts/launch_preview.py` | Lanza la preview segura en `localhost:8000` usando el mismo build que producción |
 | Exportar PDF | `python scripts/export_pdf.py` | Genera PDF para cada idioma en `book/_static/` |
+| Exportar PDF sin conexión | `python scripts/export_pdf.py --offline` | Usa la caché de Tectonic tras una exportación previa con conexión |
 | Exportar LaTeX editable | `python scripts/export_latex_project.py --output latex_exports` | Genera carpetas LaTeX y ZIPs Overleaf-ready para retoques editoriales finales |
 | Instalar LaTeX | `python scripts/setup_latex.py` | Instala Tectonic (motor LaTeX ligero) |
 | Instalar PDF completo | `python scripts/setup_latex.py --yes --full` | Instala Tectonic + TinyTeX-1 portable ligero como fallback quirúrgico |
@@ -450,7 +452,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 El flujo recomendado para PDF sigue siendo:
 
 ```bash
-python scripts/setup_latex.py --yes --full
+python scripts/setup_latex.py --yes
 python scripts/export_pdf.py --engine auto
 ```
 
@@ -460,7 +462,7 @@ Si el entorno se instaló en modo base, antes de exportar PDF ejecuta:
 python scripts/setup_env.py --yes --extras pdf
 ```
 
-Ese modo usa **Tectonic primero** y deja **TinyTeX-1 portable dentro de `.venv`** como fallback ligero (`latexmk` + XeLaTeX). TinyTeX se instala con paquetes explícitos mínimos para las plantillas del libro; no se deben usar colecciones pesadas como `collection-latexextra`, `collection-xetex`, `collection-latexrecommended`, `collection-fontsrecommended`, `collection-langspanish`, `collection-langenglish` ni `scheme-full`. El script avisa si detecta una instalación TinyTeX mayor de 1 GB o con colecciones pesadas, pero no borra nada automáticamente.
+El modo `--full` añade **TinyTeX-1 portable dentro de `.venv`** como fallback (`latexmk` + XeLaTeX). TinyTeX se instala con paquetes explícitos mínimos para las plantillas del libro; no se deben usar colecciones pesadas como `collection-latexextra`, `collection-xetex`, `collection-latexrecommended`, `collection-fontsrecommended`, `collection-langspanish`, `collection-langenglish` ni `scheme-full`. El script avisa si detecta una instalación TinyTeX mayor de 1 GB o con colecciones pesadas, pero no borra nada automáticamente.
 
 ### Vista previa para agentes de código
 
@@ -491,14 +493,14 @@ El proyecto incluye un GitHub Action (`.github/workflows/deploy.yml`) que:
 1. Se ejecuta automáticamente al hacer `push` a la rama principal.
 2. Instala/prepara el entorno TeachBook.
 3. Instala las dependencias Python de PDF con `scripts/setup_env.py --yes --extras pdf`.
-4. Instala la cadena PDF completa con `scripts/setup_latex.py --yes --full`.
+4. Prepara Tectonic con `scripts/setup_latex.py --yes` y restaura su caché.
 5. Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
-6. Compila el libro HTML y, si existe `slides/package.json`, las diapositivas Slidev para todos los idiomas con `scripts/build_book.py`.
-7. Despliega a GitHub Pages incluyendo `/slides/`.
+6. Compila el libro HTML con `scripts/build_book.py` e integra las diapositivas si `teachbook.json` activa Slidev.
+7. Despliega el sitio resultante a GitHub Pages.
 
 **Regla crítica de publicación:** no se debe publicar una versión nueva subiendo solo HTML. La ruta soportada es `commit + push` a `main`, porque el workflow regenera primero los PDFs finales de `book/_static/` y después construye la web que enlaza esos PDFs recientes. Si se cambia contenido, diagramas, imágenes o notebooks, el deploy debe producir PDFs nuevos en la misma ejecución.
 
-Si se cambian diapositivas, el deploy también debe producir de nuevo el sitio Slidev y el manifest `_static/slides_manifest.json` dentro del mismo build publicado.
+Con Slidev activado, el deploy debe incluir el sitio Slidev y el manifest `_static/slides_manifest.json` dentro del mismo build. Las releases para Zenodo se etiquetan sobre un commit comprobado tras verificar Pages y usan `.zenodo.json` para archivar el código.
 
 Para que GitHub Pages funcione, el usuario debe:
 1. Tener el repo en GitHub.
@@ -540,7 +542,7 @@ El workflow valida que `remote_dir` no sea una ruta peligrosa como `/`, `.`, `..
 
 ### Workflow de pruebas limpias
 
-El workflow `.github/workflows/test.yml` (`Test Clean Setup`) es **solo manual** (`workflow_dispatch`). No debe ejecutarse automáticamente en `push` ni en `pull_request`, porque prueba instalaciones limpias completas en Windows y macOS y consume tiempo/minutos de CI.
+El workflow `.github/workflows/test.yml` (`Test Clean Setup`) es **solo manual** (`workflow_dispatch`). Prueba instalaciones limpias en Windows, macOS y Linux, incluida la variante sin Slidev.
 
 Regla para agentes y alumnos:
 - No añadir triggers automáticos (`push`, `pull_request`, `schedule`) a `Test Clean Setup`.

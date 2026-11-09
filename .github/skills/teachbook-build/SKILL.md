@@ -20,12 +20,13 @@ description: >
 ## Qué hace `build_book.py`
 
 1. **Detecta los idiomas** automáticamente buscando archivos `_config_<lang>.yml` en `book/`.
-2. **Para cada idioma**, crea un proyecto temporal standalone, compila con `jupyter-book build`, y mueve el resultado.
+2. **Por idioma**, reutiliza el HTML válido. En ediciones de texto conserva la caché de Sphinx y compila de forma incremental.
 3. **Genera `languages.json`** para el selector de idiomas en la interfaz web.
 4. **Fusiona los assets estáticos** (CSS, JS, logos) de todos los idiomas en un `_static` global.
 5. **Crea un `index.html`** raíz que redirige al idioma principal (español por defecto).
 6. **Genera `.nojekyll`** para compatibilidad con GitHub Pages.
-7. **Compila las diapositivas Slidev** si existe `slides/package.json`, generando hubs, decks y `_static/slides_manifest.json`.
+7. **Integra las diapositivas** si `teachbook.json` contiene `"slides": true`. Compila las que han cambiado y genera hubs y manifiesto.
+8. Prepara todo en una carpeta temporal y sustituye la salida publicada tras un build correcto.
 
 ## Ubicación de salida
 
@@ -62,7 +63,7 @@ Si se han añadido o cambiado imágenes, GIFs o logos, comprobar también que lo
 | Linux / macOS | `.venv/bin/python scripts/optimize_static_assets.py --check` |
 | Windows | `.venv\Scripts\python.exe scripts\optimize_static_assets.py --check` |
 
-Si existe `slides/package.json` o se han tocado diapositivas, comprobar antes la integridad de Slidev:
+Con Slidev activado, comprueba antes la integridad de las presentaciones.
 
 | Sistema | Comando |
 |---|---|
@@ -75,6 +76,8 @@ Si existe `slides/package.json` o se han tocado diapositivas, comprobar antes la
 | Windows | `.venv\Scripts\python.exe scripts/build_book.py` |
 
 `scripts/build_slides.py` compila varias decks en paralelo con un límite conservador de 2 jobs. Para equipos con poca memoria se puede forzar ejecución secuencial con `TEACHBOOK_SLIDEV_JOBS=1`; para CI o máquinas potentes se puede aumentar de forma controlada con `TEACHBOOK_SLIDEV_JOBS=<n>`.
+
+Usa `scripts/build_book.py --clean` para regenerar todos los resultados. Si el usuario trabaja sin presentaciones, conserva `"slides": false` y compila el libro con el mismo comando.
 
 ### Si el build falla
 

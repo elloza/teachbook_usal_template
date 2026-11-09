@@ -1,4 +1,5 @@
 cff-version: 1.2.0
+version: '1.1.0'
 message: 'Si utilizas este teachbook, cita el material usando estos metadatos.'
 title: 'Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial'
 authors:

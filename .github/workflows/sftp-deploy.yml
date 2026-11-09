@@ -33,12 +33,33 @@ jobs:
         with:
           python-version: 3.12
 
+      - name: Read TeachBook options
+        id: project
+        run: |
+          slides=$(python scripts/project_options.py)
+          echo "slides=$slides" >> "$GITHUB_OUTPUT"
+
       - name: Set up Node.js for Slidev
+        if: steps.project.outputs.slides == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 22.18.0
           cache: npm
           cache-dependency-path: slides/package-lock.json
+
+      - name: Cache compiled Slidev decks
+        if: steps.project.outputs.slides == 'true'
+        uses: actions/cache@v6
+        with:
+          path: book/_build/.cache/slidev
+          key: slidev-sftp-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('slides/**', 'scripts/build_slides.py', 'book/_toc*.yml', '.github/workflows/sftp-deploy.yml') }}
+          restore-keys: slidev-sftp-v1-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Cache Tectonic resources
+        uses: actions/cache@v6
+        with:
+          path: .venv/tools/tectonic-cache
+          key: tectonic-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/setup_latex.py', 'latex_templates/**') }}
 
       - name: Install system dependencies
         run: |
@@ -113,9 +134,9 @@ jobs:
       - name: Build HTML book
         env:
           TEACHBOOK_SITE_BASE: /
+          TEACHBOOK_SLIDEV_JOBS: "4"
         run: |
           .venv/bin/python scripts/build_book.py
-          touch book/_build/html/.nojekyll
 
       - name: Verify build output
         run: |

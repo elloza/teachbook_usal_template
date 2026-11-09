@@ -34,6 +34,44 @@ jobs:
             [ -f "${d}SKILL.md" ] && echo "✅ ${d}" || { echo "❌ ${d}SKILL.md missing"; exit 1; }
           done
 
+  test-book-only:
+    needs: syntax
+    name: "Book without Slidev (${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel, windows-latest, windows-11-arm]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.12' }
+      - name: Clean setup and incremental build without Slidev
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          python -c 'from pathlib import Path; Path("teachbook.json").write_text("{\"slides\": false}\n", encoding="utf-8")'
+          python scripts/setup_env.py --yes --profile
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            tb_python=.venv/Scripts/python.exe
+          else
+            tb_python=.venv/bin/python
+          fi
+          "$tb_python" scripts/check_encoding.py
+          "$tb_python" scripts/check_multilang_integrity.py
+          "$tb_python" -m unittest discover -s tests -p test_build_modes.py
+          "$tb_python" scripts/build_book.py
+          "$tb_python" scripts/build_book.py | tee .build_logs/warm-build.log
+          grep -q "reutilizando HTML" .build_logs/warm-build.log
+          test -f book/_build/html/index.html
+          test -f book/_build/html/es/searchindex.js
+          test -f book/_build/html/en/searchindex.js
+          test ! -e slides/node_modules
+          test ! -e book/_build/html/slides
+          test ! -e book/_build/html/_static/slides_manifest.json
+
   # Test on macOS (Apple Silicon) — no Python, no git, no uv pre-installed
   test-macos:
     needs: syntax
@@ -45,16 +83,18 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: '3.12' }
 
+      - id: project
+        shell: bash
+        run: |
+          slides=$(python scripts/project_options.py)
+          echo "slides=$slides" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-node@v6
+        if: steps.project.outputs.slides == 'true'
         with:
           node-version: 22.18.0
           cache: npm
           cache-dependency-path: slides/package-lock.json
-
-      # GitHub runners have Python pre-installed, but we test the script
-      # still works correctly as if it were a fresh Mac
-      - name: Remove pre-existing venv if any
-        run: rm -rf .venv
 
       - name: Run setup_env.py
         run: |
@@ -89,6 +129,10 @@ jobs:
           test -f book/_build/html/index.html || { echo "❌ No index.html"; exit 1; }
           test -d book/_build/html/es || { echo "❌ No es/"; exit 1; }
           test -d book/_build/html/en || { echo "❌ No en/"; exit 1; }
+          if [ "${{ steps.project.outputs.slides }}" = true ]; then
+            test -f book/_build/html/_static/slides_manifest.json
+            test -f book/_build/html/slides/es/intro/4/index.html
+          fi
           echo "✅ Build OK"
 
       - name: Test PDF toolchain setup (same as CI/CD)
@@ -97,7 +141,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           .venv/bin/python scripts/setup_env.py --yes --extras pdf
-          .venv/bin/python scripts/setup_latex.py --yes --full
+          .venv/bin/python scripts/setup_latex.py --yes
 
       - name: Test PDF export on macOS with CI/CD engine policy
         timeout-minutes: 45
@@ -132,15 +176,18 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: '3.12' }
 
+      - id: project
+        shell: bash
+        run: |
+          slides=$(python scripts/project_options.py)
+          echo "slides=$slides" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-node@v6
+        if: steps.project.outputs.slides == 'true'
         with:
           node-version: 22.18.0
           cache: npm
           cache-dependency-path: slides/package-lock.json
-
-      - name: Remove pre-existing venv if any
-        shell: pwsh
-        run: if (Test-Path .venv) { Remove-Item -Recurse -Force .venv }
 
       - name: Run setup_env.py
         shell: pwsh
@@ -183,6 +230,10 @@ jobs:
           if (-Not (Test-Path "book\_build\html\index.html")) { Write-Error "No index.html"; exit 1 }
           if (-Not (Test-Path "book\_build\html\es")) { Write-Error "No es/"; exit 1 }
           if (-Not (Test-Path "book\_build\html\en")) { Write-Error "No en/"; exit 1 }
+          if ("${{ steps.project.outputs.slides }}" -eq "true") {
+            if (-not (Test-Path "book/_build/html/_static/slides_manifest.json")) { throw "Missing Slidev manifest" }
+            if (-not (Test-Path "book/_build/html/slides/es/intro/4/index.html")) { throw "Missing clean slide URL" }
+          }
           Write-Output "✅ Build OK"
 
       - name: Test preview launcher and HTTP server
@@ -255,7 +306,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           .venv\Scripts\python.exe scripts/setup_env.py --yes --extras pdf
-          .venv\Scripts\python.exe scripts/setup_latex.py --yes --full
+          .venv\Scripts\python.exe scripts/setup_latex.py --yes
 
       - name: Test PDF export on Windows with CI/CD engine policy
         shell: pwsh

@@ -1,3 +1,4 @@
+import argparse
 import io
 import subprocess
 import sys
@@ -6,8 +7,11 @@ import glob
 import shutil
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from importlib import metadata
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 
 # Fix: Windows cp1252 can't encode emojis — force UTF-8
@@ -30,16 +34,21 @@ except ModuleNotFoundError as exc:
     raise SystemExit(1)
 
 from collect_used_bibliography import BibliographyError, collect_used_bibliography
-from pdf_names import DEFAULT_PDF_FILENAME, pdf_filename_for_lang
+from build_cache import (
+    BUILD_ROOT, CACHE_ROOT, build_lock, file_hash, fingerprint, read_cache_state,
+    remove_build_tree, tree_hashes,
+)
+from pdf_names import pdf_filename_for_lang
+from project_options import PROJECT_ROOT, slides_enabled
 
 VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 
 
 def write_command_log(cmd, stdout, stderr):
     """Persist full build output so quiet mode never hides errors."""
-    log_dir = os.path.join(os.getcwd(), ".build_logs")
+    log_dir = PROJECT_ROOT / ".build_logs"
     os.makedirs(log_dir, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     log_path = os.path.join(log_dir, f"html-{timestamp}.log")
     with open(log_path, "w", encoding="utf-8", newline="\n") as f:
         f.write("$ " + " ".join(cmd) + "\n\n")
@@ -65,15 +74,10 @@ def print_output_tail(stdout, stderr, lines=80):
 
 
 def get_jupyter_book():
-    """Returns the path to jupyter-book executable. Prefers venv, falls back to system."""
-    if os.name == "nt":
-        venv_jb = os.path.join(".venv", "Scripts", "jupyter-book.exe")
-    else:
-        venv_jb = os.path.join(".venv", "bin", "jupyter-book")
-    if os.path.isfile(venv_jb):
-        return venv_jb
-    # Fallback: system-wide jupyter-book (e.g. CI environments)
-    return "jupyter-book"
+    path = PROJECT_ROOT / ".venv" / ("Scripts/jupyter-book.exe" if os.name == "nt" else "bin/jupyter-book")
+    if not path.is_file():
+        raise SystemExit("ERROR: falta Jupyter Book en .venv. Ejecuta scripts/setup_env.py --yes.")
+    return str(path)
 
 
 def run_jupyter_book_build(cmd, label, attempts=3):
@@ -83,41 +87,30 @@ def run_jupyter_book_build(cmd, label, attempts=3):
     first-use setups, a temporary network timeout should not make the whole setup
     look broken, so retry the exact same build before failing for real.
     """
-    last_error = None
     for attempt in range(1, attempts + 1):
-        try:
-            print(f"🚀 Ejecutando build {label} ({attempt}/{attempts}): {' '.join(cmd)}")
-            if VERBOSE:
-                subprocess.check_call(cmd, shell=(os.name == "nt"))
-            else:
-                result = subprocess.run(
-                    cmd,
-                    shell=(os.name == "nt"),
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                )
-                log_path = write_command_log(cmd, result.stdout, result.stderr)
-                if result.returncode != 0:
-                    print(f"❌ Build {label} falló. Log completo: {log_path}")
-                    print("Últimas líneas relevantes:")
-                    print_output_tail(result.stdout, result.stderr)
-                    raise subprocess.CalledProcessError(result.returncode, cmd)
-                print(f"   ✅ Build {label} completado. Log completo: {log_path}")
+        print(f"🚀 Ejecutando build {label} ({attempt}/{attempts}): {' '.join(cmd)}")
+        result = subprocess.run(
+            cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+        log_path = write_command_log(cmd, result.stdout, result.stderr)
+        if VERBOSE:
+            print(result.stdout, end="")
+            print(result.stderr, end="")
+        if result.returncode == 0:
+            print(f"   ✅ Build {label} completado. Log completo: {log_path}")
             return
-        except subprocess.CalledProcessError as exc:
-            last_error = exc
-            if attempt == attempts:
-                break
-            wait_seconds = 10 * attempt
-            print(
-                f"⚠️  Build {label} falló en el intento {attempt}. "
-                f"Reintentando en {wait_seconds}s..."
-            )
-            time.sleep(wait_seconds)
-    raise last_error
+
+        print(f"❌ Build {label} falló. Log completo: {log_path}")
+        if not VERBOSE:
+            print_output_tail(result.stdout, result.stderr)
+        output = (result.stderr + result.stdout).lower()
+        transient = "kroki" in output and any(
+            reason in output for reason in ("timed out", "readtimeout", "connection reset", "temporarily unavailable")
+        )
+        if not transient or attempt == attempts:
+            raise subprocess.CalledProcessError(result.returncode, cmd)
+        print("⚠️  Fallo temporal de Kroki. Reintentando...")
+        time.sleep(10 * attempt)
 
 
 # Mapping of language codes to display names (ISO 639-1)
@@ -166,10 +159,9 @@ LANG_DISPLAY_NAMES = {
     "zh": "中文",
 }
 
-BOOK_DIR = "book"
-BUILD_ROOT = os.path.join(BOOK_DIR, "_build")
-FINAL_HTML_DIR = os.path.join(BUILD_ROOT, "html")
-SLIDES_PACKAGE_JSON = os.path.join("slides", "package.json")
+BOOK_DIR = PROJECT_ROOT / "book"
+FINAL_HTML_DIR = BUILD_ROOT / "html"
+BOOK_CACHE_DIR = CACHE_ROOT / "book"
 
 
 def get_project_default_language():
@@ -200,20 +192,16 @@ def get_languages():
     return sorted(languages)
 
 
-def generate_languages_json(languages, output_static_dir=None):
+def generate_languages_json(languages, target_dir, with_slides):
     """Generates a JSON file with available languages for the JS switcher."""
     lang_data = []
     for lang in languages:
         if lang == "default":
-            continue
+            lang = get_project_default_language()
         lang_data.append(
-            {"code": lang, "name": LANG_DISPLAY_NAMES.get(lang, lang.upper())}
+            {"code": lang, "name": LANG_DISPLAY_NAMES.get(lang, lang.upper()), "slides": with_slides}
         )
 
-    # Target directory: either source or specified build dir
-    target_dir = (
-        output_static_dir if output_static_dir else os.path.join(BOOK_DIR, "_static")
-    )
 
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
@@ -442,244 +430,111 @@ def fix_duplicate_thebe_scripts(html_file):
         print(f"   🔧 Removed duplicated Thebe script in {os.path.basename(html_file)}")
 
 
-def build_language(lang):
-    """Builds the book for a specific language using a standalone temporary directory."""
-    print(f"\n🔨 Construyendo versión STANDALONE: {lang.upper()}...")
+def sphinx_environment_key():
+    packages = sorted(f"{dist.name}=={dist.version}" for dist in metadata.distributions())
+    return fingerprint([sys.version, packages, file_hash(Path(__file__))])
 
+
+def build_sphinx_language(lang, static_key, environment_key, clean):
+    """Keep Sphinx's source directory and doctrees stable between text edits."""
+    work_dir = BOOK_CACHE_DIR / f"lang-{lang}"
+    html_dir = work_dir / "_build" / "html"
     if lang == "default":
-        # Default behavior: build the root book (usually Spanish)
-        config_file = "_config.yml"
-        toc_file = "_toc.yml"
-        build_cache_dir = os.path.join(BOOK_DIR, "_build")
-        final_dest = FINAL_HTML_DIR
-        pdf_name = DEFAULT_PDF_FILENAME
-
-        # Standard build logic for default
-        if os.path.exists(build_cache_dir):
-            shutil.rmtree(build_cache_dir)
-
-        cmd = [
-            get_jupyter_book(),
-            "build",
-            os.path.abspath(BOOK_DIR),
-            "--config",
-            os.path.abspath(os.path.join(BOOK_DIR, config_file)),
-            "--toc",
-            os.path.abspath(os.path.join(BOOK_DIR, toc_file)),
-            "--all",
-        ]
-        try:
-            validate_bibliography_for_language(
-                lang,
-                os.path.abspath(BOOK_DIR),
-                os.path.abspath(os.path.join(BOOK_DIR, "_static", "references.bib")),
-            )
-            run_jupyter_book_build(cmd, "DEFAULT")
-            print(f"✅ Versión default lista en: {final_dest}")
-        except BibliographyError:
-            print(f"❌ Error validando bibliografía del idioma: {lang}")
-            sys.exit(1)
-        except subprocess.CalledProcessError:
-            print(f"❌ Error compilando idioma: {lang}")
-            sys.exit(1)
-        return
-
-    # LOCALIZED STANDALONE BUILD (en, fr, etc.)
-    config_file = f"_config_{lang}.yml"
-    toc_file = f"_toc_{lang}.yml"
-    pdf_name = pdf_filename_for_lang(lang)
-
-    # 1. Create temporary standalone project AT ROOT to avoid recursion/path issues
-    # Use _temp_build_{lang}
-    temp_build_root = os.path.abspath(os.path.join(os.getcwd(), f"_temp_build_{lang}"))
-    if os.path.exists(temp_build_root):
-        shutil.rmtree(temp_build_root)
-    os.makedirs(temp_build_root)
-
-    # 2. Copy localized content AS A SUBFOLDER to keep paths valid (e.g., temp_en/en/intro.md)
-    lang_src_dir = os.path.join(BOOK_DIR, lang)
-    lang_dst_dir = os.path.join(temp_build_root, lang)
-    if not os.path.exists(lang_src_dir):
-        print(
-            f"❌ Error: No existe la carpeta de contenido para '{lang}': {lang_src_dir}"
+        # Legacy books have their sources directly in book/. Keep this path supported.
+        remove_build_tree(work_dir)
+        validate_bibliography_for_language(lang, BOOK_DIR, BOOK_DIR / "_static" / "references.bib")
+        run_jupyter_book_build(
+            [get_jupyter_book(), "build", str(BOOK_DIR), "--path-output", str(work_dir), "--all"],
+            "DEFAULT",
         )
-        return
+        return html_dir
 
-    print(f"📂 Preparando entorno standalone en: {temp_build_root}")
-    print(f"📂 Copiando contenido de '{lang}' a carpeta interna para mantener rutas...")
-    shutil.copytree(lang_src_dir, lang_dst_dir)
-
-    # 3. Copy _static folder (required for logo, css, js)
-    static_src = os.path.join(BOOK_DIR, "_static")
-    static_dst = os.path.join(temp_build_root, "_static")
-    if os.path.exists(static_src):
-        shutil.copytree(static_src, static_dst)
-
-    # 4. Copy and rename config/toc
-    dest_config = os.path.join(temp_build_root, "_config.yml")
-    shutil.copy2(os.path.join(BOOK_DIR, config_file), dest_config)
-    shutil.copy2(
-        os.path.join(BOOK_DIR, toc_file), os.path.join(temp_build_root, "_toc.yml")
+    source = BOOK_DIR / lang
+    config = BOOK_DIR / f"_config_{lang}.yml"
+    toc = BOOK_DIR / f"_toc_{lang}.yml"
+    if not source.is_dir() or source.resolve().parent != BOOK_DIR.resolve() or not toc.is_file():
+        raise ValueError(f"Falta la carpeta o la tabla de contenidos del idioma {lang}.")
+    ignored_dirs = {".ipynb_checkpoints", "__pycache__"}
+    files = tree_hashes(source, ignored_dirs=ignored_dirs)
+    inputs = fingerprint([environment_key, static_key, file_hash(config), file_hash(toc)])
+    state = {"inputs": inputs, "files": files}
+    stamp = work_dir / ".teachbook-cache.json"
+    old_state = read_cache_state(stamp)
+    cache_valid = (
+        not clean
+        and isinstance(old_state, dict)
+        and old_state.get("inputs") == inputs
+        and isinstance(old_state.get("files"), dict)
+        and (html_dir / "searchindex.js").is_file()
+        and (work_dir / "_build" / ".doctrees" / "environment.pickle").is_file()
     )
+    if cache_valid and old_state == state:
+        print(f"♻️  Libro {lang}: reutilizando HTML.")
+        return html_dir
 
-    # Sanitize config to prevent self-exclusion
-    sanitize_config(dest_config)
-
-    # 5. Build from the temp directory (Explicit config)
-    cmd = [
-        get_jupyter_book(),
-        "build",
-        temp_build_root,
-        "--config",
-        dest_config,
-        "--all",
-        "-v",
-    ]
-
-    try:
-        validate_bibliography_for_language(
-            lang,
-            lang_dst_dir,
-            os.path.join(static_dst, "references.bib"),
+    stamp.unlink(missing_ok=True)
+    changed = []
+    if cache_valid and old_state["files"].keys() == files.keys():
+        changed = [name for name in files if files[name] != old_state["files"][name]]
+    incremental = bool(changed) and all(
+        Path(name).suffix.lower() in {".md", ".ipynb", ".rst"} for name in changed
+    )
+    if incremental:
+        for name in changed:
+            # A fresh mtime also lets Sphinx detect files restored from an older revision.
+            shutil.copyfile(source / name, work_dir / lang / name)
+    else:
+        remove_build_tree(work_dir)
+        shutil.copytree(source, work_dir / lang, ignore=shutil.ignore_patterns(*ignored_dirs))
+        shutil.copytree(
+            BOOK_DIR / "_static", work_dir / "_static",
+            ignore=shutil.ignore_patterns("languages.json"),
         )
-        run_jupyter_book_build(cmd, f"STANDALONE ({lang})")
+        shutil.copy2(config, work_dir / "_config.yml")
+        shutil.copy2(toc, work_dir / "_toc.yml")
+        sanitize_config(work_dir / "_config.yml")
 
-        # DEBUG: See what was created
-        debug_directory(temp_build_root)
-
-        # The output will be in temp_build_root/_build/html/en/ (since en is a subfolder)
-        built_html_path_nested = os.path.join(temp_build_root, "_build", "html", lang)
-        final_dest = os.path.join(FINAL_HTML_DIR, lang)
-
-        if not os.path.exists(built_html_path_nested):
-            built_html_path_nested = os.path.join(temp_build_root, "_build", "html")
-
-        # Fix PDF paths BEFORE moving
-        if os.path.exists(built_html_path_nested):
-            fix_pdf_paths(built_html_path_nested, pdf_name)
-
-        print(f"🚚 Moviendo de {built_html_path_nested} a {final_dest}")
-        if os.path.exists(final_dest):
-            shutil.rmtree(final_dest)
-
-        # Ensure parent dir exists
-        os.makedirs(os.path.dirname(final_dest), exist_ok=True)
-
-        shutil.copytree(built_html_path_nested, final_dest)
-        print(f"✅ Versión {lang} movida correctamente.")
-
-        # Fix duplicated inline Thebe config blocks on all generated pages
-        for root, _dirs, files in os.walk(final_dest):
-            for filename in files:
-                if filename.endswith(".html"):
-                    fix_duplicate_thebe_scripts(os.path.join(root, filename))
-
-        # CRITICAL FIX: Copy search files from temp build root to language dir
-        # Sphinx generates search.html, genindex.html, and searchindex.js at the HTML root,
-        # but pages reference them with relative paths like "../search.html"
-        temp_html_root = os.path.join(temp_build_root, "_build", "html")
-        search_files = ["search.html", "genindex.html", "searchindex.js"]
-        for search_file in search_files:
-            src = os.path.join(temp_html_root, search_file)
-            if os.path.isfile(src):
-                dst = os.path.join(final_dest, search_file)
-                shutil.copy2(src, dst)
-                print(f"📋 Copied {search_file} to {final_dest}")
-
-                # CRITICAL: Fix asset paths in HTML files
-                # Sphinx generated these files at the build root where _static/ is
-                # a sibling. Now they're inside /es/ so _static/ is at ../_static/
-                if search_file.endswith(".html"):
-                    fix_html_asset_paths(dst)
-
-                # CRITICAL: Fix searchindex.js docnames (strip "es/" prefix)
-                # Without this, search results link to /es/es/page.html (double prefix → 404)
-                if search_file == "searchindex.js":
-                    fix_searchindex_paths(dst, lang)
-
-        fix_language_page_searchindex_refs(final_dest)
-
-        # CRITICAL FIX: Merge the generated _static folder (containing theme assets)
-        # from the temp build to the final root _static folder.
-        temp_static_dir = os.path.join(temp_build_root, "_build", "html", "_static")
-        final_static_dir = os.path.join(FINAL_HTML_DIR, "_static")
-
-        if os.path.exists(temp_static_dir):
-            print(
-                f"📦 Merging theme assets from temp build ({lang}) to global _static..."
-            )
-
-            # DEBUG: List source files to verify we actually have something to copy
-            print(f"   🔍 Source _static content ({temp_static_dir}):")
-            try:
-                for item in os.listdir(temp_static_dir):
-                    print(f"      - {item}")
-            except Exception as e:
-                print(f"      ⚠️ Error listing source: {e}")
-
-            if not os.path.exists(final_static_dir):
-                os.makedirs(final_static_dir)
-
-            # Use the robust merge_dir_into (now global)
-            merge_dir_into(temp_static_dir, final_static_dir)
-
-            # DEBUG: Verify copy
-            print(
-                f"   ✅ Merge complete. Final _static count: {len(os.listdir(final_static_dir))}"
-            )
-
-        # CRITICAL FIX: Sphinx stores document images in a root-level _images/
-        # directory, while localized pages live under /es/ and /en/ and link to
-        # ../../_images/.... A clean multi-language build must therefore merge
-        # each temp build's _images directory into the final root _images.
-        temp_images_dir = os.path.join(temp_build_root, "_build", "html", "_images")
-        final_images_dir = os.path.join(FINAL_HTML_DIR, "_images")
-        if os.path.exists(temp_images_dir):
-            print(f"🖼️  Merging document images from temp build ({lang}) to global _images...")
-            if not os.path.exists(final_images_dir):
-                os.makedirs(final_images_dir)
-            merge_dir_into(temp_images_dir, final_images_dir)
-
-        # Sphinx stores files referenced as downloads in a root-level _downloads/
-        # directory. Localized pages point to ../_downloads/..., so merge it too.
-        temp_downloads_dir = os.path.join(temp_build_root, "_build", "html", "_downloads")
-        final_downloads_dir = os.path.join(FINAL_HTML_DIR, "_downloads")
-        if os.path.exists(temp_downloads_dir):
-            print(f"   Merging downloads from temp build ({lang}) to global _downloads...")
-            if not os.path.exists(final_downloads_dir):
-                os.makedirs(final_downloads_dir)
-            merge_dir_into(temp_downloads_dir, final_downloads_dir)
-
-    except subprocess.CalledProcessError:
-        print(f"❌ Error compilando idioma standalone: {lang}")
-        sys.exit(1)
-    except BibliographyError:
-        print(f"❌ Error validando bibliografía del idioma standalone: {lang}")
-        sys.exit(1)
-    finally:
-        # Cleanup temp directory
-        if os.path.exists(temp_build_root):
-            shutil.rmtree(temp_build_root)
+    validate_bibliography_for_language(lang, work_dir / lang, work_dir / "_static" / "references.bib")
+    cmd = [get_jupyter_book(), "build", str(work_dir)]
+    if not incremental:
+        cmd.append("--all")
+    label = f"{lang} incremental ({len(changed)} archivo(s))" if incremental else f"{lang} completo"
+    run_jupyter_book_build(cmd, label)
+    if not (html_dir / "searchindex.js").is_file():
+        raise ValueError(f"Jupyter Book no generó el índice de búsqueda de {lang}.")
+    stamp.write_text(json.dumps(state), encoding="utf-8")
+    return html_dir
 
 
-def merge_dir_into(src_dir, dst_dir):
-    """Merge src_dir into dst_dir without deleting dst_dir first.
-    Overwrites files that already exist. Skips locked files gracefully."""
-    print(f"   🔄 Merging '{src_dir}' -> '{dst_dir}'")
-    for root, dirs, files in os.walk(src_dir):
-        rel_path = os.path.relpath(root, src_dir)
-        target_dir = os.path.join(dst_dir, rel_path)
-        if not os.path.exists(target_dir):
-            os.makedirs(target_dir)
-        for file in files:
-            src_file = os.path.join(root, file)
-            dst_file = os.path.join(target_dir, file)
-            try:
-                shutil.copy2(src_file, dst_file)
-            except PermissionError:
-                print(f"      ⚠️  Skipped locked file: {dst_file}")
-            except Exception as e:
-                print(f"      ⚠️  Copy error: {e}")
+def assemble_language(lang, html_dir, site_dir):
+    if lang == "default":
+        shutil.copytree(html_dir, site_dir, dirs_exist_ok=True)
+        return
+
+    # Keep the public URL scheme used by the book and GitHub Pages.
+    final_dest = site_dir / lang
+    pages = html_dir / lang
+    shutil.copytree(pages if pages.is_dir() else html_dir, final_dest)
+    fix_pdf_paths(final_dest, pdf_filename_for_lang(lang))
+    for page in final_dest.rglob("*.html"):
+        fix_duplicate_thebe_scripts(page)
+
+    for name in ("search.html", "genindex.html", "searchindex.js"):
+        source = html_dir / name
+        if source.is_file():
+            dest = final_dest / name
+            shutil.copy2(source, dest)
+            if name.endswith(".html"):
+                fix_html_asset_paths(dest)
+            else:
+                fix_searchindex_paths(dest, lang)
+    fix_language_page_searchindex_refs(final_dest)
+
+    # Sphinx places these at the build root, shared by the published languages.
+    for name in ("_static", "_images", "_downloads"):
+        source = html_dir / name
+        if source.is_dir():
+            shutil.copytree(source, site_dir / name, dirs_exist_ok=True)
 
 
 def debug_directory(path):
@@ -737,7 +592,7 @@ def sanitize_config(config_path):
         print(f"⚠️ Error saneando configuración: {e}")
 
 
-def create_redirect_index(default_lang="es"):
+def create_redirect_index(site_dir, default_lang="es"):
     """Creates a root index.html that redirects to the default language."""
     redirect_html = f"""
     <!DOCTYPE html>
@@ -752,79 +607,46 @@ def create_redirect_index(default_lang="es"):
     </body>
     </html>
     """
-    with open(os.path.join(FINAL_HTML_DIR, "index.html"), "w", encoding="utf-8") as f:
+    with open(site_dir / "index.html", "w", encoding="utf-8") as f:
         f.write(redirect_html)
     print(f"🔀 Redirección raíz creada apuntando a: /{default_lang}/")
 
 
-def build_slides_if_configured():
-    """Build Slidev decks after the book HTML exists."""
-    if not os.path.isfile(SLIDES_PACKAGE_JSON):
-        return
-
-    site_base = os.environ.get("TEACHBOOK_SITE_BASE", "/")
-    cmd = [
-        sys.executable,
-        os.path.join("scripts", "build_slides.py"),
-        "--site-base",
-        site_base,
-    ]
-    print("\n🎞️  Construyendo diapositivas Slidev...")
-    try:
-        subprocess.check_call(cmd)
-    except subprocess.CalledProcessError:
-        print("❌ Error construyendo las diapositivas Slidev.")
-        sys.exit(1)
-
-
-def main():
+def build_site(site_dir, *, clean, with_slides):
     print("📚 Iniciando proceso de construcción multi-idioma...")
     languages = get_languages()
+    if not languages:
+        raise ValueError("No se encontraron configuraciones en book/.")
     print(f"🔍 Idiomas detectados: {languages}")
 
-    # Start from a clean HTML output tree so deleted assets do not survive
-    # between builds. The source assets remain in book/_static.
-    if os.path.exists(FINAL_HTML_DIR):
-        shutil.rmtree(FINAL_HTML_DIR)
-    os.makedirs(FINAL_HTML_DIR)
-
-    # Pre-create root _static to avoid race conditions or missing dirs
-    final_static = os.path.join(FINAL_HTML_DIR, "_static")
-    if not os.path.exists(final_static):
-        os.makedirs(final_static)
-
-    generate_languages_json(languages)
+    custom_static = BOOK_DIR / "_static"
+    static_key = fingerprint(tree_hashes(custom_static, ignored_files={"languages.json"}))
+    environment_key = sphinx_environment_key()
+    with ThreadPoolExecutor(max_workers=min(2, len(languages))) as executor:
+        builds = {
+            lang: executor.submit(build_sphinx_language, lang, static_key, environment_key, clean)
+            for lang in languages
+        }
 
     for lang in languages:
-        build_language(lang)
+        assemble_language(lang, builds[lang].result(), site_dir)
 
-    # 1. Merge our custom static files into the root _static
-    custom_static = os.path.join(BOOK_DIR, "_static")
-    if os.path.exists(custom_static):
-        merge_dir_into(custom_static, final_static)
-        print(f"📦 Custom static assets merged into: {final_static}")
+    final_static = site_dir / "_static"
+    if custom_static.is_dir():
+        shutil.copytree(custom_static, final_static, dirs_exist_ok=True)
+    generate_languages_json(languages, final_static, with_slides)
 
-    # 2. Regenerate languages.json in ALL _static directories (Just in case)
-    generate_languages_json(languages, final_static)
-
-    # 3. Copy languages.json into each per-language _static directory
-    # Each standalone build has its own _static/ and the JS resolves relative to URL_ROOT
-    # which points to the per-language root (e.g., /es/), not the site root.
+    # Preserve the language manifest for pages whose Sphinx root is language-local.
     for lang in languages:
-        if lang == "default":
-            continue
-        lang_static = os.path.join(FINAL_HTML_DIR, lang, "_static")
-        if os.path.exists(lang_static):
-            lang_json_src = os.path.join(final_static, "languages.json")
-            lang_json_dst = os.path.join(lang_static, "languages.json")
-            shutil.copy2(lang_json_src, lang_json_dst)
-            print(f"📋 Copied languages.json to {lang_static}")
+        lang_static = site_dir / lang / "_static"
+        if lang_static.is_dir():
+            shutil.copy2(final_static / "languages.json", lang_static)
 
-    if "default" not in languages and len(languages) > 0:
+    if "default" not in languages:
         default_lang = get_project_default_language()
         if default_lang not in languages:
             default_lang = languages[0]
-        create_redirect_index(default_lang)
+        create_redirect_index(site_dir, default_lang)
 
         # Create root search.html that redirects to default language search
         # CRITICAL: preserve query string (?q=...) so search terms survive the redirect
@@ -842,23 +664,64 @@ def main():
     <p>Redirecting to <a href="{default_lang}/search.html">search</a>...</p>
 </body>
 </html>"""
-        with open(
-            os.path.join(FINAL_HTML_DIR, "search.html"), "w", encoding="utf-8"
-        ) as f:
-            f.write(search_redirect)
+        (site_dir / "search.html").write_text(search_redirect, encoding="utf-8")
         print(f"🔍 Root search redirect created.")
 
-    # Ensure .nojekyll exists to prevent GitHub Pages from ignoring _static
-    nojekyll_path = os.path.join(FINAL_HTML_DIR, ".nojekyll")
-    if not os.path.exists(nojekyll_path):
-        with open(nojekyll_path, "w") as f:
-            pass
-        print("✅ Archivo .nojekyll creado para GitHub Pages.")
+    (site_dir / ".nojekyll").touch()
 
-    build_slides_if_configured()
+    if with_slides:
+        from build_slides import build_site_slides, parse_jobs
 
-    print("\n✅ ¡Construcción completa!")
-    print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")
+        print("\n🎞️  Construyendo diapositivas Slidev...")
+        build_site_slides(
+            site_dir, os.environ.get("TEACHBOOK_SITE_BASE", "/"),
+            jobs=parse_jobs(os.environ.get("TEACHBOOK_SLIDEV_JOBS")), clean=clean,
+        )
+    else:
+        (final_static / "slides_manifest.json").unlink(missing_ok=True)
+        print("Slidev desactivado en teachbook.json.")
+
+
+def publish_site(site_dir, backup):
+    remove_build_tree(backup)
+    if FINAL_HTML_DIR.exists():
+        if FINAL_HTML_DIR.is_symlink() or FINAL_HTML_DIR.is_junction():
+            raise ValueError(f"La salida de compilación no puede ser un enlace: {FINAL_HTML_DIR}")
+        FINAL_HTML_DIR.replace(backup)
+    try:
+        site_dir.replace(FINAL_HTML_DIR)
+    except OSError:
+        if backup.exists():
+            backup.replace(FINAL_HTML_DIR)
+        raise
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Compila el sitio del TeachBook.")
+    parser.add_argument("--clean", action="store_true", help="Reconstruir el libro y Slidev desde cero.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Mostrar los registros de Jupyter Book.")
+    args = parser.parse_args()
+    with_slides = slides_enabled()
+    started = time.perf_counter()
+
+    try:
+        with build_lock():
+            backup = BUILD_ROOT / ".html-previous"
+            if backup.is_dir() and not FINAL_HTML_DIR.exists():
+                backup.replace(FINAL_HTML_DIR)
+            with TemporaryDirectory(prefix=".site-", dir=BUILD_ROOT, ignore_cleanup_errors=True) as stage:
+                site = Path(stage) / "html"
+                site.mkdir()
+                build_site(site, clean=args.clean, with_slides=with_slides)
+                if not (site / "index.html").is_file():
+                    raise ValueError("La compilación no generó index.html.")
+                publish_site(site, backup)
+            remove_build_tree(backup)
+    except (BibliographyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
+        raise SystemExit(f"ERROR: compilación incompleta. {exc}") from exc
+
+    print(f"\n✅ ¡Construcción completa en {time.perf_counter() - started:.2f}s!")
+    print(f"🌍 Web disponible en: {FINAL_HTML_DIR}")
 
 
 if __name__ == "__main__":

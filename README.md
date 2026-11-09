@@ -15,9 +15,7 @@ La cita recomendada está en formato APA 7.ª edición. También hay metadatos r
 
 > Lozano Murciego, Á., & Sales Mendes, A. F. (2026). *Elaboración de libros electrónicos mediante código y asistentes de Inteligencia Artificial*. Universidad de Salamanca. https://doi.org/10.5281/zenodo.20449102
 
-DOI definitivo de Zenodo para esta versión:
-
-- https://doi.org/10.5281/zenodo.20449102
+El DOI del conjunto de versiones lleva al registro actualizado del libro. Cada edición archivada tiene además su propio DOI. [Consultar en Zenodo](https://doi.org/10.5281/zenodo.20449102)
 
 Autores:
 
@@ -52,7 +50,7 @@ Antes de abrir la plantilla con tu agente de IA, necesitas tener instalado **com
 ### Recomendado (no obligatorio, el agente te ayudará a instalarlo)
 2. **Git** → [Descargar](https://git-scm.com/) (necesario para publicar en GitHub)
 3. **uv** (gestor de paquetes ultrarrápido) → El agente te preguntará si quieres instalarlo
-4. **Node.js 22.18 o superior** → [Descargar](https://nodejs.org/) (necesario para compilar las diapositivas web)
+4. **Node.js 22.18 o superior y npm** solo para proyectos que activan Slidev. [Descargar Node.js](https://nodejs.org/)
 
 ### Para publicar en la web
 5. **Cuenta en GitHub** → [Crear cuenta](https://github.com/signup)
@@ -76,14 +74,14 @@ O también puedes decir:
 - *"No me funciona, falta algo"*
 
 El agente:
-- Detectará tu sistema operativo (Windows o Mac)
+- Detectará tu sistema operativo (Windows, macOS o Linux)
 - Instalará `uv` (gestor de paquetes rápido) si no lo tienes
 - Creará el entorno virtual `.venv`
-- Instalará todas las dependencias
+- Instalará las dependencias del libro y los extras que solicites
 - Si usas diapositivas, comprobará Node.js y preparará `slides/`
 - Sincronizará las instrucciones para que funcione con tu herramienta
 
-⏱️ **Tarda 1-3 minutos** la primera vez.
+Puedes decirle **«Prepara la plantilla sin diapositivas»** antes de instalar. El agente pondrá `"slides": false` en `teachbook.json` y preparará el libro sin Node.js. La demo usa `"slides": true`. Para activar las diapositivas en tu proyecto, cambia ese valor a `true` y vuelve a ejecutar `python scripts/setup_env.py --yes`.
 
 ### 2️⃣ Compilar el libro (generar la web)
 
@@ -91,19 +89,21 @@ El agente:
 
 Esto crea la versión HTML navegable en `book/_build/html/`. Puedes abrirla en cualquier navegador.
 
-Si el proyecto tiene la carpeta `slides/` y Node.js cumple el requisito mínimo, el mismo comando también integra las diapositivas en la web final.
+El build reutiliza el HTML por idioma y las presentaciones que siguen al día. Con Slidev activado, integra las diapositivas en la web final. Para comprobar un build desde cero usa `python scripts/build_book.py --clean`.
 
 ### 3️⃣ Ver cambios en tiempo real (desarrollo)
 
 > **"Quiero ver el libro en vivo"** o **"Abre la vista previa"**
 
-Se abrirá tu navegador en `localhost:8000` y los cambios se reflejarán automáticamente al guardar los archivos.
+Se abrirá tu navegador en `localhost:8000`. Tras guardar, la vista previa prepara los cambios con el mismo build que producción. Si una compilación falla durante la edición, puedes seguir consultando la última compilación correcta y ver el error en el registro.
 
 ### 4️⃣ Generar los PDFs
 
 > **"Genera los PDFs del libro"** o **"Exportar a PDF"**
 
 El agente instalará LaTeX (Tectonic) si es necesario y generará `ElaboracionDeLibrosElectronicosMedianteCodigoYAsistentesDeInteligenciaArtificial.pdf` y `CreatingElectronicBooksWithCodeAndArtificialIntelligenceAssistants.pdf`.
+
+Tras exportar ambos PDF una vez con conexión, puedes volver a generarlos con `python scripts/export_pdf.py --offline` mientras Tectonic tenga los recursos necesarios en la caché del proyecto.
 
 ### 5️⃣ Generar diapositivas para clase
 
@@ -113,7 +113,7 @@ El agente usará `slides/` para crear una presentación Slidev por cada capítul
 
 Las diapositivas también son multi-idioma: si se crean en español, debe existir su equivalente en inglés. Se escriben en Markdown, como el libro, para que el agente pueda generarlas y mantenerlas sin que tengas que aprender una herramienta nueva.
 
-Para acelerar la publicación, las decks se compilan en paralelo con un valor conservador. Si un equipo va justo de memoria, se puede usar `TEACHBOOK_SLIDEV_JOBS=1`; en CI o equipos potentes se puede subir de forma controlada.
+Las presentaciones que han cambiado se compilan en paralelo. Si el equipo tiene poca memoria, puedes usar `TEACHBOOK_SLIDEV_JOBS=1`.
 
 > Nota: descargar las diapositivas como PDF está planificado para una versión futura. Ahora la funcionalidad estable es la publicación web de las diapositivas.
 
@@ -183,6 +183,7 @@ teachbook_usal_template/
 │   └── en/                  # Presentaciones en inglés
 ├── scripts/                 # Scripts de automatización (no editar)
 ├── latex_templates/         # Plantillas PDF (personalizable)
+├── teachbook.json           # Activa o desactiva Slidev para todo el proyecto
 ├── AGENTS.md                # Instrucciones para el agente de IA
 └── .github/skills/          # Skills del agente (no editar)
 ```
@@ -193,6 +194,7 @@ teachbook_usal_template/
 - `book/_config_es.yml` y `book/_config_en.yml` — título, autor, etc.
 - `book/_static/` — imágenes y logos
 - `book/_static/references.bib` — bibliografía global del libro
+- `teachbook.json` — activar o desactivar Slidev
 - `slides/es/**/slides.md` y `slides/en/**/slides.md` — diapositivas de cada capítulo principal, preferiblemente con ayuda del agente
 
 ### Archivos que NO debes tocar:
@@ -213,7 +215,7 @@ El libro genera versiones en **español** e **inglés** automáticamente con un 
 
 El agente se encargará de crear el contenido en `book/es/` Y `book/en/`, y de actualizar ambos índices.
 
-Las diapositivas siguen la misma regla. Cada capítulo principal puede tener una deck en `slides/<idioma>/.../slides.md`; las secciones del capítulo usan esa misma presentación. El botón **Slides** de la web abre automáticamente la presentación adecuada para la página que estás leyendo.
+Con Slidev activado, cada capítulo principal tiene una presentación en `slides/<idioma>/.../slides.md` para cada idioma. Las secciones del capítulo usan esa misma presentación. El botón **Slides** abre la presentación asociada a la página que estás leyendo.
 
 Para revisar que no falta ninguna presentación multi-idioma, dile al agente:
 
@@ -259,7 +261,7 @@ Esa página imprime la bibliografía global del libro y sirve también para la e
 
 ## 🧪 Tests de verificación
 
-El proyecto incluye tests de verificación en **Windows** y **macOS (Apple Silicon)**, pero **NO se ejecutan automáticamente en cada push**. Esto está hecho así para que el profesorado o alumnado que copie la plantilla no gaste minutos de GitHub Actions innecesariamente.
+El workflow manual **Test Clean Setup** comprueba la instalación y el build en Linux, macOS y Windows, con pruebas del libro sin Slidev en x64 y ARM64.
 
 Los tests se lanzan **solo manualmente** desde la pestaña **Actions** en GitHub, cuando quieras comprobar que el proyecto arranca bien desde cero.
 
@@ -279,7 +281,9 @@ Estos tests verifican que:
 
 El **deploy de GitHub Pages** sí se ejecuta automáticamente al hacer `push` a `main`.
 
-Los workflows están preparados para usar Node.js 22.18 y publicar también la carpeta `/slides/` cuando el build se complete correctamente. No edites la web generada a mano: el flujo recomendado sigue siendo guardar cambios, hacer push y dejar que GitHub Actions reconstruya el libro.
+Los workflows de Pages y SFTP regeneran los PDF y reutilizan la caché de Tectonic. Con Slidev activado en `teachbook.json`, también preparan Node.js y publican las presentaciones dentro del mismo sitio.
+
+Las ediciones archivables se publican como releases de GitHub tras validar el despliegue. La integración de Zenodo archiva el código etiquetado con los metadatos de `.zenodo.json`. [Releases del proyecto](https://github.com/elloza/teachbook_usal_template/releases)
 
 ---
 

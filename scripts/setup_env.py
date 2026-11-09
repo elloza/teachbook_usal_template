@@ -1,5 +1,5 @@
 import argparse
-import importlib.util
+import hashlib
 import io
 import json
 import os
@@ -11,6 +11,8 @@ import sys
 import sysconfig
 import time
 from pathlib import Path
+
+from project_options import SLIDES_DIR, SLIDEV_CLI, node_runtime, slides_enabled
 
 
 # Keep setup output readable on Windows consoles that default to cp1252.
@@ -33,10 +35,10 @@ EXTRA_REQUIREMENTS = {
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 VENV_PATH = PROJECT_ROOT / VENV_DIR
 BUILD_LOGS = PROJECT_ROOT / ".build_logs"
-SLIDES_DIR = PROJECT_ROOT / "slides"
+BOOTSTRAP_TOOLS = BUILD_LOGS / "tools"
 SLIDES_PACKAGE_JSON = SLIDES_DIR / "package.json"
 SLIDES_PACKAGE_LOCK = SLIDES_DIR / "package-lock.json"
-MIN_NODE_VERSION = (22, 18, 0)
+SLIDEV_INSTALL_STAMP = SLIDES_DIR / "node_modules" / ".teachbook-install.json"
 
 SKILLS_SOURCE = PROJECT_ROOT / ".github" / "skills"
 SKILLS_DESTINATIONS = [
@@ -125,12 +127,13 @@ class _ProfilePhase:
         return False
 
 
-def run(cmd, *, cwd=PROJECT_ROOT, check=True, capture=False):
+def run(cmd, *, cwd=PROJECT_ROOT, check=True, capture=False, env=None):
     kwargs = {
         "cwd": str(cwd),
         "text": True,
         "encoding": "utf-8",
         "errors": "replace",
+        "env": env,
     }
     if capture:
         kwargs["stdout"] = subprocess.PIPE
@@ -188,7 +191,7 @@ def get_uv_version():
 
 def fix_path_for_uv():
     home = Path.home()
-    extra_dirs = []
+    extra_dirs = [BOOTSTRAP_TOOLS, BOOTSTRAP_TOOLS / ("Scripts" if os.name == "nt" else "bin")]
     scripts_path = sysconfig.get_path("scripts")
     if scripts_path:
         extra_dirs.append(Path(scripts_path))
@@ -205,7 +208,7 @@ def fix_path_for_uv():
 
     current = os.environ.get("PATH", "")
     parts = current.split(os.pathsep) if current else []
-    for directory in extra_dirs:
+    for directory in reversed(extra_dirs):
         directory_str = str(directory)
         if directory.is_dir() and directory_str not in parts:
             parts.insert(0, directory_str)
@@ -221,15 +224,14 @@ def install_uv_noninteractive():
         else ["sh", "-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"]
     )
 
+    env = os.environ.copy()
+    env.update(UV_INSTALL_DIR=str(BOOTSTRAP_TOOLS), UV_NO_MODIFY_PATH="1")
     try:
-        run(installer_cmd)
+        run(installer_cmd, env=env)
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         print(f"Instalador oficial de uv no disponible: {exc}")
         print("Instalando uv mediante pip como fallback...")
-        try:
-            run([sys.executable, "-m", "pip", "install", "--upgrade", "uv"])
-        except subprocess.CalledProcessError:
-            run([sys.executable, "-m", "pip", "install", "--user", "--upgrade", "uv"])
+        run([sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(BOOTSTRAP_TOOLS), "uv"])
     finally:
         fix_path_for_uv()
 
@@ -288,26 +290,18 @@ def remove_venv_safely():
         shutil.rmtree(resolved)
 
 
-def ensure_target_python(target_python):
-    print(f"Preparando Python {target_python} con uv...")
-    try:
-        run(["uv", "python", "install", target_python])
-    except subprocess.CalledProcessError as exc:
-        print(f"No se pudo instalar/localizar Python {target_python} con uv.")
-        raise exc
-
-
 def create_or_validate_venv(target_python, recreate=False):
     if VENV_PATH.exists():
         if not get_venv_python().is_file():
             explain_wrong_os_venv()
             raise SystemExit(1)
 
-        current = get_venv_major_minor()
+        version = get_venv_version()
+        current = ".".join(version.split(".")[:2]) if version else None
         if current != target_python:
             if not recreate:
                 print(
-                    f"ERROR: .venv usa Python {get_venv_version()}, pero este proyecto requiere Python {target_python}."
+                    f"ERROR: .venv usa Python {version}, pero este proyecto requiere Python {target_python}."
                 )
                 print("Para recrearlo de forma explicita ejecuta:")
                 print(f"  python scripts/setup_env.py --recreate --yes --python {target_python}")
@@ -315,7 +309,7 @@ def create_or_validate_venv(target_python, recreate=False):
             print(f"Recreando .venv: Python {current} -> {target_python}")
             remove_venv_safely()
         else:
-            print(f".venv correcto: Python {get_venv_version()}")
+            print(f".venv correcto: Python {version}")
             return
 
     print(f"Creando .venv con Python {target_python}...")
@@ -342,33 +336,22 @@ def normalize_extras(raw_extras=None, *, all_extras=False, dev_mode=False):
     return extras
 
 
-def install_requirement_file(requirements_file, label):
-    python_cmd = str(get_venv_python())
-    req = PROJECT_ROOT / requirements_file
-    if req.is_file():
-        print(f"Instalando {label} desde {requirements_file}...")
-        run(["uv", "pip", "install", "--python", python_cmd, "-r", str(req)])
-    else:
-        print(f"AVISO: {requirements_file} no existe.")
-
-
 def install_requirements(dev_mode=False, extras=None):
     python_cmd = str(get_venv_python())
-    install_requirement_file(REQUIREMENTS_FILE, "dependencias base")
-
-    for extra in sorted(extras or []):
-        if extra == "dev":
-            continue
-        install_requirement_file(EXTRA_REQUIREMENTS[extra], f"extra '{extra}'")
-
+    files = [REQUIREMENTS_FILE]
+    files.extend(EXTRA_REQUIREMENTS[extra] for extra in sorted(extras or []) if extra != "dev")
     if dev_mode:
-        dev_req = PROJECT_ROOT / DEV_REQUIREMENTS_FILE
-        if dev_req.is_file():
-            print(f"Instalando dependencias de desarrollo desde {DEV_REQUIREMENTS_FILE}...")
-            run(["uv", "pip", "install", "--python", python_cmd, "-r", str(dev_req)])
-            install_playwright_browsers(python_cmd)
-        else:
-            print(f"AVISO: {DEV_REQUIREMENTS_FILE} no existe.")
+        files.append(DEV_REQUIREMENTS_FILE)
+    cmd = ["uv", "pip", "install", "--python", python_cmd]
+    for name in files:
+        path = PROJECT_ROOT / name
+        if not path.is_file():
+            raise SystemExit(f"ERROR: falta el archivo de dependencias {name}.")
+        cmd.extend(["-r", str(path)])
+    print(f"Instalando dependencias: {', '.join(files)}...")
+    run(cmd)
+    if dev_mode:
+        install_playwright_browsers(python_cmd)
 
 
 def install_playwright_browsers(python_cmd):
@@ -379,61 +362,48 @@ def install_playwright_browsers(python_cmd):
         print("AVISO: no se pudieron instalar navegadores Playwright.")
 
 
-def parse_node_version(output):
-    import re
-
-    match = re.search(r"v?(\d+)\.(\d+)\.(\d+)", output.strip())
-    if not match:
-        return None
-    return tuple(int(part) for part in match.groups())
-
-
 def ensure_node_for_slides():
-    if not SLIDES_PACKAGE_JSON.is_file():
-        return
+    if not SLIDES_PACKAGE_JSON.is_file() or not SLIDES_PACKAGE_LOCK.is_file():
+        raise SystemExit("ERROR: Slidev está activado y requiere slides/package.json y slides/package-lock.json.")
+    _, node_version = node_runtime()
+    npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
+    if not npm:
+        raise SystemExit("ERROR: npm no está disponible. Reinstala Node.js desde https://nodejs.org/.")
+    npm_version = run([npm, "--version"], capture=True).stdout.strip()
+    print(f"Slidev: Node.js {node_version}, npm {npm_version}")
+    return npm, node_version, npm_version
 
-    print("\nVerificando Node.js para Slidev:")
+
+def install_slidev_dependencies(npm, node_version, npm_version, *, refresh=False):
+    lock_digest = hashlib.sha256(SLIDES_PACKAGE_LOCK.read_bytes()).hexdigest()
+    state = {
+        "lock": lock_digest,
+        "package": hashlib.sha256(SLIDES_PACKAGE_JSON.read_bytes()).hexdigest(),
+        "npmrc": hashlib.sha256((SLIDES_DIR / ".npmrc").read_bytes()).hexdigest()
+        if (SLIDES_DIR / ".npmrc").is_file() else None,
+        "node": node_version,
+        "npm": npm_version,
+        "system": platform.system(),
+        "arch": platform.machine(),
+    }
+    installed_lock = SLIDEV_INSTALL_STAMP.parent / ".package-lock.json"
     try:
-        node_result = run(["node", "--version"], capture=True, check=False)
-    except FileNotFoundError:
-        node_result = None
-
-    if node_result is None or node_result.returncode != 0:
-        print("ERROR: Node.js no esta instalado y es necesario para Slidev.")
-        print("Instala Node.js >= 22.18.0 desde https://nodejs.org/ y ejecuta de nuevo:")
-        print("  python scripts/setup_env.py --yes")
-        raise SystemExit(1)
-
-    node_version = parse_node_version(node_result.stdout)
-    if node_version is None or node_version < MIN_NODE_VERSION:
-        print(f"ERROR: Node.js demasiado antiguo: {node_result.stdout.strip() or 'desconocido'}")
-        print("Se requiere Node.js >= 22.18.0 para compilar las diapositivas Slidev.")
-        print("Instala una version actual desde https://nodejs.org/ y ejecuta de nuevo:")
-        print("  python scripts/setup_env.py --yes")
-        raise SystemExit(1)
-
-    try:
-        npm_result = run(["npm", "--version"], capture=True, check=False)
-    except FileNotFoundError:
-        npm_result = None
-    if npm_result is None or npm_result.returncode != 0:
-        print("ERROR: npm no esta disponible. Reinstala Node.js desde https://nodejs.org/.")
-        raise SystemExit(1)
-
-    print(f"  Node.js: {node_result.stdout.strip()}")
-    print(f"  npm:     {npm_result.stdout.strip()}")
-
-
-def install_slidev_dependencies():
-    if not SLIDES_PACKAGE_JSON.is_file():
-        return
-    ensure_node_for_slides()
-    if not SLIDES_PACKAGE_LOCK.is_file():
-        print("ERROR: falta slides/package-lock.json.")
-        print("Genera el lockfile con: npm --prefix slides install --package-lock-only")
-        raise SystemExit(1)
+        recorded = json.loads(SLIDEV_INSTALL_STAMP.read_text(encoding="utf-8"))
+        if (
+            not refresh and SLIDEV_CLI.is_file() and installed_lock.is_file()
+            and recorded == {**state, "installed": hashlib.sha256(installed_lock.read_bytes()).hexdigest()}
+        ):
+            print("Dependencias Slidev al día.")
+            return
+    except (OSError, ValueError):
+        pass
+    SLIDEV_INSTALL_STAMP.unlink(missing_ok=True)
     print("\nInstalando dependencias Slidev con npm ci...")
-    run(["npm", "--prefix", "slides", "ci"])
+    run([npm, "ci", "--prefer-offline", "--no-audit", "--no-fund"], cwd=SLIDES_DIR)
+    if not SLIDEV_CLI.is_file() or not installed_lock.is_file():
+        raise SystemExit("ERROR: npm ci terminó sin instalar el CLI de Slidev.")
+    state["installed"] = hashlib.sha256(installed_lock.read_bytes()).hexdigest()
+    SLIDEV_INSTALL_STAMP.write_text(json.dumps(state), encoding="utf-8")
 
 
 def verify_installation(dev_mode=False, target_python=TARGET_PYTHON_VERSION, extras=None):
@@ -501,14 +471,7 @@ def verify_runtime_tools():
         print("  Tectonic: disponible")
     else:
         print("  Tectonic: no encontrado. Para PDF ejecuta:")
-        print("    python scripts/setup_latex.py --yes --full")
-
-    if SLIDES_PACKAGE_JSON.is_file():
-        if shutil.which("node") and shutil.which("npm"):
-            print("  Node/npm: disponible para Slidev")
-        else:
-            print("  Node/npm: no encontrado. Necesario para Slidev: https://nodejs.org/")
-
+        print("    python scripts/setup_latex.py --yes")
 
 def sync_skills():
     print("\nSincronizando skills...")
@@ -516,10 +479,19 @@ def sync_skills():
         print(f"ERROR: origen de skills no encontrado: {SKILLS_SOURCE}")
         return False
 
+    source_files = {path.relative_to(SKILLS_SOURCE): path.read_bytes() for path in SKILLS_SOURCE.rglob("*") if path.is_file()}
     ok = True
     for dest in SKILLS_DESTINATIONS:
         try:
             if dest.exists():
+                if dest.resolve() != dest or dest.is_symlink() or dest.is_junction():
+                    raise ValueError(f"Ruta de sincronización no segura: {dest}")
+                dest_files = {path.relative_to(dest): path for path in dest.rglob("*") if path.is_file()}
+                if source_files.keys() == dest_files.keys() and all(
+                    data == dest_files[name].read_bytes() for name, data in source_files.items()
+                ):
+                    print(f"  Al día: {dest.relative_to(PROJECT_ROOT)}")
+                    continue
                 shutil.rmtree(dest)
             shutil.copytree(SKILLS_SOURCE, dest)
             print(f"  OK {dest.relative_to(PROJECT_ROOT)}")
@@ -536,7 +508,8 @@ def sync_instructions():
         return False
     try:
         COPILOT_INSTRUCTIONS.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(AGENTS_MD, COPILOT_INSTRUCTIONS)
+        if not COPILOT_INSTRUCTIONS.is_file() or AGENTS_MD.read_bytes() != COPILOT_INSTRUCTIONS.read_bytes():
+            shutil.copy2(AGENTS_MD, COPILOT_INSTRUCTIONS)
         print(f"  OK {COPILOT_INSTRUCTIONS.relative_to(PROJECT_ROOT)}")
         return True
     except Exception as exc:
@@ -571,7 +544,7 @@ def print_summary(dev_mode=False, target_python=TARGET_PYTHON_VERSION, extras=No
     print("Siguientes comandos habituales:")
     print("  python scripts/build_book.py")
     print("  python scripts/setup_env.py --yes --extras pdf")
-    print("  python scripts/setup_latex.py --yes --full")
+    print("  python scripts/setup_latex.py --yes")
     print("  python scripts/export_pdf.py --engine auto")
 
 
@@ -609,6 +582,7 @@ def parse_args():
     parser.add_argument("--notebooks", action="store_true", help="Alias de --extras notebooks")
     parser.add_argument("--pdf-import", action="store_true", help="Alias de --extras pdf-import")
     parser.add_argument("--all", action="store_true", help="Instalar todos los extras opcionales")
+    parser.add_argument("--refresh-slides", action="store_true", help="Reinstalar las dependencias de Slidev")
     return parser.parse_args()
 
 
@@ -638,26 +612,33 @@ def main():
     with profiler.phase("diagnostics"):
         print_diagnostics(args.python)
 
+    if VENV_PATH.exists() and not get_venv_python().is_file():
+        explain_wrong_os_venv()
+        raise SystemExit(1)
+
+    with profiler.phase("node"):
+        slide_tools = ensure_node_for_slides() if slides_enabled() else None
+        if slide_tools is None:
+            print("Slidev desactivado en teachbook.json.")
+
     with profiler.phase("uv"):
         if not ensure_uv(yes=args.yes):
             print("ERROR: uv es necesario para crear un entorno determinista.")
             print("Instala uv o ejecuta de nuevo con --yes para instalarlo automaticamente.")
             raise SystemExit(1)
 
-    with profiler.phase("python"):
-        ensure_target_python(args.python)
-
     with profiler.phase("venv"):
         create_or_validate_venv(args.python, recreate=args.recreate)
 
     with profiler.phase("requirements"):
-        install_requirements(dev_mode=args.dev, extras=extras)
+        install_requirements(dev_mode="dev" in extras, extras=extras)
 
     with profiler.phase("slidev"):
-        install_slidev_dependencies()
+        if slide_tools:
+            install_slidev_dependencies(*slide_tools, refresh=args.refresh_slides)
 
     with profiler.phase("verification"):
-        verify_installation(dev_mode=args.dev, target_python=args.python, extras=extras)
+        verify_installation(dev_mode="dev" in extras, target_python=args.python, extras=extras)
         verify_runtime_tools()
 
     with profiler.phase("skills"):
@@ -667,7 +648,7 @@ def main():
             raise SystemExit(1)
 
     profiler.write(args.python, use_uv=True)
-    print_summary(dev_mode=args.dev, target_python=args.python, extras=extras)
+    print_summary(dev_mode="dev" in extras, target_python=args.python, extras=extras)
 
 
 if __name__ == "__main__":

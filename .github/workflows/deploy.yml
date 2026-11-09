@@ -9,6 +9,10 @@ on:
     types:
       - deploy-book
 
+concurrency:
+  group: teachbook-pages
+  cancel-in-progress: false
+
 env:
   # Opt in early to GitHub's Node 24 runtime for JavaScript actions.
   # This avoids Node 20 deprecation warnings on official actions.
@@ -34,12 +38,33 @@ jobs:
         with:
           python-version: 3.12
 
+      - name: Read TeachBook options
+        id: project
+        run: |
+          slides=$(python scripts/project_options.py)
+          echo "slides=$slides" >> "$GITHUB_OUTPUT"
+
       - name: Set up Node.js for Slidev
+        if: steps.project.outputs.slides == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 22.18.0
           cache: npm
           cache-dependency-path: slides/package-lock.json
+
+      - name: Cache compiled Slidev decks
+        if: steps.project.outputs.slides == 'true'
+        uses: actions/cache@v6
+        with:
+          path: book/_build/.cache/slidev
+          key: slidev-pages-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('slides/**', 'scripts/build_slides.py', 'book/_toc*.yml', '.github/workflows/deploy.yml') }}
+          restore-keys: slidev-pages-v1-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Cache Tectonic resources
+        uses: actions/cache@v6
+        with:
+          path: .venv/tools/tectonic-cache
+          key: tectonic-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/setup_latex.py', 'latex_templates/**') }}
 
       - name: Install system dependencies
         run: |
@@ -100,17 +125,9 @@ jobs:
       - name: Build HTML book
         env:
           TEACHBOOK_SITE_BASE: /${{ github.event.repository.name }}/
+          TEACHBOOK_SLIDEV_JOBS: "4"
         run: |
           .venv/bin/python scripts/build_book.py
-          # FAILSAFE: Ensure .nojekyll exists even if script skipped it
-          touch book/_build/html/.nojekyll
-
-      - name: Debug Build Output
-        run: |
-          echo "Listing build output structure:"
-          ls -R book/_build/html
-          echo "Checking for .nojekyll:"
-          ls -la book/_build/html/.nojekyll
 
       - name: Package Pages artifact
         run: |
@@ -118,7 +135,7 @@ jobs:
             --dereference \
             --hard-dereference \
             --directory book/_build/html \
-            -cvf "$RUNNER_TEMP/artifact.tar" \
+            -cf "$RUNNER_TEMP/artifact.tar" \
             .
 
       - name: Upload artifact
