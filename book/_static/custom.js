@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (window.TEACHBOOK_LOADED_VERSION === TEACHBOOK_VERSION) return;
     window.TEACHBOOK_LOADED_VERSION = TEACHBOOK_VERSION;
 
+    setupImageViewer();
+
     const TEACHBOOK_DEBUG = new URLSearchParams(window.location.search).has("teachbook_debug")
         || localStorage.getItem("teachbook-debug") === "true";
     const debugLog = (...args) => {
@@ -568,4 +570,185 @@ function getCurrentPageKey(rootPrefix) {
     }
 
     return decodeURI(currentPath);
+}
+
+function setupImageViewer() {
+    if (!window.HTMLDialogElement?.prototype.showModal) return;
+
+    const figures = Array.from(document.querySelectorAll(".bd-article img"), source => ({
+        source,
+        link: source.closest("a")
+    })).filter(({ source, link }) => (
+        !source.closest("button, [aria-hidden='true']") &&
+        (!link || (link.classList.contains("image-reference") && link.href === source.src))
+    ));
+    if (!figures.length) return;
+
+    const pageLang = getCurrentPageKey(document.documentElement.dataset.content_root).split("/")[0];
+    const lang = ["es", "en"].includes(pageLang) ? pageLang : document.documentElement.lang.split("-")[0];
+    const labels = lang === "es" ? {
+        open: "Ampliar imagen", out: "Reducir", in: "Ampliar", fit: "Ajustar imagen",
+        actual: "Tamaño original", close: "Cerrar", error: "No se ha podido cargar la imagen"
+    } : {
+        open: "Enlarge image", out: "Zoom out", in: "Zoom in", fit: "Fit image",
+        actual: "Actual size", close: "Close", error: "Image could not be loaded"
+    };
+
+    const dialog = document.createElement("dialog");
+    dialog.className = "teachbook-image-viewer";
+    dialog.setAttribute("aria-label", labels.open);
+    dialog.innerHTML = `
+        <div class="image-viewer-toolbar">
+            <p class="image-viewer-caption"></p>
+            <output class="image-viewer-scale"></output>
+        </div>
+        <div class="image-viewer-stage" tabindex="0">
+            <div class="image-viewer-canvas"><img alt="" draggable="false"></div>
+        </div>`;
+    document.body.append(dialog);
+
+    const toolbar = dialog.querySelector(".image-viewer-toolbar");
+    const stage = dialog.querySelector(".image-viewer-stage");
+    const caption = dialog.querySelector(".image-viewer-caption");
+    const scaleLabel = dialog.querySelector("output");
+    const image = dialog.querySelector("img");
+    const maxScale = 8;
+    let scale = 1;
+    let minScale = 1;
+    let isVector = false;
+    let drag = null;
+    let opener = null;
+
+    function addControl(label, markup, action) {
+        const control = document.createElement("button");
+        control.type = "button";
+        control.title = label;
+        control.setAttribute("aria-label", label);
+        control.innerHTML = markup;
+        control.addEventListener("click", action);
+        toolbar.append(control);
+        return control;
+    }
+
+    function fit() {
+        if (!image.naturalWidth || !image.naturalHeight) return;
+        // Leave the 16 px padding on either side of the image.
+        const fittedScale = Math.min(
+            isVector ? maxScale : 1,
+            Math.max(1, stage.clientWidth - 32) / image.naturalWidth,
+            Math.max(1, stage.clientHeight - 32) / image.naturalHeight
+        );
+        minScale = Math.min(1, fittedScale);
+        fitButton.disabled = false;
+        actualButton.disabled = false;
+        zoom(fittedScale);
+        stage.scrollTo(0, 0);
+    }
+
+    function zoom(nextScale) {
+        if (!image.complete || !image.naturalWidth) return;
+        const stageBounds = stage.getBoundingClientRect();
+        const before = image.getBoundingClientRect();
+        const midX = stageBounds.left + stage.clientWidth / 2;
+        const midY = stageBounds.top + stage.clientHeight / 2;
+        const centerX = before.width ? Math.max(0, Math.min(1, (midX - before.left) / before.width)) : 0.5;
+        const centerY = before.height ? Math.max(0, Math.min(1, (midY - before.top) / before.height)) : 0.5;
+
+        scale = Math.max(minScale, Math.min(maxScale, nextScale));
+        image.style.width = `${image.naturalWidth * scale}px`;
+        scaleLabel.textContent = `${Math.round(scale * 100)}%`;
+        smaller.disabled = scale <= minScale;
+        larger.disabled = scale >= maxScale;
+
+        const after = image.getBoundingClientRect();
+        stage.scrollLeft += after.left + centerX * after.width - midX;
+        stage.scrollTop += after.top + centerY * after.height - midY;
+    }
+
+    const smaller = addControl(labels.out, '<i class="fa-solid fa-minus" aria-hidden="true"></i>', () => zoom(scale / 1.25));
+    const larger = addControl(labels.in, '<i class="fa-solid fa-plus" aria-hidden="true"></i>', () => zoom(scale * 1.25));
+    const fitButton = addControl(labels.fit, '<i class="fa-solid fa-expand" aria-hidden="true"></i>', fit);
+    const actualButton = addControl(labels.actual, "1:1", () => zoom(1));
+    const close = addControl(labels.close, '<i class="fa-solid fa-xmark" aria-hidden="true"></i>', () => dialog.close());
+    close.autofocus = true;
+
+    function open(source, trigger) {
+        if (dialog.open) return;
+        const figure = source.closest("figure");
+        const figureCaption = figure?.querySelector(".caption-text") || figure?.querySelector("figcaption");
+        const url = source.currentSrc || source.src;
+        isVector = /\.svg(?:[?#]|$)|^data:image\/svg\+xml[;,]/i.test(url);
+        caption.textContent = figureCaption?.textContent.trim() || source.alt;
+        image.alt = source.alt;
+        image.style.width = "0px";
+        scale = 1;
+        scaleLabel.textContent = "";
+        [smaller, larger, fitButton, actualButton].forEach(control => { control.disabled = true; });
+
+        opener = trigger;
+        dialog.showModal();
+        document.body.classList.add("teachbook-image-viewer-open");
+        image.src = url;
+        if (image.complete && image.naturalWidth) fit();
+    }
+
+    image.addEventListener("load", () => { if (dialog.open) fit(); });
+    image.addEventListener("error", () => { if (dialog.open) caption.textContent = labels.error; });
+    figures.forEach(({ source, link }) => {
+        const trigger = link || source;
+        source.dataset.imageViewer = "";
+        if (!trigger.title) trigger.title = labels.open;
+        trigger.setAttribute("aria-haspopup", "dialog");
+        if (!link) {
+            source.tabIndex = 0;
+            source.setAttribute("role", "button");
+            source.setAttribute("aria-label", source.alt ? `${labels.open} – ${source.alt}` : labels.open);
+            source.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    open(source, trigger);
+                }
+            });
+        }
+        trigger.addEventListener("click", event => {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            open(source, trigger);
+        });
+    });
+
+    dialog.addEventListener("close", () => {
+        if (dialog.open) return;
+        document.body.classList.remove("teachbook-image-viewer-open");
+        image.removeAttribute("src");
+        drag = null;
+        opener?.focus({ preventScroll: true });
+    });
+    dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener("keydown", event => {
+        if (!["+", "=", "-"].includes(event.key) || event.ctrlKey || event.metaKey || event.altKey) return;
+        event.preventDefault();
+        zoom(event.key === "-" ? scale / 1.25 : scale * 1.25);
+    });
+    stage.addEventListener("wheel", event => {
+        if (event.ctrlKey || event.metaKey || !event.deltaY) return;
+        event.preventDefault();
+        zoom(event.deltaY < 0 ? scale * 1.15 : scale / 1.15);
+    }, { passive: false });
+    stage.addEventListener("dblclick", () => scale === 1 ? fit() : zoom(1));
+    stage.addEventListener("pointerdown", event => {
+        if (event.pointerType === "touch" || event.button !== 0 || !event.isPrimary) return;
+        drag = {
+            pointer: event.pointerId, x: event.clientX, y: event.clientY,
+            left: stage.scrollLeft, top: stage.scrollTop
+        };
+        stage.setPointerCapture(event.pointerId);
+    });
+    stage.addEventListener("pointermove", event => {
+        if (drag?.pointer !== event.pointerId) return;
+        stage.scrollLeft = drag.left + drag.x - event.clientX;
+        stage.scrollTop = drag.top + drag.y - event.clientY;
+    });
+    stage.addEventListener("lostpointercapture", () => { drag = null; });
+    window.addEventListener("resize", () => { if (dialog.open) fit(); });
 }

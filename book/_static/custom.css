@@ -574,6 +574,138 @@ html.opendyslexic-mode code {
     display: none !important;
 }
 
+/* Viewer for figures and images in the book content */
+.bd-article img[data-image-viewer] {
+    cursor: zoom-in;
+}
+
+.bd-article img[data-image-viewer]:focus-visible,
+.image-viewer-toolbar button:focus-visible {
+    outline: 2px solid var(--pst-color-primary, #0072ce);
+    outline-offset: 2px;
+}
+
+body.teachbook-image-viewer-open {
+    overflow: hidden;
+}
+
+.teachbook-image-viewer {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 32px);
+    height: calc(100dvh - 32px);
+    max-width: 1600px;
+    max-height: none;
+    padding: 0;
+    border: 1px solid var(--pst-color-border, #737373);
+    border-radius: 6px;
+    background: var(--pst-color-background, white);
+    color: var(--pst-color-text-base, #222);
+}
+
+.teachbook-image-viewer::backdrop {
+    background: rgb(0 0 0 / 75%);
+}
+
+.teachbook-image-viewer[open] {
+    display: flex;
+    flex-direction: column;
+}
+
+.image-viewer-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-bottom: 1px solid var(--pst-color-border, #ddd);
+}
+
+.image-viewer-toolbar button {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--pst-color-border, #ddd);
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.image-viewer-toolbar button:disabled {
+    opacity: .4;
+    cursor: default;
+}
+
+.image-viewer-caption {
+    flex: 1 1 180px;
+    max-height: 25vh;
+    margin: 0;
+    overflow: auto;
+    overflow-wrap: anywhere;
+    font-size: 0.875rem;
+}
+
+.image-viewer-scale {
+    width: 3.5rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.image-viewer-stage {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    cursor: grab;
+}
+
+.image-viewer-stage:active {
+    cursor: grabbing;
+}
+
+.image-viewer-stage:focus-visible {
+    outline: 2px solid var(--pst-color-primary, #0072ce);
+    outline-offset: -2px;
+}
+
+.image-viewer-canvas {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    min-height: 100%;
+    padding: 16px;
+}
+
+.image-viewer-canvas img {
+    display: block;
+    max-width: none;
+    max-height: none;
+    height: auto;
+    user-select: none;
+}
+
+@media (max-width: 600px) {
+    .teachbook-image-viewer {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-width: none;
+        border-radius: 0;
+    }
+
+    .image-viewer-caption {
+        flex-basis: 100%;
+    }
+}
+
+@media print {
+    .teachbook-image-viewer[open] {
+        display: none;
+    }
+}
+
 @media (max-width: 900px) {
     .author-profile-grid {
         grid-template-columns: 1fr;
